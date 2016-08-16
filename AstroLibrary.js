@@ -3,7 +3,6 @@
  * @author Astro <astr36@naver.com>
  * @version 1.0
  */
-
 /**
  * @namespace me
  */
@@ -468,7 +467,7 @@ let me = this.me || {};
     NetworkChecker.WIFI = 0;
 
     /**
-     * 4G, 3G, etc
+     * LTE, 3G, etc
      * @type {Number}
      */
     NetworkChecker.MOBILE = 1;
@@ -1001,6 +1000,216 @@ let me = this.me || {};
         return this;
     };
 
+
+
+    /**
+     * Contains classes about utils.
+     * @memberOf me.astro
+     * @namespace utils
+     */
+
+    /**
+     * Class representing a addon manager.
+     * @since 2016-07-28
+     * @class
+     * @memberOf me.astro.utils
+     * @param {String} packageName Package name of application
+     */
+    function AddonManager(packageName) {
+        this._manager = net.zhuoweizhang.mcpelauncher.AddonManager(CONTEXT);
+        this._packageName = packageName;
+    }
+
+    /**
+     * Download and install
+     * @type {Number}
+     */
+    AddonManager.DOWNLOAD_INSTALL = 0;
+
+    /**
+     * Download only
+     * @type {Number}
+     */
+    AddonManager.DOWNLOAD_ONLY = 1;
+
+    /**
+     * Downloads an addon from URL.
+     * @since 2016-07-28
+     * @param {String} path File path where to save downloaded addon.
+     * @param {String} url URL
+     * @param {Number} [downloadType=me.astro.utils.AddonManager.DOWNLOAD_INSTALL] Download type
+     */
+    AddonManager.prototype.download = function (path, url, downloadType) {
+        let thiz = this,
+            file = new File_(path.toString());
+        if (!file.exists()) {
+            File.download(path, url);
+        }
+        if (typeof downloadType === "undefined" || downloadType === 0) {
+            new Thread_({
+                run() {
+                    while (true) {
+                        Thread_.sleep(500);
+                        if (file.exists()) {
+                            thiz.install(path);
+                            break;
+                        }
+                    }
+                }
+            }).start();
+        }
+        return this;
+    };
+
+    /**
+     * Returns version of addon.
+     * @since 2016-07-28
+     * @returns {String} Version of addon
+     */
+    AddonManager.prototype.getVersion = function () {
+        return CONTEXT.getPackageManager().getPackageInfo(this._packageName, PackageManager_.GET_INSTRUMENTATION).versionName;
+    };
+
+    /**
+     * Installs the addon on your device.
+     * @since 2016-07-28
+     * @param {String} path File path
+     */
+    AddonManager.prototype.install = function (path) {
+        let intent = new Intent_(Intent_.ACTION_VIEW);
+        intent.setDataAndType(new Uri_.parse("file://" + path.toString()), "application/vnd.android.package-archive");
+        CONTEXT.startActivity(intent);
+        return this;
+    };
+
+    /**
+     * Check if the addon is enabled.
+     * @since 2016-07-28
+     * @returns {Boolean} If the addon is enabled, returns true, or not returns false.
+     */
+    AddonManager.prototype.isEnabled = function () {
+        return this._manager.isEnabled(this._packageName);
+    };
+
+    /**
+     * Check if the addon is installed.
+     * @since 2016-07-28
+     * @returns {Boolean} If the addon is installed, returns true, or not returns false.
+     */
+    AddonManager.prototype.isInstalled = function () {
+        return CONTEXT.getPackageManager().getPackageInfo(this._packageName, PackageManager_.GET_ACTIVITIES);
+    };
+
+    /**
+     * Sets the addon disabled.
+     * @since 2016-07-28
+     */
+    AddonManager.prototype.setDisable = function () {
+        this._manager.setEnabled(this._packageName, false);
+        return this;
+    };
+
+    /**
+     * Sets the addon enabled.
+     * @since 2016-07-28
+     */
+    AddonManager.prototype.setEnabled = function () {
+        this._manager.setEnabled(this._packageName, true);
+        return this;
+    };
+
+
+
+    /**
+     * Class representing a file.
+     * @since 2016-07-08
+     * @class
+     * @memberOf me.astro.utils
+     */
+    function File() {}
+
+    /**
+     * Downloads a file.
+     * @since 2016-07-08
+     * @param {String} path File path
+     * @param {String} url URL
+     */
+    File.download = function (path, url) {
+        try {
+            let file = new File_(path),
+                filename = file.getName(),
+                downloadManager = new DownloadManager_.Request(new Uri_.parse(url));
+            downloadManager.setTitle(filename);
+            downloadManager.setNotificationVisibility(0);
+            downloadManager.setDestinationInExternalPublicDir(file.getParent().replace("/sdcard", ""), filename);
+            CONTEXT.getSystemService(Context_.DOWNLOAD_SERVICE).enqueue(downloadManager);
+        } catch (e) {
+            Toast.show(e);
+        }
+    };
+
+
+
+    /**
+     * Class representing a text.
+     * @since 2016-07-03
+     * @class
+     * @memberOf me.astro.utils
+     */
+    function Text() {}
+
+    /**
+     * Verifies validation of E-mail.
+     * @since 2016-07-05
+     * @param {String} str E-mail
+     * @returns {Boolean} Validation
+     */
+    Text.verifyEmail = function (str) {
+        return /^.+\@naver\.com$/i.test(str);
+    };
+
+    /**
+     * Verifies validation of ID.
+     * @since 2016-07-05
+     * @param {String} str ID
+     * @returns {Boolean} Validation
+     */
+    Text.verifyId = function (str) {
+        return /^\w{4,12}$/i.test(str);
+    };
+
+    /**
+     * Verifies validation of name.
+     * @since 2016-07-05
+     * @param {String} str Name
+     * @returns {Boolean} Validation
+     */
+    Text.verifyName = function (str) {
+        return /^\w{1,20}$/i.test(str);
+    };
+
+    /**
+     * Verifies validation of number.
+     * @since 2016-07-05
+     * @param {String} str Number
+     * @returns {Boolean} Validation
+     */
+    Text.verifyNumber = function (str) {
+        return /^\d+$/.test(str);
+    };
+
+    /**
+     * Verifies validation of password.
+     * @since 2016-07-05
+     * @param {String} str Password
+     * @returns {Boolean} Validation
+     */
+    Text.verifyPassword = function (str) {
+        return /^\w{4,12}$/i.test(str);
+    };
+
+
+
     astro.design = {
         Bitmap: Bitmap,
         Color: Color,
@@ -1017,6 +1226,11 @@ let me = this.me || {};
     };
     astro.security = {
         Account: Account
+    };
+    astro.utils = {
+        AddonManager: AddonManager,
+        File: File,
+        Text: Text
     };
 
     $.selectLevelHook = () => {

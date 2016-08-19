@@ -235,7 +235,7 @@ let me = this.me || {};
     ShadowDrawable.RESOURCE = RESOURCE.getDrawable(17301521);
 
     /**
-     * Creates a drawable which has a shadow. 
+     * Creates a drawable which has a shadow.
      * @since 2016-05-03
      * @returns {android.graphics.drawable.LayerDrawable} A drawable which has a shadow.
      */
@@ -1210,6 +1210,1356 @@ let me = this.me || {};
 
 
 
+    /**
+     * Contains classes for views and widgets.
+     * @memberOf me.astro
+     * @namespace widget
+     */
+
+    /**
+     * Class representing a view.
+     * @since 2016-05-03
+     * @class
+     * @abstract
+     * @memberOf me.astro.widget
+     */
+    function View() {}
+
+    /**
+     * Returns the theme of the view.
+     * @since 2016-05-03
+     * @returns {me.astro.design.Theme} Theme of the view
+     */
+    View.prototype.getTheme = function () {
+        return this._theme;
+    };
+
+    /**
+     * Returns the view.
+     * @since 2016-05-03
+     * @returns {android.view.View} View
+     */
+    View.prototype.getView = function () {
+        return this._view;
+    };
+
+    /**
+     * Sets a gravity for the view.
+     * @since 2016-05-03
+     * @param {Number} gravity Gravity for the view
+     */
+    View.prototype.setGravity = function () {
+        return new Error("must be implemented by subclass!");
+    };
+
+    /**
+     * Sets the theme of the view.
+     * @since 2016-05-03
+     * @param {me.astro.design.Theme} theme Theme of the view
+     */
+    View.prototype.setTheme = function (theme) {
+        this._theme = theme;
+        return this;
+    };
+
+    /**
+     * Returns the view.
+     * @since 2016-05-03
+     * @returns {android.view.View} View
+     */
+    View.prototype.show = function () {
+        return this._view;
+    };
+
+
+
+    /**
+     * Class representing a text view.
+     * @since 2016-05-03
+     * @class
+     * @extends me.astro.widget.View
+     * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of text view
+     */
+    function TextView(theme) {
+        theme = theme || Theme.DEFAULT;
+        let params = this._params = new LinearLayout_.LayoutParams(-1, -2),
+            view = this._view = new TextView_(CONTEXT);
+        this._theme = theme;
+        params.setMargins(DP * 8, DP * 8, DP * 8, DP * 8);
+        view.setLayoutParams(params);
+        view.setText("TextView");
+        view.setTextColor(theme.getTextView(Theme.TEXT_COLOR));
+        view.setTextSize(1, 16);
+    }
+
+    TextView.prototype = Object.create(View.prototype);
+    TextView.constructor = TextView;
+
+    /**
+     * Returns the displayed text.
+     * @since 2016-05-03
+     * @returns {String} Displayed text
+     */
+    TextView.prototype.getText = function () {
+        return this._view.getText().toString();
+    };
+
+    /**
+     * Returns the color of displayed text.
+     * @since 2016-05-03
+     * @returns {Number} Color of text
+     */
+    TextView.prototype.getTextColor = function () {
+        return this._view.getTextColor();
+    };
+
+    /**
+     * Returns the size of displayed text.
+     * @since 2016-05-03
+     * @returns {Number} Size of text
+     */
+    TextView.prototype.getTextSize = function () {
+        return this._view.getTextSize();
+    };
+
+    /**
+     * Returns the width and height of the view.
+     * @since 2016-05-03
+     * @returns {Array.<Number>} Width and height of view
+     */
+    TextView.prototype.getWH = function () {
+        let params = this._params;
+        return [params.width, params.height];
+    };
+
+    TextView.prototype.setGravity = function (gravity) {
+        this._view.setGravity(gravity);
+        return this;
+    };
+
+    /**
+     * Sets the padding of the view.
+     * @since 2016-05-03
+     * @param {Number} left Left padding
+     * @param {Number} top Top padding
+     * @param {Number} right Right padding
+     * @param {Number} bottom Bottom padding
+     */
+    TextView.prototype.setPadding = function (left, top, right, bottom) {
+        this._params.setMargins(left, top, right, bottom);
+        return this;
+    };
+
+    /**
+     * Sets a displayed text.
+     * @since 2016-05-03
+     * @param {String} text Displayed text
+     */
+    TextView.prototype.setText = function (text) {
+        this._view.setText(text.toString());
+        return this;
+    };
+
+    /**
+     * Sets the color of displayed text.
+     * @since 2016-05-03
+     * @param {Number} textColor Color of displayed text
+     */
+    TextView.prototype.setTextColor = function (textColor) {
+        this._view.setTextColor(textColor);
+        return this;
+    };
+
+    /**
+     * Returns the size of displayed text.
+     * @since 2016-05-03
+     * @param {Number} textSize Size of displayed text
+     */
+    TextView.prototype.setTextSize = function (textSize) {
+        this._view.setTextSize(1, textSize);
+        return this;
+    };
+
+    /**
+     * Sets the width and height of the view.
+     * @since 2016-05-03
+     * @param {Number} width Width of the view
+     * @param {Number} height Height of the view
+     */
+    TextView.prototype.setWH = function (width, height) {
+        let params = this._params;
+        params.width = width;
+        params.height = height;
+        return this;
+    };
+
+    TextView.prototype.show = function () {
+        return this._view;
+    };
+
+
+
+    /**
+     * Class representing a button.
+     * @since 2016-05-03
+     * @class
+     * @extends me.astro.widget.TextView
+     * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of button
+     */
+    function Button(theme) {
+        theme = theme || Theme.DEFAULT;
+        let thiz = this,
+            params = this._params = new LinearLayout_.LayoutParams(DP * 88, DP * 36),
+            view = this._view = new TextView_(CONTEXT),
+            unpressedDrawable = this._unpressedDrawable = new ColorDrawable_(theme.getButton(Theme.BACKGROUND_COLOR));
+        this._theme = theme;
+        this._pressedDrawable = new ColorDrawable_(theme.getButton(Theme.EFFECT_COLOR));
+        this._func = () => {};
+        params.setMargins(DP * 8, DP * 6, DP * 8, DP * 6);
+        view.setBackgroundDrawable(unpressedDrawable);
+        view.setGravity(Gravity_.CENTER);
+        view.setLayoutParams(params);
+        view.setOnTouchListener(new View_.OnTouchListener({
+            onTouch(v, event) {
+                let width = v.getWidth(),
+                    height = v.getHeight(),
+                    x = event.getX(),
+                    y = event.getY();
+                switch (event.getAction()) {
+                case MotionEvent_.ACTION_DOWN:
+                    v.setBackgroundDrawable(thiz._pressedDrawable);
+                    break;
+                case MotionEvent_.ACTION_MOVE:
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._pressedDrawable);
+                    } else {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                    break;
+                case MotionEvent_.ACTION_UP:
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                        thiz._func(v);
+                    }
+                    break;
+                case MotionEvent_.ACTION_CANCEL:
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                }
+                return true;
+            }
+        }));
+        view.setText("Button");
+        view.setTextColor(theme.getButton(Theme.TEXT_COLOR));
+        view.setTextSize(1, 16);
+    }
+    Button.prototype = Object.create(TextView.prototype);
+    Button.prototype.constructor = Button;
+
+    /**
+     * Returns the effect function.
+     * @since 2016-05-03
+     * @returns {Function} Effect function
+     */
+    Button.prototype.getEffect = function () {
+        return this._func;
+    };
+
+    /**
+     * Sets the color of the button.
+     * @since 2016-05-03
+     * @param {Number} color Color of the button
+     */
+    Button.prototype.setColor = function (color) {
+        this._view.setBackgroundDrawable(this._unpressedDrawable = new ColorDrawable_(color));
+        return this;
+    };
+
+    /**
+     * Sets the effect function.
+     * @since 2016-05-03
+     * @param {Function} func Effect function
+     */
+    Button.prototype.setEffect = function (func) {
+        if (typeof func === "function") {
+            this._func = func;
+        } else {
+            this._func = () => {};
+        }
+        return this;
+    };
+
+    /**
+     * Sets the color of the clicked button.
+     * @since 2016-05-03
+     * @param {Number} color Color of the clicked button
+     */
+    Button.prototype.setEffectColor = function (color) {
+        this._pressedDrawable = new ColorDrawable_(color);
+        return this;
+    };
+
+
+
+    /**
+     * Class representing a edit text.
+     * @since 2016-05-27
+     * @class
+     * @extends me.astro.widget.TextView
+     * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of edit text
+     */
+    function EditText(theme) {
+        theme = theme || Theme.DEFAULT;
+        let thiz = this,
+            shapeDrawable = new ShapeDrawable_(),
+            paint = shapeDrawable.getPaint();
+        paint.setColor(-1);
+        paint.setStyle(Paint_.Style.STROKE);
+        paint.setColor(theme.getEditText(Theme.BACKGROUND_COLOR));
+        paint.setStrokeWidth(DP * 3);
+        thiz._theme = theme;
+        thiz._params = new LinearLayout_.LayoutParams(-1, DP * 40);
+        thiz._view = new EditText_(CONTEXT);
+        thiz._params.setMargins(DP * 8, DP * 4, DP * 8, DP * 4);
+        thiz._view.setBackgroundDrawable(shapeDrawable);
+        thiz._view.setHint("EditText");
+        thiz._view.setHintTextColor(theme.getEditText(Theme.HINT_TEXT_COLOR));
+        thiz._view.setImeOptions(6);
+        thiz._view.setLayoutParams(thiz._params);
+        thiz._view.setPadding(DP * 8, DP * 8, DP * 8, DP * 8);
+        thiz._view.setTextColor(theme.getEditText(Theme.TEXT_COLOR));
+        thiz._view.setTextSize(1, 16);
+    }
+
+    EditText.prototype = Object.create(TextView.prototype);
+    EditText.prototype.constructor = EditText;
+
+    /**
+     * Returns the hint text of the edit text.
+     * @since 2016-05-27
+     * @returns {String} Hint Hint text of the edit text
+     */
+    EditText.prototype.getHint = function () {
+        return this._view.getHint().toString();
+    };
+
+    /**
+     * Sets the color of the edit text.
+     * @since 2016-05-27
+     * @param {Number} color Color of the edit text
+     */
+    EditText.prototype.setColor = function (color) {
+        let shapeDrawable = new ShapeDrawable_(),
+            paint = shapeDrawable.getPaint();
+        paint.setColor(-1);
+        paint.setStyle(Paint_.Style.STROKE);
+        paint.setColor(color);
+        paint.setStrokeWidth(DP * 3);
+        this._view.setBackgroundDrawable(shapeDrawable);
+        return this;
+    };
+
+    /**
+     * Sets the hint text of the edit text.
+     * @since 2016-05-27
+     * @param {String} Hint Hint text of the edit text
+     */
+    EditText.prototype.setHint = function (text) {
+        this._view.setHint(text);
+        return this;
+    };
+
+    /**
+     * Sets the color of the hint text.
+     * @since 2016-05-27
+     * @param {Number} color Hint Color of the hint text
+     */
+    EditText.prototype.setHintColor = function (color) {
+        this._view.setHintTextColor(color);
+        return this;
+    };
+
+
+
+    /**
+     * Class representing a image button.
+     * @since 2016-05-27
+     * @class
+     * @extends me.astro.widget.Button
+     * @memberOf me.astro.widget
+     * @param {Number} [shape=me.astro.design.Shape.RECT] Shape of image button
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of image button
+     */
+    function ImageButton(shape, theme) {
+        shape = shape || Shape.RECT;
+        theme = theme || Theme.DEFAULT;
+        let thiz = this;
+        thiz._shape = shape;
+        thiz._theme = theme;
+        thiz._params = new LinearLayout_.LayoutParams(shape === Shape.RECT ? -1 : DP * 40, shape === Shape.RECT ? DP * 36 : DP * 40);
+        thiz._view = new TextView_(CONTEXT);
+        thiz._pressedDrawable = new ColorDrawable_(0);
+        thiz._unpressedDrawable = new ColorDrawable_(0);
+        thiz._func = () => {};
+        thiz._params.setMargins(DP * 6, DP * 6, DP * 6, DP * 6);
+        thiz._view.setBackgroundDrawable(thiz._unpressedDrawable);
+        thiz._view.setGravity(Gravity_.CENTER);
+        thiz._view.setLayoutParams(thiz._params);
+        thiz._view.setOnTouchListener(new View_.OnTouchListener({
+            onTouch(v, event) {
+                let width = v.getWidth(),
+                    height = v.getHeight(),
+                    x = event.getX(),
+                    y = event.getY();
+                switch (event.getAction()) {
+                case MotionEvent_.ACTION_DOWN:
+                    v.setBackgroundDrawable(thiz._pressedDrawable);
+                    break;
+                case MotionEvent_.ACTION_MOVE:
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._pressedDrawable);
+                    } else {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                    break;
+                case MotionEvent_.ACTION_UP:
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                        thiz._func(v);
+                    }
+                    break;
+                case MotionEvent_.ACTION_CANCEL:
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                }
+                return true;
+            }
+        }));
+    }
+
+    ImageButton.prototype = Object.create(Button.prototype);
+    ImageButton.prototype.constructor = ImageButton;
+
+    /**
+     * Sets the image of the button.
+     * @since 2016-05-27
+     * @param {android.graphics.Bitmap|android.graphics.drawable.BitmapDrawable} image Image bitmap or drawable
+     * @param {Number} [color] Color of the background
+     * @param {Object.<Number>|Number} [padding=DP*8] Padding of the image
+     */
+    ImageButton.prototype.setImage = function (image, color, padding) {
+        let drawable;
+        if (this._shape === Shape.RECT) {
+            drawable = new ColorDrawable_(color || this._theme.getButton(Theme.BACKGROUND_COLOR));
+        } else {
+            drawable = new ShapeDrawable_(new OvalShape_());
+            drawable.getPaint().setColor(color || this._theme.getButton(Theme.BACKGROUND_COLOR));
+        }
+        this._unpressedDrawable = new LayerDrawable_([drawable, (image instanceof Bitmap_ ? new BitmapDrawable_(image) : image)]);
+        padding = padding || DP * 8;
+        if (typeof padding === "number") {
+            this._unpressedDrawable.setLayerInset(1, padding, padding, padding, padding);
+        } else if (typeof padding === "object") {
+            this._unpressedDrawable.setLayerInset(1, padding[0], padding[1], padding[2], padding[3]);
+        }
+        this._view.setBackgroundDrawable(this._unpressedDrawable);
+        return this;
+    };
+
+    /**
+     * Sets the image of the clicked button.
+     * @since 2016-05-27
+     * @param {android.graphics.Bitmap|android.graphics.drawable.BitmapDrawable} image Image bitmap or drawable
+     * @param {Number} [color] Color of the background
+     * @param {Object.<Number>|Number} [padding=DP*8] Padding of the image
+     */
+    ImageButton.prototype.setEffectImage = function (image, color, padding) {
+        let drawable;
+        if (this._shape === Shape.RECT) {
+            drawable = new ColorDrawable_(color || this._theme.getButton(Theme.EFFECT_COLOR));
+        } else {
+            drawable = new ShapeDrawable_(new OvalShape_());
+            drawable.getPaint().setColor(color || this._theme.getButton(Theme.EFFECT_COLOR));
+        }
+        this._pressedDrawable = new LayerDrawable_([drawable, (image instanceof Bitmap_ ? new BitmapDrawable_(image) : image)]);
+        padding = padding || DP * 8;
+        if (typeof padding === "number") {
+            this._pressedDrawable.setLayerInset(1, padding, padding, padding, padding);
+        } else if (typeof padding === "object") {
+            this._pressedDrawable.setLayerInset(1, padding[0], padding[1], padding[2], padding[3]);
+        }
+        return this;
+    };
+
+
+
+    /**
+     * Class representing a image toggle.
+     * @since 2016-05-27
+     * @class
+     * @extends me.astro.widget.ImageButton
+     * @memberOf me.astro.widget
+     * @param {Number} [shape=me.astro.design.Shape.RECT] Shape of image toggle
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of image toggle
+     */
+    function ImageToggle(shape, theme) {
+        shape = shape || Shape.RECT;
+        theme = theme || Theme.DEFAULT;
+        let thiz = this;
+        thiz._shape = shape;
+        thiz._theme = theme;
+        thiz._params = new LinearLayout_.LayoutParams(-1, DP * 36);
+        thiz._view = new ToggleButton_(CONTEXT);
+        thiz._pressedDrawable = new ColorDrawable_(0);
+        thiz._unpressedDrawable = new ColorDrawable_(0);
+        thiz._func = () => {};
+        thiz._params.setMargins(DP * 6, DP * 6, DP * 6, DP * 6);
+        thiz._view.setBackgroundDrawable(thiz._unpressedDrawable);
+        thiz._view.setGravity(Gravity_.CENTER);
+        thiz._view.setLayoutParams(thiz._params);
+        thiz._view.setOnCheckedChangeListener(new CompoundButton_.OnCheckedChangeListener({
+            onCheckedChanged(buttonView, isChecked) {
+                thiz._func(buttonView, isChecked);
+                if (isChecked) {
+                    buttonView.setBackgroundDrawable(thiz._pressedDrawable);
+                } else {
+                    buttonView.setBackgroundDrawable(thiz._unpressedDrawable);
+                }
+            }
+        }));
+        thiz._view.setTextOff("");
+        thiz._view.setTextOn("");
+    }
+
+    ImageToggle.prototype = Object.create(ImageButton.prototype);
+    ImageToggle.prototype.constructor = ImageToggle;
+
+    /**
+     * Checks whether the toggle is clicked.
+     * @since 2016-05-27
+     * @returns {Boolean} isChecked If the toggle is clicked, returns true, or not returns false
+     */
+    ImageToggle.prototype.isChecked = function () {
+        return this._view.isChecked();
+    };
+
+    /**
+     * Sets the click state of the toggle.
+     * @since 2016-05-27
+     * @param {Boolean} checked Click state of the toggle
+     */
+    ImageToggle.prototype.setChecked = function (checked) {
+        if (checked) {
+            this._view.setBackgroundDrawable(this._pressedDrawable);
+        } else {
+            this._view.setBackgroundDrawable(this._unpressedDrawable);
+        }
+        this._view.setChecked(checked);
+        return this;
+    };
+
+
+
+    /**
+     * Class representing a layout.
+     * @since 2016-07-14
+     * @class
+     * @memberOf me.astro.widget
+     */
+
+    function Layout() {
+        this._layout = new LinearLayout_(CONTEXT);
+        this._layout.setOrientation(1);
+    }
+
+    /**
+     * Adds a view on the layout.
+     * @since 2016-07-14
+     * @param {android.view.View} view View
+     */
+    Layout.prototype.addView = function (view) {
+        this._layout.addView(view);
+        return this;
+    };
+
+    /**
+     * Returns the layout.
+     * @since 2016-07-14
+     * @returns {android.widget.LinearLayout} Layout
+     */
+    Layout.prototype.getLayout = function () {
+        return this._layout;
+    };
+
+    /**
+     * Sets the orientation of the layout.
+     * @since 2016-07-14
+     * @param {Number} orientation Orientation of the layout
+     */
+    Layout.prototype.setOrientation = function (orientation) {
+        this._layout.setOrientation(orientation);
+        return this;
+    };
+
+    /**
+     * Returns the layout.
+     * @since 2016-07-14
+     * @returns {android.widget.LinearLayout} Layout
+     */
+    Layout.prototype.show = function (canScroll) {
+        if (typeof canScroll === "undefined" || canScroll) {
+            let scrollView = new ScrollView_(CONTEXT);
+            scrollView.addView(this._layout);
+            return scrollView;
+        } else {
+            return this._layout;
+        }
+    };
+
+
+
+    /**
+     * Class representing a progress window.
+     * @since 2016-07-05
+     * @class
+     * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
+     */
+    function ProgressWindow(theme) {
+        theme = theme || Theme.DEFAULT;
+        let thiz = this,
+            gradientDrawable = new GradientDrawable_(),
+            layout = new LinearLayout_(CONTEXT);
+        thiz._theme = theme;
+        thiz._window = new PopupWindow_(CONTEXT);
+        thiz._textView = new TextView_(CONTEXT);
+        thiz._layout = new LinearLayout_(CONTEXT);
+        thiz._effect = new TextView_(CONTEXT);
+        thiz._isRunning = true;
+        thiz._window.setBackgroundDrawable(new ColorDrawable_(theme.getProgressWindow(Theme.BACKGROUND_COLOR)));
+        thiz._window.setContentView(layout);
+        thiz._window.setWidth(DEVICE_WIDTH);
+        thiz._window.setHeight(DEVICE_HEIGHT);
+        thiz._textView.setGravity(Gravity_.CENTER);
+        thiz._textView.setPadding(DP * 12, DP * 8, DP * 12, DP * 24);
+        thiz._textView.setText("Now Loading...");
+        thiz._textView.setTextColor(theme.getProgressWindow(Theme.TEXT_COLOR));
+        thiz._textView.setTextSize(1, 18);
+        gradientDrawable.setColors([theme.getProgressWindow(Theme.EFFECT_COLOR), theme.getProgressWindow(Theme.TEXT_COLOR)]);
+        gradientDrawable.setOrientation(GradientDrawable_.Orientation.LEFT_RIGHT);
+        thiz._effect.setBackgroundDrawable(gradientDrawable);
+        thiz._layout.addView(thiz._effect);
+        thiz._layout.setBackgroundDrawable(new ColorDrawable_(theme.getProgressWindow(Theme.TEXT_COLOR)));
+        thiz._layout.setGravity(Gravity_.LEFT);
+        thiz._layout.setLayoutParams(LinearLayout_.LayoutParams(DP * 304, DP * 28));
+        thiz._layout.setPadding(DP * 2, DP * 2, DP * 2, DP * 2);
+        layout.addView(thiz._textView);
+        layout.addView(thiz._layout);
+        layout.setGravity(Gravity_.CENTER);
+        layout.setOrientation(1);
+
+        new Thread_({
+            run() {
+                let max = DP * 300,
+                    isIncreasing,
+                    canForceShutdown = false,
+                    time = 0,
+                    progress = 0;
+                while (thiz._isRunning) {
+                    Thread_.sleep(5);
+                    if (progress >= max) {
+                        isIncreasing = false;
+                    } else if (progress <= 0) {
+                        isIncreasing = true;
+                    }
+                    time += 5;
+                    progress += isIncreasing ? DP : -DP;
+                    CONTEXT.runOnUiThread({
+                        run() {
+                            if (time >= 5000 && !canForceShutdown) {
+                                canForceShutdown = true;
+                                thiz._textView.setText(thiz._textView.getText() + "\n\n[Force shutdown]");
+                                thiz._textView.setOnClickListener(new View_.OnClickListener({
+                                    onClick(view) {
+                                        thiz._isRunning = false;
+                                        thiz._window.dismiss();
+                                    }
+                                }));
+                            }
+                            thiz._effect.setLayoutParams(LinearLayout_.LayoutParams(progress, DP * 24));
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    /**
+     * Disposes of the progress window.
+     * @since 2016-07-05
+     */
+    ProgressWindow.prototype.dismiss = function () {
+        let thiz = this;
+        CONTEXT.runOnUiThread({
+            run() {
+                thiz._isRunning = false;
+                thiz._window.dismiss();
+            }
+        });
+        return this;
+    };
+
+    /**
+     * Returns the progress window.
+     * @since 2016-07-05
+     * @returns {android.widget.PopupWindow} Progress window
+     */
+    ProgressWindow.prototype.getWindow = function () {
+        return this._window;
+    };
+
+    /**
+     * Sets the color of the progress window.
+     * @since 2016-07-05
+     * @param {Number} color Color of the progress window
+     */
+    ProgressWindow.prototype.setColor = function (color) {
+        this._window.setBackgroundDrawable(new ColorDrawable_(color));
+        return this;
+    };
+
+    /**
+     * Sets the effect function.
+     * @since 2016-07-05
+     * @param {Number} color0 Effect color
+     * @param {Number} color1 Background color
+     */
+    ProgressWindow.prototype.setEffectColor = function (color0, color1) {
+        let gradientDrawable = new GradientDrawable_();
+        gradientDrawable.setColors([color0, color1]);
+        gradientDrawable.setOrientation(GradientDrawable_.Orientation.LEFT_RIGHT);
+        this._effect.setBackgroundDrawable(gradientDrawable);
+        this._layout.setBackgroundDrawable(new ColorDrawable_(color1));
+        return this;
+    };
+
+    /**
+     * Sets a displayed text.
+     * @since 2016-07-05
+     * @param {Number} text Displayed text
+     */
+    ProgressWindow.prototype.setText = function (text) {
+        this._textView.setText(text.toString());
+        return this;
+    };
+
+    /**
+     * Sets the color of displayed text.
+     * @since 2016-07-05
+     * @param {Number} textColor Color of displayed text
+     */
+    ProgressWindow.prototype.setTextColor = function (textColor) {
+        this._textView.setTextColor(textColor);
+        return this;
+    };
+
+    /**
+     * Show the progress window on the screen.
+     * @since 2016-07-05
+     */
+    ProgressWindow.prototype.show = function () {
+        this._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
+        return this;
+    };
+
+    /**
+     * Stops the effect of progress.
+     * @since 2016-07-05
+     */
+    ProgressWindow.prototype.stop = function () {
+        this._isRunning = false;
+        return this;
+    };
+
+
+
+    /**
+     * Class representing a sensor button.
+     * @since 2016-08-04
+     * @class
+     * @extends me.astro.widget.ImageButton
+     * @memberOf me.astro.widget
+     * @param {Number} [shape=me.astro.design.Shape.RECT] Shape of sensor button
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of sensor button
+     */
+    function SensorButton(shape, theme) {
+        shape = shape || Shape.RECT;
+        theme = theme || Theme.DEFAULT;
+        let thiz = this,
+            isLongClick = false;
+        thiz._shape = shape;
+        thiz._theme = theme;
+        thiz._params = new LinearLayout_.LayoutParams(shape === Shape.RECT ? -1 : DP * 40, shape === Shape.RECT ? DP * 36 : DP * 40);
+        thiz._view = new TextView_(CONTEXT);
+        thiz._pressedDrawable = new ColorDrawable_(0);
+        thiz._unpressedDrawable = new ColorDrawable_(0);
+        thiz._func = () => {};
+        thiz._params.setMargins(DP * 6, DP * 6, DP * 6, DP * 6);
+        thiz._view.setBackgroundDrawable(thiz._unpressedDrawable);
+        thiz._view.setGravity(Gravity_.CENTER);
+        thiz._view.setLayoutParams(thiz._params);
+        thiz._view.setOnLongClickListener(new View_.OnLongClickListener({
+            onLongClick(v) {
+                isLongClick = true;
+                return true;
+            }
+        }));
+        thiz._view.setOnTouchListener(new View_.OnTouchListener({
+            onTouch(v, event) {
+                let width = v.getWidth(),
+                    height = v.getHeight(),
+                    x = event.getX(),
+                    y = event.getY();
+                switch (event.getAction()) {
+                case MotionEvent_.ACTION_DOWN:
+                    v.setBackgroundDrawable(thiz._pressedDrawable);
+                    break;
+                case MotionEvent_.ACTION_MOVE:
+                    if (isLongClick) {
+                        thiz._func(event.getRawX(), event.getRawY(), v.getWidth(), v.getHeight());
+                    }
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._pressedDrawable);
+                    } else {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                    break;
+                case MotionEvent_.ACTION_UP:
+                    isLongClick = false;
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                    break;
+                case MotionEvent_.ACTION_CANCEL:
+                    isLongClick = false;
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                }
+                return false;
+            }
+        }));
+    }
+
+    SensorButton.prototype = Object.create(ImageButton.prototype);
+    SensorButton.prototype.constructor = SensorButton;
+
+
+
+    /**
+     * Class representing a slide button.
+     * @since 2016-08-04
+     * @class
+     * @extends me.astro.widget.ImageButton
+     * @memberOf me.astro.widget
+     * @param {Number} [shape=me.astro.design.Shape.RECT] Shape of slide button
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of slide button
+     */
+    function SlideButton(shape, theme) {
+        shape = shape || Shape.RECT;
+        theme = theme || Theme.DEFAULT;
+        let thiz = this,
+            oriX;
+        thiz._shape = shape;
+        thiz._theme = theme;
+        thiz._params = new LinearLayout_.LayoutParams(shape === Shape.RECT ? -1 : DP * 40, shape === Shape.RECT ? DP * 36 : DP * 40);
+        thiz._view = new TextView_(CONTEXT);
+        thiz._pressedDrawable = new ColorDrawable_(0);
+        thiz._unpressedDrawable = new ColorDrawable_(0);
+        thiz._func = () => {};
+        thiz._params.setMargins(DP * 6, DP * 6, DP * 6, DP * 6);
+        thiz._view.setBackgroundDrawable(thiz._unpressedDrawable);
+        thiz._view.setGravity(Gravity_.CENTER);
+        thiz._view.setLayoutParams(thiz._params);
+        thiz._view.setOnTouchListener(new View_.OnTouchListener({
+            onTouch(v, event) {
+                let width = v.getWidth(),
+                    height = v.getHeight(),
+                    x = event.getX(),
+                    y = event.getY();
+                switch (event.getAction()) {
+                case MotionEvent_.ACTION_DOWN:
+                    oriX = x;
+                    v.setBackgroundDrawable(thiz._pressedDrawable);
+                    break;
+                case MotionEvent_.ACTION_MOVE:
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._pressedDrawable);
+                    } else {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                    break;
+                case MotionEvent_.ACTION_UP:
+                    if (Math.abs(oriX - x) > width / 2) {
+                        if (oriX < x) {
+                            thiz._func(v, SlideButton.LEFT_RIGHT);
+                        } else {
+                            thiz._func(v, SlideButton.RIGHT_LEFT);
+                        }
+                    }
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                    break;
+                case MotionEvent_.ACTION_CANCEL:
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                }
+                return true;
+            }
+        }));
+    }
+
+    SlideButton.LEFT_RIGHT = 0;
+    SlideButton.RIGHT_LEFT = 1;
+
+    SlideButton.prototype = Object.create(ImageButton.prototype);
+    SlideButton.prototype.constructor = SlideButton;
+
+
+
+    /**
+     * Class representing a toast.
+     * @since 2016-05-28
+     * @class
+     * @memberOf me.astro.widget
+     */
+    function Toast() {}
+
+    /**
+     * Shows the toast on the screen.
+     * @since 2016-05-27
+     * @param {String} text Displayed text of the toast
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of toast
+     */
+    Toast.show = function (text, theme) {
+        theme = theme || Theme.DEFAULT;
+        CONTEXT.runOnUiThread({
+            run() {
+                let textView = new TextView_(CONTEXT);
+                textView.setBackgroundDrawable(new ColorDrawable_(theme.getToast(Theme.BACKGROUND_COLOR)));
+                textView.setPadding(DP * 12, DP * 8, DP * 12, DP * 8);
+                textView.setText(text.toString());
+                textView.setTextColor(theme.getToast(Theme.TEXT_COLOR));
+                textView.setTextSize(1, 14);
+                let toast_ = new Toast_(CONTEXT);
+                toast_.setView(textView);
+                toast_.show();
+            }
+        });
+    };
+
+
+
+    /**
+     * Class representing a verticle window.
+     * @since 2016-08-04
+     * @class
+     * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of verticle window
+     */
+    function VerticalWindow(theme) {
+        theme = theme || Theme.DEFAULT;
+        let thiz = this;
+        thiz._theme = theme;
+        thiz._height = DP * 156;
+        thiz._width = DP * 52;
+        thiz._layouts = [];
+        thiz._window = new PopupWindow_(CONTEXT);
+        thiz._windowLayout = new FrameLayout_(CONTEXT);
+        thiz._sensor = new SensorButton(Shape.CIRCLE, theme)
+            .setEffect((x, y, width, height) => {
+                thiz._window.update(DEVICE_WIDTH - x + DP * 26, DEVICE_HEIGHT - y - DP * 78, -1, -1);
+            })
+            .setEffectImage(Bitmap.createBitmap(PATH + "ic_open_with.png", DP * 24, DP * 24), theme.getButton(Theme.EFFECT_COLOR))
+            .setImage(Bitmap.createBitmap(PATH + "ic_open_with.png", DP * 24, DP * 24), theme.getButton(Theme.BACKGROUND_COLOR));
+        thiz._slides = [];
+        thiz._window.setBackgroundDrawable(new ColorDrawable_(0));
+        thiz._window.setContentView(thiz._windowLayout);
+        thiz._window.setWidth(DP * 52);
+        thiz._window.setHeight(DP * 156);
+    }
+
+    /**
+     * Adds a view on the window.
+     * @since 2016-08-04
+     * @param {android.widget.LinearLayout} view View
+     */
+    VerticalWindow.prototype.addView = function (view) {
+        let thiz = this,
+            theme = ("getTheme" in view) ? view.getTheme() : thiz._theme,
+            layouts = thiz._layouts;
+        if (typeof layouts[0] === "undefined" || layouts[layouts.length - 1].getChildCount() >= 3) {
+            let slideButton = new SlideButton(Shape.CIRCLE, theme);
+            slideButton.getView().setId(layouts.length);
+            slideButton.setEffect((view, direction) => {
+                    let id = 0;
+                    if (direction === SlideButton.LEFT_RIGHT) {
+                        id = view.getId() - 1;
+                    } else if (direction === SlideButton.RIGHT_LEFT) {
+                        id = view.getId() + 1;
+                    }
+                    if (layouts[id] instanceof LinearLayout_) {
+                        for (let i = 0, len = layouts.length; i < len; i++) {
+                            layouts[i].setVisibility(View_.GONE);
+                        }
+                        layouts[id].setVisibility(View_.VISIBLE);
+                    }
+                })
+                .setEffectImage(Bitmap.createBitmap(PATH + "ic_swap_horiz.png", DP * 24, DP * 24), theme.getButton(Theme.EFFECT_COLOR))
+                .setImage(Bitmap.createBitmap(PATH + "ic_swap_horiz.png", DP * 24, DP * 24), theme.getButton(Theme.BACKGROUND_COLOR));
+            thiz._slides.push(slideButton);
+            let layout = new LinearLayout_(CONTEXT);
+            layout.addView(view, 0);
+            layout.addView(new TextView_(CONTEXT), 1, new LinearLayout_.LayoutParams(DP * 52, DP * 52));
+            layout.addView(slideButton.show(), 2);
+            layout.removeViewAt(1);
+            layout.setOrientation(1);
+            layout.setVisibility(View_.GONE);
+            thiz._layouts.push(layout);
+            thiz._windowLayout.addView(layout);
+        } else {
+            layouts[layouts.length - 1].addView(view, 1);
+        }
+        return this;
+    };
+
+    /**
+     * Disposes of the vertical window.
+     * @since 2016-08-04
+     */
+    VerticalWindow.prototype.dismiss = function () {
+        let thiz = this,
+            layouts = thiz._layouts;
+        CONTEXT.runOnUiThread({
+            run() {
+                thiz._window.dismiss();
+                thiz._window = null;
+                for (let i = 0, len = layouts.length; i < len; i++) {
+                    layouts[i].setVisibility(View_.GONE);
+                }
+                thiz._layouts = null;
+            }
+        });
+        return this;
+    };
+
+    /**
+     * Returns the vertical window.
+     * @since 2016-08-04
+     * @returns {android.widget.PopupWindow} Vertical window
+     */
+    VerticalWindow.prototype.getWindow = function () {
+        return this._window;
+    };
+
+    /**
+     * Returns the size of the vertical window.
+     * @since 2016-05-27
+     * @returns {Array.<Number>} Width and height of the vertical window.
+     */
+    VerticalWindow.prototype.getWH = function () {
+        return [this._width, this._height];
+    };
+
+    /**
+     * Sets the color of the vertical window.
+     * @since 2016-08-04
+     * @param {Number} color Color of the vertical window
+     */
+    VerticalWindow.prototype.setColor = function (color) {
+        this._sensor.setImage(Bitmap.createBitmap(PATH + "ic_open_with.png", DP * 24, DP * 24), color);
+        for (let i of this._slides) {
+            i.setImage(Bitmap.createBitmap(PATH + "ic_swap_horiz.png", DP * 24, DP * 24), color);
+        }
+        return this;
+    };
+
+    /**
+     * Shows the vertical window on the screen.
+     * @since 2016-08-04
+     */
+    VerticalWindow.prototype.show = function () {
+        let thiz = this,
+            layouts = thiz._layouts;
+        thiz.addView(thiz._sensor.show());
+        layouts[0].setVisibility(View_.VISIBLE);
+        thiz._window.showAtLocation(SCREEN, Gravity_.BOTTOM | Gravity_.RIGHT, 0, 0);
+        modernWrapFactory.popups.clear();
+        return this;
+    };
+
+
+
+    /**
+     * Class representing a window.
+     * @since 2016-05-27
+     * @class
+     * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
+     */
+    function Window(theme) {
+        theme = theme || Theme.DEFAULT;
+        let thiz = this;
+        thiz._theme = theme;
+        thiz._height = DP * 320;
+        thiz._width = DP * 400;
+        thiz._layouts = [];
+        thiz._toggles = [];
+        thiz._window = new PopupWindow_(CONTEXT);
+        thiz._windowLayout = new LinearLayout_(CONTEXT);
+        thiz._sideBarLayout = new LinearLayout_(CONTEXT);
+        thiz._contentLayout = new FrameLayout_(CONTEXT);
+        thiz._windowLayout.addView(thiz._sideBarLayout, DP * 60, thiz._height);
+        thiz._windowLayout.addView(thiz._contentLayout, thiz._width - DP * 60, thiz._height);
+        thiz._windowLayout.setGravity(Gravity_.CENTER);
+        thiz._sideBarLayout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.BACKGROUND_COLOR)));
+        thiz._sideBarLayout.setOrientation(1);
+        thiz._contentLayout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.TEXT_COLOR)));
+        thiz._window.setBackgroundDrawable(new ColorDrawable_(0));
+        thiz._window.setContentView(thiz._windowLayout);
+        thiz._window.setWidth(thiz._width + DP * 24);
+        thiz._window.setHeight(thiz._height + DP * 24);
+    }
+
+    /**
+     * Adds a layout on the window.
+     * @since 2016-05-27
+     * @param {android.graphics.Bitmap} image Image which is placed the sidebar
+     * @param {android.widget.LinearLayout} layout Layout
+     */
+    Window.prototype.addLayout = function (image, layout) {
+        let thiz = this,
+            theme = thiz._theme,
+            imageToggle = new ImageToggle();
+        imageToggle.getView().setId(thiz._layouts.length);
+        thiz._sideBarLayout.addView(imageToggle.setEffect(function (buttonView, isChecked) {
+                let layouts = thiz._layouts,
+                    toggles = thiz._toggles,
+                    id = buttonView.getId();
+                for (let i = 0, len = layouts.length; i < len; i++) {
+                    layouts[i].setVisibility(View_.GONE);
+                    toggles[i].setChecked(false);
+                }
+                layouts[id].setVisibility(View_.VISIBLE);
+            })
+            .setEffectImage(Drawable.setTint(new BitmapDrawable_(image), theme.getWindow(Theme.TEXT_COLOR)), theme.getWindow(Theme.EFFECT_COLOR), DP * 12)
+            .setImage(Drawable.setTint(new BitmapDrawable_(image), theme.getWindow(Theme.TEXT_COLOR)), theme.getWindow(Theme.BACKGROUND_COLOR), DP * 12)
+            .setPadding(0, 0, 0, 0)
+            .setWH(DP * 60, DP * 60)
+            .show());
+        thiz._layouts.push(layout);
+        thiz._toggles.push(imageToggle);
+        thiz._contentLayout.addView(layout);
+        return this;
+    };
+
+    /**
+     * Disposes of the progress window.
+     * @since 2016-05-27
+     */
+    Window.prototype.dismiss = function () {
+        let thiz = this,
+            layouts = thiz._layouts;
+        CONTEXT.runOnUiThread({
+            run() {
+                thiz._window.dismiss();
+                thiz._window = null;
+                for (let i = 0, len = layouts.length; i < len; i++) {
+                    layouts[i].setVisibility(View_.GONE);
+                }
+                thiz._layouts = null;
+            }
+        });
+        return this;
+    };
+
+    /**
+     * Returns the window.
+     * @since 2016-05-27
+     * @returns {android.widget.PopupWindow} Window
+     */
+    Window.prototype.getWindow = function () {
+        return this._window;
+    };
+
+    /**
+     * Returns the size of the window.
+     * @since 2016-05-27
+     * @returns {Array.<Number>} Width and height of the window
+     */
+    Window.prototype.getWH = function () {
+        return [this._width, this._height];
+    };
+
+    /**
+     * Sets the color of the window.
+     * @since 2016-05-27
+     * @param {Number} color Color of the window
+     */
+    Window.prototype.setColor = function (color) {
+        this._color = color;
+        this._sideBarLayout.setBackgroundDrawable(new ColorDrawable_(color));
+        return this;
+    };
+
+    /**
+     * Sets the focusable of the window.
+     * @since 2016-05-27
+     * @param {Boolean} focusable Focusable of the window
+     */
+    Window.prototype.setFocusable = function (focusable) {
+        this._window.setFocusable(focusable);
+        return this;
+    };
+
+    /**
+     * Sets the size of the window.
+     * @since 2016-05-27
+     * @param {Number} width Width of the window
+     * @param {Number} height Height of the window
+     */
+    Window.prototype.setWH = function (width, height) {
+        this._width = width;
+        this._height = height;
+        return this;
+    };
+
+    /**
+     * Shows the window on the screen.
+     * @since 2016-05-27
+     */
+    Window.prototype.show = function () {
+        let thiz = this,
+            layouts = thiz._layouts;
+        thiz._window.showAtLocation(SCREEN, Gravity_.CENTER, -DP * 15, DP * 2);
+        thiz._toggles[0].setChecked(true);
+        for (let i = 1, len = layouts.length; i < len; i++) {
+            layouts[i].setVisibility(View_.GONE);
+        }
+        modernWrapFactory.popups.clear();
+        return this;
+    };
+
+
+
+    /**
+     * Returns the account instance.
+     * @since 2016-07-05
+     * @memberOf me.astro
+     * @returns {me.astro.security.Account} Account instance
+     */
+    const getUser = () => user;
+
+
+
+    /**
+     * Returns the window.
+     * @since 2016-07-05
+     * @memberOf me.astro
+     * @returns {me.astro.widget.VerticalWindow} Window
+     */
+    const getWindow = () => verticalWindow;
+
+
+
+    /**
+     * Initializes the library.
+     * @since 2016-05-03
+     * @memberOf me.astro
+     */
+    function init() {
+        let res = ["ic_account_circle.png", "ic_edit.png", "ic_help_outline.png", "ic_info_outline.png", "ic_open_with.png", "ic_person.png", "ic_person_add.png", "ic_swap_horiz.png"],
+            isExists = true;
+        for (let i = res.length; i--;) {
+            if (!new File_(PATH, res[i]).exists()) {
+                File.download(PATH + res[i], "https://github.com/Astro36/AstroLibrary/raw/master/res/" + res[i]);
+                isExists = false;
+            }
+        }
+        if (isExists) {
+            let scriptManager = new ScriptManager_(),
+                nativeJavaMethod = Class_.forName("org.mozilla.javascript.NativeJavaMethod", true, CONTEXT.getClass().getClassLoader()),
+                blockLauncherMethodWatcherField = nativeJavaMethod.getDeclaredField("blockLauncherMethodWatcher"),
+                modernWrapFactoryField = scriptManager.getClass().getDeclaredField("modernWrapFactory"),
+                scriptingEnabledField = scriptManager.getClass().getDeclaredField("scriptingEnabled"),
+                Clazz = function () {};
+            Clazz.prototype.canCall = function () {
+                return true;
+            };
+            AccessibleObject_.setAccessible([blockLauncherMethodWatcherField, modernWrapFactoryField, scriptingEnabledField], true);
+            blockLauncherMethodWatcherField.set(null, null);
+            NativeJavaMethod_.setMethodWatcher(new Clazz());
+            modernWrapFactory = modernWrapFactoryField.get(scriptManager);
+            modernWrapFactory.popups.clear();
+            if (new NetworkChecker().isConnected()) {
+                notice = readHtml("http://minedev.dothome.co.kr/deneb/notice.txt");
+            }
+            verticalWindow = new VerticalWindow();
+            CONTEXT.runOnUiThread({
+                run() {
+                    verticalWindow.addView(new ImageButton(Shape.CIRCLE)
+                        .setEffect(showWindowAccount)
+                        .setEffectImage(Bitmap.createBitmap(PATH + "ic_account_circle.png", DP * 24, DP * 24))
+                        .setImage(Bitmap.createBitmap(PATH + "ic_account_circle.png", DP * 24, DP * 24))
+                        .show());
+                    verticalWindow.show();
+                }
+            });
+            login();
+        } else {
+            if (new NetworkChecker().isConnected()) {
+                let progressWindow;
+                CONTEXT.runOnUiThread({
+                    run() {
+                        progressWindow = new ProgressWindow();
+                        progressWindow.setText("Downloading...");
+                        progressWindow.show();
+                    }
+                });
+                new Thread_({
+                    run() {
+                        while (!isExists) {
+                            Thread_.sleep(1000);
+                            for (let i = res.length; i--;) {
+                                if (!new File_(PATH, res[i]).exists()) {
+                                    isExists = false;
+                                    break;
+                                } else {
+                                    isExists = true;
+                                }
+                            }
+                        }
+                        progressWindow.dismiss();
+                        init();
+                    }
+                }).start();
+            } else {
+                Toast.show("Error: No Internet.");
+            }
+        }
+    }
+
+
+    astro.getUser = getUser;
+    astro.getWindow = getWindow;
+    astro.init = init;
     astro.design = {
         Bitmap: Bitmap,
         Color: Color,
@@ -1232,6 +2582,18 @@ let me = this.me || {};
         File: File,
         Text: Text
     };
+    astro.widget = {
+        View: View,
+        TextView: TextView,
+        Button: Button,
+        EditText: EditText,
+        ImageButton: ImageButton,
+        ImageToggle: ImageToggle,
+        Layout: Layout,
+        ProgressWindow: ProgressWindow,
+        Toast: Toast,
+        Window: Window
+    };
 
     $.selectLevelHook = () => {
         hasLevel = true;
@@ -1240,5 +2602,7 @@ let me = this.me || {};
     $.leaveGame = () => {
         hasLevel = false;
     };
+
+    init();
 
 })(this, (typeof me.astro === "object" ? me.astro : (me.astro = {})));

@@ -1308,7 +1308,7 @@ let me = this.me || {};
     /**
      * Returns the color of displayed text.
      * @since 2016-05-03
-     * @returns {Number} Color of text
+     * @returns {Number} Color of displayed text
      */
     TextView.prototype.getTextColor = function () {
         return this._view.getTextColor();
@@ -1317,7 +1317,7 @@ let me = this.me || {};
     /**
      * Returns the size of displayed text.
      * @since 2016-05-03
-     * @returns {Number} Size of text
+     * @returns {Number} Size of displayed text
      */
     TextView.prototype.getTextSize = function () {
         return this._view.getTextSize();
@@ -1372,7 +1372,7 @@ let me = this.me || {};
     };
 
     /**
-     * Returns the size of displayed text.
+     * Sets the size of displayed text.
      * @since 2016-05-03
      * @param {Number} textSize Size of displayed text
      */

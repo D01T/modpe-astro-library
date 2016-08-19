@@ -2480,6 +2480,489 @@ let me = this.me || {};
 
 
     /**
+     * Sign in the server.
+     * @since 2016-06-04
+     * @private
+     * @memberOf me.astro
+     */
+    function login() {
+        let file = new File_(PATH, "user.dat");
+        if (file.exists()) {
+            if (new NetworkChecker().isConnected()) {
+                let progressWindow,
+                    fileInputStream = new FileInputStream_(file),
+                    inputStreamReader = new InputStreamReader_(fileInputStream),
+                    bufferedReader = new BufferedReader_(inputStreamReader),
+                    str = bufferedReader.readLine(),
+                    arr = str.split(",");
+                fileInputStream.close();
+                inputStreamReader.close();
+                bufferedReader.close();
+                CONTEXT.runOnUiThread({
+                    run() {
+                        progressWindow = new ProgressWindow();
+                        progressWindow.setText("Logging in...");
+                        progressWindow.show();
+                    }
+                });
+                user = null;
+                user = new Account(arr[0], arr[1]);
+                user.login(code => {
+                    if (code === Account.LOGIN_FAIL) {
+                        user = null;
+                        showWindow();
+                    }
+                    if (typeof $.onLoginListener === "function") {
+                        $.onLoginListener(code);
+                    }
+                    progressWindow.dismiss();
+                });
+            } else {
+                Toast.show("Error: No Internet.");
+            }
+        } else {
+            showWindow();
+        }
+    }
+
+
+
+    /**
+     * Logout the server.
+     * @since 2016-07-05
+     * @private
+     * @memberOf me.astro
+     */
+    function logout() {
+        new File_(PATH, "user.dat").delete();
+        if (user instanceof Account && user.isAvailable()) {
+            user.logout();
+            if (typeof $.onLoginListener === "function") {
+                $.onLoginListener(Account.LOGOUT);
+            }
+        }
+        showWindow();
+    }
+
+
+
+    /**
+     * Shows the window about the library information and login.
+     * @since 2016-06-04
+     * @private
+     * @memberOf me.astro
+     */
+    function showWindow() {
+        CONTEXT.runOnUiThread({
+            run() {
+                let window = new Window(),
+                    loginId = new EditText(),
+                    loginPassword = new EditText(),
+                    registerId = new EditText(),
+                    registerPassword = new EditText(),
+                    registerName = new EditText(),
+                    registerEmail = new EditText();
+                window.addLayout(Bitmap.createBitmap(PATH + "ic_person.png"), new Layout()
+                        .addView(new TextView()
+                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                            .setText("Deneb DB")
+                            .setTextSize(24)
+                            .show())
+                        .addView(new TextView()
+                            .setPadding(DP * 12, 0, DP * 8, DP * 12)
+                            .setText("Login")
+                            .setTextSize(14)
+                            .show())
+                        .addView(loginId.setHint("ID")
+                            .show())
+                        .addView(loginPassword.setHint("Password")
+                            .show())
+                        .addView(new Layout()
+                            .addView(new Button()
+                                .setText("Login")
+                                .setEffect(() => {
+                                    let id = loginId.getText(),
+                                        password = loginPassword.getText(),
+                                        progressWindow = new ProgressWindow();
+                                    progressWindow.setText("Logging in...");
+                                    progressWindow.show();
+                                    user = new Account(id, password);
+                                    user.login(code => {
+                                        if (code === Account.LOGIN_FAIL) {
+                                            user = null;
+                                            CONTEXT.runOnUiThread({
+                                                run() {
+                                                    loginPassword.setText("");
+                                                }
+                                            });
+                                        } else if (code === Account.LOGIN_SUCCESS) {
+                                            let fileOutputStream = new FileOutputStream_(PATH + "user.dat");
+                                            fileOutputStream.write(new String_(id + "," + password).getBytes());
+                                            fileOutputStream.close();
+                                            window.dismiss();
+                                        }
+                                        if (typeof $.onLoginListener === "function") {
+                                            $.onLoginListener(code);
+                                        }
+                                        progressWindow.dismiss();
+                                    });
+                                })
+                                .show())
+                            .addView(new Button()
+                                .setText("Close")
+                                .setEffect(() => window.dismiss())
+                                .show())
+                            .setOrientation(0)
+                            .show())
+                        .show())
+                    .addLayout(Bitmap.createBitmap(PATH + "ic_person_add.png"), new Layout()
+                        .addView(new TextView()
+                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                            .setText("Deneb DB")
+                            .setTextSize(24)
+                            .show())
+                        .addView(new TextView()
+                            .setPadding(DP * 12, 0, DP * 8, DP * 12)
+                            .setText("Sign up")
+                            .setTextSize(14)
+                            .show())
+                        .addView(registerId.setHint("ID")
+                            .show())
+                        .addView(registerPassword.setHint("Password")
+                            .show())
+                        .addView(registerEmail.setHint("E-mail")
+                            .show())
+                        .addView(registerName.setHint("Name")
+                            .show())
+                        .addView(new Layout()
+                            .addView(new Button()
+                                .setText("Sign up")
+                                .setEffect(() => {
+                                    let id = registerId.getText(),
+                                        password = registerPassword.getText(),
+                                        email = registerEmail.getText(),
+                                        name = registerName.getText(),
+                                        progressWindow = new ProgressWindow();
+                                    progressWindow.setText("Signing up...");
+                                    progressWindow.show();
+                                    Account.signUp(id, password, name, email, code => {
+                                        if (code === Account.REGISTER_FAIL) {
+                                            CONTEXT.runOnUiThread({
+                                                run() {
+                                                    registerId.setText("");
+                                                }
+                                            });
+                                        }
+                                        progressWindow.dismiss();
+                                    });
+                                })
+                                .show())
+                            .addView(new Button()
+                                .setText("Close")
+                                .setEffect(() => window.dismiss())
+                                .show())
+                            .setOrientation(0)
+                            .show())
+                        .show())
+                    .addLayout(Bitmap.createBitmap(PATH + "ic_info_outline.png"), new Layout()
+                        .addView(new TextView()
+                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                            .setText("Notice")
+                            .setTextSize(24)
+                            .show())
+                        .addView(new TextView()
+                            .setText(notice)
+                            .show())
+                        .addView(new Button()
+                            .setText("Close")
+                            .setEffect(() => window.dismiss())
+                            .show())
+                        .show())
+                    .addLayout(Bitmap.createBitmap(PATH + "ic_help_outline.png"), new Layout()
+                        .addView(new TextView()
+                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                            .setText("Device Info")
+                            .setTextSize(24)
+                            .show())
+                        .addView(new TextView()
+                            .setText("Device model: " + DEVICE_MODEL + "\nDevice version: " + DEVICE_VERSION + "\n\n")
+                            .show())
+                        .addView(new TextView()
+                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                            .setText("Library Info")
+                            .setTextSize(24)
+                            .show())
+                        .addView(new TextView()
+                            .setText(NAME + " " + VERSION + "\n\nName Code: " + NAME_CODE + "\nDeveleoper: " + DEVELOPER + "\n\n")
+                            .show())
+                        .addView(new TextView()
+                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                            .setText("Error Message Translation (Korean)")
+                            .setTextSize(24)
+                            .show())
+                        .addView(new TextView()
+                            .setText("Cannot connect to the server.\n- 서버 오류. 이 오류를 발견한다면 즉시 개발자에게 알려주세요.\n\nCan not find player.\n- 맵 안에서만 사용 가능한 기능입니다.\n\nCannot find the user.\n- 서버에 올바르지 않은 계정 아이디가 입력되었습니다.\n\nIncompatible version. (Library version ≥ {version})\n- 라이브러리의 버전이 호환되지 않습니다. 최신 버전으로 업데이트해주세요.\n\nInvalid format.\n- 유효하지 않은 형식입니다.\n    ID & Password: 4~12자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    Name: 1~20자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    E-mail: 네이버 E-mail만 사용 가능합니다.\n\nInvalid number.\n- 유효하지 않은 숫자입니다. 정수를 입력해주세요.\n\nInvalid parameters.\n- 스크립트 오류. 해당 스크립트 개발자에게 문의하세요.\n\nInvalid version format.\n- 유효하지 않은 버전 형식입니다. 1.0과 같은 형식으로 입력해주세요.\n\nNo Internet.\n- 인터넷에 연결해주세요.\n\nThe password is incorrect.\n- 비밀번호가 올바르지 않습니다.\n\nThis e-mail is already used.\n-이미 사용중인 E-mail입니다. 다른 E-mail를 입력하세요.\n\nThis ID is already used.\n- 이미 사용중인 아이디입니다. 다른 아이디를 입력하세요.\n\nThis ID is not accepted.\n- 아이디가 아직 승인되지 않았습니다. 개발자가 아이디를 사용 허가할 때까지 기다려주세요.\n\nThis ID is not signed up the server.\n- 서버에 가입하지 않은 아이디입니다. 서버에 가입해주세요.")
+                            .show())
+                        .addView(new Button()
+                            .setText("Close")
+                            .setEffect(() => window.dismiss())
+                            .show())
+                        .show())
+                    .setFocusable(true)
+                    .show();
+            }
+        });
+    }
+
+
+
+    /**
+     * Shows the window about the user information.
+     * @since 2016-07-04
+     * @private
+     * @memberOf me.astro
+     */
+    function showWindowAccount() {
+        if (user instanceof Account && user.isAvailable()) {
+            CONTEXT.runOnUiThread({
+                run() {
+                    try {
+                        let window = new Window(),
+                            password = new EditText(),
+                            name = new EditText(),
+                            email = new EditText();
+                        window.addLayout(Bitmap.createBitmap(PATH + "ic_person.png"), new Layout()
+                                .addView(new TextView()
+                                    .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                    .setText("Account")
+                                    .setTextSize(24)
+                                    .show())
+                                .addView(new TextView()
+                                    .setPadding(DP * 12, 0, DP * 8, DP * 12)
+                                    .setText("내 계정 (" + user.getId() + ")")
+                                    .setTextSize(14)
+                                    .show())
+                                .addView(new TextView()
+                                    .setPadding(DP * 8, DP * 12, DP * 8, DP * 12)
+                                    .setText("Password")
+                                    .show())
+                                .addView(password.setHint("Password")
+                                    .setText(user.getPassword())
+                                    .show())
+                                .addView(new TextView()
+                                    .setPadding(DP * 8, DP * 12, DP * 8, DP * 12)
+                                    .setText("Name")
+                                    .show())
+                                .addView(name.setHint("Name")
+                                    .setText(user.getName())
+                                    .show())
+                                .addView(new TextView()
+                                    .setPadding(DP * 8, DP * 12, DP * 8, DP * 12)
+                                    .setText("E-mail: ")
+                                    .show())
+                                .addView(email.setHint("E-mail")
+                                    .setText(user.getEmail())
+                                    .show())
+                                .addView(new Layout()
+                                    .addView(new Button()
+                                        .setText("Save")
+                                        .setEffect(() => {
+                                            let progressWindow = new ProgressWindow();
+                                            progressWindow.setText("Modifying...");
+                                            progressWindow.show();
+                                            user.modifyUserData(password.getText(), name.getText(), email.getText(), code => {
+                                                if (code === Account.EDIT_SUCCESS) {
+                                                    let fileOutputStream = new FileOutputStream_(PATH + "user.dat");
+                                                    fileOutputStream.write(new String_(user.getId() + "," + password.getText()).getBytes());
+                                                    fileOutputStream.close();
+                                                    window.dismiss();
+                                                }
+                                                if (typeof $.onLoginListener === "function") {
+                                                    $.onLoginListener(code);
+                                                }
+                                                progressWindow.dismiss();
+                                            });
+                                        })
+                                        .show())
+                                    .addView(new Button()
+                                        .setText("Logout")
+                                        .setEffect(() => {
+                                            window.dismiss();
+                                            logout();
+                                        })
+                                        .show())
+                                    .addView(new Button()
+                                        .setText("Close")
+                                        .setEffect(() => window.dismiss())
+                                        .show())
+                                    .setOrientation(0)
+                                    .show())
+                                .show()
+                            )
+                            .addLayout(Bitmap.createBitmap(PATH + "ic_edit.png"), (() => {
+                                if (hasLevel) {
+                                    let health = new EditText(),
+                                        hunger = new EditText(),
+                                        level = new EditText(),
+                                        exp = new EditText(),
+                                        playerEntity = Player.getEntity();
+                                    return new Layout().addView(new TextView()
+                                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                            .setText("Player Manager")
+                                            .setTextSize(24)
+                                            .show())
+                                        .addView(new TextView()
+                                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                            .setText("Gamemode")
+                                            .setTextSize(14)
+                                            .show())
+                                        .addView(new Layout()
+                                            .addView(new Button()
+                                                .setText("Survival")
+                                                .setEffect(() => {
+                                                    Level.setGameMode(0);
+                                                    Toast.show("Gamemode changed.");
+                                                })
+                                                .show())
+                                            .addView(new Button()
+                                                .setText("Creative")
+                                                .setEffect(() => {
+                                                    Level.setGameMode(1);
+                                                    Toast.show("Gamemode changed.");
+                                                })
+                                                .show())
+                                            .setOrientation(0)
+                                            .show(false))
+                                        .addView(new TextView()
+                                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                            .setText("Health")
+                                            .setTextSize(14)
+                                            .show())
+                                        .addView(health.setHint("Health")
+                                            .setText(Entity.getHealth(playerEntity))
+                                            .show())
+                                        .addView(new Button()
+                                            .setText("Set")
+                                            .setEffect(() => {
+                                                let str = health.getText();
+                                                if (Text.verifyNumber(str)) {
+                                                    Entity.setHealth(playerEntity, Number(str));
+                                                    Toast.show("Health changed.");
+                                                } else {
+                                                    Toast.show("Error: Invalid number.");
+                                                }
+                                            })
+                                            .show())
+                                        .addView(new TextView()
+                                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                            .setText("Hunger")
+                                            .setTextSize(14)
+                                            .show())
+                                        .addView(hunger.setHint("Hunger")
+                                            .setText(Player.getHunger())
+                                            .show())
+                                        .addView(new Button()
+                                            .setText("Set")
+                                            .setEffect(() => {
+                                                let str = hunger.getText();
+                                                if (Text.verifyNumber(str)) {
+                                                    Player.setHunger(Number(str));
+                                                    Toast.show("Hunger changed.");
+                                                } else {
+                                                    Toast.show("Error: Invalid number.");
+                                                }
+                                            })
+                                            .show())
+                                        .addView(new TextView()
+                                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                            .setText("Level")
+                                            .setTextSize(14)
+                                            .show())
+                                        .addView(level.setHint("Level")
+                                            .setText(Player.getLevel())
+                                            .show())
+                                        .addView(new Button()
+                                            .setText("Set")
+                                            .setEffect(() => {
+                                                let str = level.getText();
+                                                if (Text.verifyNumber(str)) {
+                                                    Player.setLevel(Number(str));
+                                                    Toast.show("Level changed.");
+                                                } else {
+                                                    Toast.show("Error: Invalid number.");
+                                                }
+                                            })
+                                            .show())
+                                        .addView(new TextView()
+                                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                            .setText("Exp")
+                                            .setTextSize(14)
+                                            .show())
+                                        .addView(exp.setHint("Exp")
+                                            .setText(Player.getExp().toFixed(2))
+                                            .show())
+                                        .addView(new Button()
+                                            .setText("Set")
+                                            .setEffect(() => {
+                                                let str = exp.getText();
+                                                if (Text.verifyNumber(str)) {
+                                                    Player.setExp(Number(str));
+                                                    Toast.show("Exp changed.");
+                                                } else {
+                                                    Toast.show("Error: Invalid number.");
+                                                }
+                                            })
+                                            .show())
+                                        .addView(new Button()
+                                            .setText("Close")
+                                            .setEffect(() => window.dismiss())
+                                            .show())
+                                        .show();
+                                } else {
+                                    return new Layout().addView(new TextView()
+                                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                            .setText("Player Manager")
+                                            .setTextSize(24)
+                                            .show())
+                                        .addView(new TextView()
+                                            .setText("Error: Can not find player.")
+                                            .show())
+                                        .addView(new Button()
+                                            .setText("Close")
+                                            .setEffect(() => window.dismiss())
+                                            .show())
+                                        .show();
+                                }
+                            })())
+                            .addLayout(Bitmap.createBitmap(PATH + "ic_info_outline.png"), new Layout()
+                                .addView(new TextView()
+                                    .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                    .setText("Notice")
+                                    .setTextSize(24)
+                                    .show())
+                                .addView(new TextView()
+                                    .setText(notice)
+                                    .show())
+                                .addView(new Button()
+                                    .setText("Close")
+                                    .setEffect(() => window.dismiss())
+                                    .show())
+                                .show())
+                            .setFocusable(true)
+                            .show();
+                    } catch (e) {
+                        print(e + "-" + e.lineNumber);
+                    }
+                }
+            });
+        } else {
+            showWindow();
+        }
+    }
+
+
+
+    /**
      * Initializes the library.
      * @since 2016-05-03
      * @memberOf me.astro
@@ -2555,6 +3038,7 @@ let me = this.me || {};
             }
         }
     }
+
 
 
     astro.getUser = getUser;

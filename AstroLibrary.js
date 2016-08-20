@@ -1225,7 +1225,7 @@ let me = this.me || {};
     /**
      * Check if the script is modified.
      * @since 2016-08-20
-     * @returns {String} If the script is modified, returns true
+     * @returns {Boolean} If the script is modified, returns true
      */
     ScriptChecker.prototype.isModified = function () {
         let iterator = ScriptManager_.enabledScritps.interator();

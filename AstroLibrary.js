@@ -57,10 +57,13 @@ let me = this.me || {};
         InputStreamReader_ = java.io.InputStreamReader,
         Byte_ = java.lang.Byte,
         Class_ = java.lang.Class,
+        Integer_ = java.lang.Integer,
         String_ = java.lang.String,
+        StringBuffer_ = java.lang.StringBuffer,
         Thread_ = java.lang.Thread,
         Array_ = java.lang.reflect.Array,
         AccessibleObject_ = java.lang.reflect.AccessibleObject,
+        MessageDigest_ = java.security.MessageDigest,
         URL_ = java.net.URL,
         ScriptManager_ = net.zhuoweizhang.mcpelauncher.ScriptManager,
         HttpGet_ = org.apache.http.client.methods.HttpGet,
@@ -1146,6 +1149,92 @@ let me = this.me || {};
         } catch (e) {
             Toast.show(e);
         }
+    };
+
+    /**
+     * Reads a file and returns the contents of the file.
+     * @since 2016-08-20
+     * @param {String} path File path
+     * @returns {String} Contents of the file
+     */
+    File.read = function (path) {
+        let file = new File_(path);
+        if (file.exists()) {
+            let fileInputStream = new FileInputStream_(path),
+                inputStreamReader = new InputStreamReader_(fileInputStream),
+                bufferedReader = new BufferedReader_(inputStreamReader),
+                arr = [],
+                line;
+            while ((line = bufferedReader.readLine()) !== -1) {
+                arr.push(line);
+            }
+            bufferedReader.close();
+            inputStreamReader.close();
+            fileInputStream.close();
+            return arr.join("\n");
+        } else {
+            return "";
+        }
+    };
+
+    /**
+     * Writes a file.
+     * @since 2016-08-20
+     * @param {String} path File path
+     * @param {String} str Contents to write
+     */
+    File.write = function (path, str) {
+        let file = new File_(path),
+            fileOutputStream = new FileOutputStream_(path);
+        file.getParentFile().mkdirs();
+        fileOutputStream.write(new String_(str).getBytes());
+        fileOutputStream.close();
+    };
+
+
+
+    /**
+     * Class representing a script checker.
+     * @since 2016-08-20
+     * @class
+     * @memberOf me.astro.utils
+     * @param {String} [src=hashValue] Script source
+     */
+    function ScriptChecker(src) {
+        this._hash = typeof src === "string" ? ScriptChecker.getHash(src) : readHtml("https://github.com/Astro36/AstroLibrary/raw/master/sha256.txt");
+    }
+
+    /**
+     * Returns a hash of the string.
+     * @since 2016-08-20
+     * @param {String} str String
+     * @returns {String} Hash of the string
+     */
+    ScriptChecher.getHash = function (str) {
+        let messageDigest = MessageDigest_.getInstance("SHA-256"),
+            stringBuffer = new StringBuffer_(),
+            bytes; 
+        messageDigest.update(new String_(str).getBytes());
+        bytes = messageDigest.digest();
+        for (let i = 0, len = bytes.length; i < len; i++) {
+            stringBuffer.append(Integer_.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+        }
+        return stringBuffer.toString();
+    };
+
+    /**
+     * Check if the script is modified.
+     * @since 2016-08-20
+     * @returns {String} If the script is modified, returns true
+     */
+    ScriptChecker.prototype.isModified = function () {
+        let iterator = ScriptManager_.enabledScritps.interator();
+        while (iterator.hasNext()) {
+            if (this._hash === ScriptChecker.getHash(File.read(CONTEXT.getDir("modpescripts", 0) + "/" + iterator.next()))) {
+                return false;
+            }
+        }
+        return true;
     };
 
 
@@ -3056,7 +3145,7 @@ let me = this.me || {};
         NetworkChecker: NetworkChecker,
         Server: Server,
         getIp: getIp,
-        readHtml: readHtml,
+        readHtml: readHtml
     };
     astro.security = {
         Account: Account
@@ -3064,6 +3153,7 @@ let me = this.me || {};
     astro.utils = {
         AddonManager: AddonManager,
         File: File,
+        ScriptChecker: ScriptChecker,
         Text: Text
     };
     astro.widget = {

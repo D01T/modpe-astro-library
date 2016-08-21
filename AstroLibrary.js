@@ -1198,11 +1198,8 @@ let me = this.me || {};
      * @since 2016-08-20
      * @class
      * @memberOf me.astro.utils
-     * @param {String} [src=hashValue] Script source
      */
-    function ScriptChecker(src) {
-        this._hash = typeof src === "string" ? ScriptChecker.getHash(src) : readHtml("https://github.com/Astro36/AstroLibrary/raw/master/sha256.txt");
-    }
+    function ScriptChecker() {}
 
     /**
      * Returns a hash of the string.
@@ -1221,16 +1218,41 @@ let me = this.me || {};
         }
         return stringBuffer.toString();
     };
+    
+    /**
+     * Check if the script is last version.
+     * @since 2016-08-21
+     * @param {String} [version=VERSION] Script version
+     * @param {String} [url="https://github.com/Astro36/AstroLibrary/raw/master/version.txt"] URL for script version 
+     * @returns {Boolean} If the script is last version, returns true
+     */
+    ScriptChecker.isLastVersion = function (version, url) {
+        for (let tmpA = (version || VERSION).split("."),
+                tmpB = readHtml(url || "https://github.com/Astro36/AstroLibrary/raw/master/version.txt").split("."),
+                len = Math.max(tmpA.length, tmpB.length),
+                i = 0; i < len; i++) {
+            let a = Number(tmpA[i] || 0),
+                b = Number(tmpB[i] || 0);
+            if (a > b) {
+                return true;
+            } else if (a < b) {
+                return false;
+            }
+        }
+        return true;
+    };
 
     /**
      * Check if the script is modified.
      * @since 2016-08-20
+     * @param {String} [src=hashValue] Script source
      * @returns {Boolean} If the script is modified, returns true
      */
-    ScriptChecker.prototype.isModified = function () {
-        let iterator = ScriptManager_.enabledScritps.interator();
+    ScriptChecker.isModified = function (src) {
+        let hash = typeof src === "string" ? ScriptChecker.getHash(src) : readHtml("https://github.com/Astro36/AstroLibrary/raw/master/sha256.txt"),
+            iterator = ScriptManager_.enabledScripts.interator();
         while (iterator.hasNext()) {
-            if (this._hash === ScriptChecker.getHash(File.read(CONTEXT.getDir("modpescripts", 0) + "/" + iterator.next()))) {
+            if (hash === ScriptChecker.getHash(File.read(CONTEXT.getDir("modpescripts", 0) + "/" + iterator.next()))) {
                 return false;
             }
         }

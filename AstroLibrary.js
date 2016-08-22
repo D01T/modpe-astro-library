@@ -76,6 +76,8 @@ let me = this.me || {};
         NAME = "Astro Library",
         NAME_CODE = "me_astro_library",
         VERSION = "1.0",
+        VERSION_URL = "https://github.com/Astro36/AstroLibrary/raw/master/version.txt",
+        HASH_URL = "https://github.com/Astro36/AstroLibrary/raw/master/sha256.txt",
         DEVELOPER = "Astro",
         PATH = "/sdcard/games/me.astro/library/",
         DEVICE_WIDTH = CONTEXT.getScreenWidth(),
@@ -84,6 +86,7 @@ let me = this.me || {};
         DEVICE_VERSION = Build_.VERSION.RELEASE;
 
     let hasLevel = false,
+        scriptChecker,
         verticalWindow,
         modernWrapFactory,
         notice = "Error: No Internet.",
@@ -1199,8 +1202,11 @@ let me = this.me || {};
      * @since 2016-08-20
      * @class
      * @memberOf me.astro.utils
+     * @param {me.astro.utils.ScriptInfo} info Script information
      */
-    function ScriptChecker() {}
+    function ScriptChecker(info) {
+        this._info = info;
+    }
 
     /**
      * Returns a hash of the string.
@@ -1223,15 +1229,13 @@ let me = this.me || {};
     /**
      * Check if the script is last version.
      * @since 2016-08-21
-     * @param {String} [version=VERSION] Script version
-     * @param {String} [url="https://github.com/Astro36/AstroLibrary/raw/master/version.txt"] URL for script version 
      * @returns {Boolean} If the script is last version, returns true
      */
-    ScriptChecker.isLastVersion = function (version, url) {
-        for (let tmpA = (version || VERSION).split("."),
-                tmpB = readHtml(url || "https://github.com/Astro36/AstroLibrary/raw/master/version.txt").split("."),
-                len = Math.max(tmpA.length, tmpB.length),
-                i = 0; i < len; i++) {
+    ScriptChecker.prototype.isLastVersion = function () {
+        let info = this._info,
+            tmpA = info.getVersion().split("."),
+            tmpB = readHtml(info.getVersionUrl()).split(".");
+        for (let i = 0, len = Math.max(tmpA.length, tmpB.length); i < len; i++) {
             let a = Number(tmpA[i] || 0),
                 b = Number(tmpB[i] || 0);
             if (a > b) {
@@ -1246,11 +1250,10 @@ let me = this.me || {};
     /**
      * Check if the script is modified.
      * @since 2016-08-20
-     * @param {String} [src=hashValue] Script source
      * @returns {Boolean} If the script is modified, returns true
      */
-    ScriptChecker.isModified = function (src) {
-        let hash = typeof src === "string" ? ScriptChecker.getHash(src) : readHtml("https://github.com/Astro36/AstroLibrary/raw/master/sha256.txt"),
+    ScriptChecker.prototype.isModified = function () {
+        let hash = readHtml(this._info.getHashUrl()),
             iterator = ScriptManager_.enabledScripts.interator();
         while (iterator.hasNext()) {
             if (hash === ScriptChecker.getHash(File.read(CONTEXT.getDir("modpescripts", 0) + "/" + iterator.next()))) {
@@ -1258,6 +1261,114 @@ let me = this.me || {};
             }
         }
         return true;
+    };
+
+
+
+    /**
+     * Class representing a script information.
+     * @since 2016-08-22
+     * @param {String} [name=""] Name of the script
+     * @param {String} [version="1.0"] Version of the script
+     */
+    function ScriptInfo(name, version) {
+        this._name = name || "";
+        this._version = version || "1.0";
+    }
+
+    /**
+     * Returns the developer name of the script.
+     * @since 2016-08-22
+     * @returns {String} Developer name of the script.
+     */
+    ScriptInfo.prototype.getDeveloper = function () {
+        return this._developer;
+    };
+
+    /**
+     * Returns the hash url of the script.
+     * @since 2016-08-22
+     * @returns {String} Hash url of the script
+     */
+    ScriptInfo.prototype.getHashUrl = function () {
+        return this._hashUrl;
+    };
+
+    /**
+     * Returns the name of the script.
+     * @since 2016-08-22
+     * @returns {String} Name of the script
+     */
+    ScriptInfo.prototype.getName = function () {
+        return this._name;
+    };
+
+    /**
+     * Returns the version of the script.
+     * @since 2016-08-22
+     * @returns {String} Version of the script
+     */
+    ScriptInfo.prototype.getVersion = function () {
+        return this._version;
+    };
+
+    /**
+     * Returns the version url of the script.
+     * @since 2016-08-22
+     * @returns {String} Version url of the script
+     */
+    ScriptInfo.prototype.getVersionUrl = function () {
+        return this._versionUrl;
+    };
+
+    /**
+     * Sets the developer name of the script.
+     * @since 2016-08-22
+     * @param {String} developer Developer name of the script.
+     */
+    ScriptInfo.prototype.setDeveloper = function (developer) {
+        this._developer = developer;
+        return this;
+    };
+
+    /**
+     * Sets the hash url of the script.
+     * @since 2016-08-22
+     * @params {String} url Hash url of the script
+     */
+    ScriptInfo.prototype.setHashUrl = function (url) {
+        this._hashUrl = url;
+        return this;
+    };
+
+    /**
+     * Sets the name of the script.
+     * @since 2016-08-22
+     * @params {String} name Name of the script
+     */
+    ScriptInfo.prototype.setName = function (name) {
+        this._name = name;
+        return this;
+    };
+
+    /**
+     * Sets the version of the script.
+     * @since 2016-08-22
+     * @params {String} version Version of the script
+     */
+    ScriptInfo.prototype.setVersion = function (version) {
+        this._version = version;
+        return this;
+    };
+
+    /**
+     * Sets the version url of the script.
+     * @since 2016-08-22
+     * @params {String} url Version url of the script
+     */
+    ScriptInfo.prototype.setVersionUrl = function (url) {
+        this._versionUrl = url;
+        return this;
     };
 
 
@@ -3106,6 +3217,10 @@ let me = this.me || {};
             if (new NetworkChecker().isConnected()) {
                 notice = readHtml("http://minedev.dothome.co.kr/deneb/notice.txt");
             }
+            scriptChecker = new ScriptChecker(new ScriptInfo(NAME, VERSION)
+                .setDeveloper(DEVELOPER)
+                .setHashUrl(HASH_URL)
+                .setVersionUrl(VERSION_URL));
             verticalWindow = new VerticalWindow();
             CONTEXT.runOnUiThread({
                 run() {
@@ -3177,6 +3292,7 @@ let me = this.me || {};
         AddonManager: AddonManager,
         File: File,
         ScriptChecker: ScriptChecker,
+        ScriptInfo: ScriptInfo,
         Text: Text
     };
     astro.widget = {

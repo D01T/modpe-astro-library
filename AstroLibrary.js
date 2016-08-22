@@ -2,6 +2,7 @@
  * @file ModPE integrated library
  * @author Astro <astr36@naver.com>
  * @version 1.0
+ * @license Apache-2.0
  */
 /**
  * @namespace me
@@ -1207,10 +1208,10 @@ let me = this.me || {};
      * @param {String} str String
      * @returns {String} Hash of the string
      */
-    ScriptChecher.getHash = function (str) {
+    ScriptChecker.getHash = function (str) {
         let messageDigest = MessageDigest_.getInstance("SHA-256"),
             stringBuffer = new StringBuffer_(),
-            bytes; 
+            bytes;
         messageDigest.update(new String_(str).getBytes());
         bytes = messageDigest.digest();
         for (let i = 0, len = bytes.length; i < len; i++) {
@@ -1218,7 +1219,7 @@ let me = this.me || {};
         }
         return stringBuffer.toString();
     };
-    
+
     /**
      * Check if the script is last version.
      * @since 2016-08-21

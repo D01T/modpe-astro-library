@@ -2,5 +2,11 @@
     "name": "Astro Library",
     "version": "1.0",
     "description": "ModPE integrated library",
-    "author": "Astro <astr36@naver.com>"
+    "homepage": "http://minedev.dothome.co.kr/docs/lib_astro/1.0/index.html",
+    "license": "Apache-2.0",
+    "author": "Astro <astr36@naver.com>",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Astro36/AstroLibrary.git"
+    }
 }

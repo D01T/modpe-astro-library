@@ -1268,6 +1268,8 @@ let me = this.me || {};
     /**
      * Class representing a script information.
      * @since 2016-08-22
+     * @class
+     * @memberOf me.astro.utils
      * @param {String} [name=""] Name of the script
      * @param {String} [version="1.0"] Version of the script
      */
@@ -1334,7 +1336,7 @@ let me = this.me || {};
     /**
      * Sets the hash url of the script.
      * @since 2016-08-22
-     * @params {String} url Hash url of the script
+     * @param {String} url Hash url of the script
      */
     ScriptInfo.prototype.setHashUrl = function (url) {
         this._hashUrl = url;
@@ -1344,7 +1346,7 @@ let me = this.me || {};
     /**
      * Sets the name of the script.
      * @since 2016-08-22
-     * @params {String} name Name of the script
+     * @param {String} name Name of the script
      */
     ScriptInfo.prototype.setName = function (name) {
         this._name = name;
@@ -1354,7 +1356,7 @@ let me = this.me || {};
     /**
      * Sets the version of the script.
      * @since 2016-08-22
-     * @params {String} version Version of the script
+     * @param {String} version Version of the script
      */
     ScriptInfo.prototype.setVersion = function (version) {
         this._version = version;
@@ -1364,7 +1366,7 @@ let me = this.me || {};
     /**
      * Sets the version url of the script.
      * @since 2016-08-22
-     * @params {String} url Version url of the script
+     * @param {String} url Version url of the script
      */
     ScriptInfo.prototype.setVersionUrl = function (url) {
         this._versionUrl = url;
@@ -3304,7 +3306,10 @@ let me = this.me || {};
         ImageToggle: ImageToggle,
         Layout: Layout,
         ProgressWindow: ProgressWindow,
+        SensorButton: SensorButton,
+        SlideButton: SlideButton,
         Toast: Toast,
+        VerticalWindow: VerticalWindow,
         Window: Window
     };
 

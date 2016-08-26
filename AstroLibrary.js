@@ -73,11 +73,14 @@ let me = this.me || {};
         DP = CONTEXT.getResources().getDisplayMetrics().density,
         RESOURCE = CONTEXT.getResources(),
         SCREEN = CONTEXT.getWindow().getDecorView(),
+        GITHUB_URL = "https://github.com/Astro36/AstroLibrary/raw/master/",
         NAME = "Astro Library",
         NAME_CODE = "me_astro_library",
         VERSION = "1.0",
-        VERSION_URL = "https://github.com/Astro36/AstroLibrary/raw/master/version.txt",
-        HASH_URL = "https://github.com/Astro36/AstroLibrary/raw/master/sha256.txt",
+        VERSION_URL = GITHUB_URL + "version.txt",
+        HASH_URL = GITHUB_URL + "sha256.txt",
+        ACCOUNT_URL = "http://minedev.dothome.co.kr/deneb/admin.php",
+        NOTICE_URL = "http://minedev.dothome.co.kr/deneb/notice.txt",
         DEVELOPER = "Astro",
         PATH = "/sdcard/games/me.astro/library/",
         DEVICE_WIDTH = CONTEXT.getScreenWidth(),
@@ -86,6 +89,7 @@ let me = this.me || {};
         DEVICE_VERSION = Build_.VERSION.RELEASE;
 
     let hasLevel = false,
+        preference,
         scriptChecker,
         verticalWindow,
         modernWrapFactory,
@@ -710,7 +714,7 @@ let me = this.me || {};
     Account.signUp = function (id, password, name, email, response) {
         response = response || (() => {});
         if (Text.verifyId(id) && Text.verifyPassword(password) && Text.verifyName(name) && Text.verifyEmail(email)) {
-            let server = new Server("http://minedev.dothome.co.kr/deneb/admin.php");
+            let server = new Server(ACCOUNT_URL);
             server.post("type=sign_up&id=" + id + "&pw=" + password + "&email=" + email + "&name=" + name, inputStream => {
                 if (inputStream !== null) {
                     let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
@@ -748,7 +752,7 @@ let me = this.me || {};
      */
     Account.prototype.getDataFromServer = function (key, response) {
         response = response || (() => {});
-        let server = new Server("http://minedev.dothome.co.kr/deneb/admin.php");
+        let server = new Server(ACCOUNT_URL);
         server.post("type=get&userid=" + this._userId + "&key=" + key, inputStream => {
             if (inputStream !== null) {
                 let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
@@ -819,7 +823,7 @@ let me = this.me || {};
      */
     Account.prototype.getRank = function (key, response) {
         response = response || (() => {});
-        let server = new Server("http://minedev.dothome.co.kr/deneb/admin.php");
+        let server = new Server(ACCOUNT_URL);
         server.post("type=rank&key=" + key, inputStream => {
             if (inputStream !== null) {
                 let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
@@ -876,7 +880,7 @@ let me = this.me || {};
         response = response || (() => {});
         if (Text.verifyId(this._id) && Text.verifyPassword(this._password)) {
             let thiz = this,
-                server = new Server("http://minedev.dothome.co.kr/deneb/admin.php");
+                server = new Server(ACCOUNT_URL);
             server.post("type=sign_in&id=" + thiz._id + "&pw=" + thiz._password, inputStream => {
                 if (inputStream !== null) {
                     let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
@@ -931,7 +935,7 @@ let me = this.me || {};
      */
     Account.prototype.modifyData = function (key, value, response) {
         response = response || (() => {});
-        let server = new Server("http://minedev.dothome.co.kr/deneb/admin.php");
+        let server = new Server(ACCOUNT_URL);
         server.post("type=modify&userid=" + this._userId + "&key=" + key + "&value=" + value, inputStream => {
             if (inputStream !== null) {
                 let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
@@ -973,7 +977,7 @@ let me = this.me || {};
         response = response || (() => {});
         if (Text.verifyPassword(password) && Text.verifyName(name) && Text.verifyEmail(email)) {
             let thiz = this,
-                server = new Server("http://minedev.dothome.co.kr/deneb/admin.php");
+                server = new Server(ACCOUNT_URL);
             server.post("type=modify_user&userid=" + this._userId + "&key=pw|name|email&value=" + [password, name, email].join("|"), inputStream => {
                 if (inputStream !== null) {
                     let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
@@ -1193,6 +1197,38 @@ let me = this.me || {};
         file.getParentFile().mkdirs();
         fileOutputStream.write(new String_(str).getBytes());
         fileOutputStream.close();
+    };
+
+
+
+    /**
+     * Class representing a preference.
+     * @since 2016-08-26
+     * @class
+     * @memberOf me.astro.utils
+     * @param {String} path Path of preference file
+     */
+    function Preference(path) {
+        this._path = path;
+        this._file = new File_(path);
+        if (this._file.exists()) {
+            this._obj = JSON.stringify(File.read(path));
+        } else {
+            this._obj = {};
+        }
+    }
+
+    Preference.prototype.exists = function (key) {
+        return key in this._obj;
+    };
+
+    Preference.prototype.get = function (key) {
+        return this._obj[key];
+    };
+
+    Preference.prototype.set = function (key, value) {
+        this._obj[key] = value;
+        return this;
     };
 
 
@@ -2410,7 +2446,9 @@ let me = this.me || {};
         thiz._windowLayout = new FrameLayout_(CONTEXT);
         thiz._sensor = new SensorButton(Shape.CIRCLE, theme)
             .setEffect((x, y, width, height) => {
-                thiz._window.update(DEVICE_WIDTH - x + DP * 26, DEVICE_HEIGHT - y - DP * 78, -1, -1);
+                x = thiz._x = DEVICE_WIDTH - x + DP * 26;
+                y = thiz._y = DEVICE_HEIGHT - y - DP * 78;
+                thiz._window.update(x, y, -1, -1);
             })
             .setEffectImage(Bitmap.createBitmap(PATH + "ic_open_with.png", DP * 24, DP * 24), theme.getButton(Theme.EFFECT_COLOR))
             .setImage(Bitmap.createBitmap(PATH + "ic_open_with.png", DP * 24, DP * 24), theme.getButton(Theme.BACKGROUND_COLOR));
@@ -2496,11 +2534,29 @@ let me = this.me || {};
 
     /**
      * Returns the size of the vertical window.
-     * @since 2016-05-27
+     * @since 2016-08-04
      * @returns {Array.<Number>} Width and height of the vertical window.
      */
     VerticalWindow.prototype.getWH = function () {
         return [this._width, this._height];
+    };
+
+    /**
+     * Returns the x location of the vertical window.
+     * @since 2016-08-26
+     * @returns {Number} X location of the vertical window.
+     */
+    VerticalWindow.prototype.getX = function () {
+        return this._x;
+    };
+
+    /**
+     * Returns the y location of the vertical window.
+     * @since 2016-08-26
+     * @returns {Number} Y location of the vertical window.
+     */
+    VerticalWindow.prototype.getY = function () {
+        return this._y;
     };
 
     /**
@@ -2519,13 +2575,15 @@ let me = this.me || {};
     /**
      * Shows the vertical window on the screen.
      * @since 2016-08-04
+     * @param {Number} [x=0] X location of the vertical window.
+     * @param {Number} [y=0] Y location of the vertical window.
      */
-    VerticalWindow.prototype.show = function () {
+    VerticalWindow.prototype.show = function (x, y) {
         let thiz = this,
             layouts = thiz._layouts;
         thiz.addView(thiz._sensor.show());
         layouts[0].setVisibility(View_.VISIBLE);
-        thiz._window.showAtLocation(SCREEN, Gravity_.BOTTOM | Gravity_.RIGHT, 0, 0);
+        thiz._window.showAtLocation(SCREEN, Gravity_.BOTTOM | Gravity_.RIGHT, x || 0, y || 0);
         modernWrapFactory.popups.clear();
         return this;
     };
@@ -2964,7 +3022,7 @@ let me = this.me || {};
                                     .show())
                                 .addView(new TextView()
                                     .setPadding(DP * 12, 0, DP * 8, DP * 12)
-                                    .setText("내 계정 (" + user.getId() + ")")
+                                    .setText("My Account (" + user.getId() + ")")
                                     .setTextSize(14)
                                     .show())
                                 .addView(new TextView()
@@ -3173,6 +3231,32 @@ let me = this.me || {};
                                     .setEffect(() => window.dismiss())
                                     .show())
                                 .show())
+                        .addLayout(Bitmap.createBitmap(PATH + "ic_help_outline.png"), new Layout()
+                                .addView(new TextView()
+                                    .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                    .setText("Device Info")
+                                    .setTextSize(24)
+                                    .show())
+                                .addView(new TextView()
+                                    .setText("Device model: " + DEVICE_MODEL + "\nDevice version: " + DEVICE_VERSION + "\n\n")
+                                    .show())
+                                .addView(new TextView()
+                                    .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                    .setText("Library Info")
+                                    .setTextSize(24)
+                                    .show())
+                                .addView(new TextView()
+                                    .setText(NAME + " " + VERSION + "\n\nName Code: " + NAME_CODE + "\nDeveleoper: " + DEVELOPER + "\n\n")
+                                    .show())
+                                .addView(new TextView()
+                                    .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                    .setText("Error Message Translation (Korean)")
+                                    .setTextSize(24)
+                                    .show())
+                                .addView(new TextView()
+                                    .setText("Cannot connect to the server.\n- 서버 오류. 이 오류를 발견한다면 즉시 개발자에게 알려주세요.\n\nCan not find player.\n- 맵 안에서만 사용 가능한 기능입니다.\n\nCannot find the user.\n- 서버에 올바르지 않은 계정 아이디가 입력되었습니다.\n\nIncompatible version. (Library version ≥ {version})\n- 라이브러리의 버전이 호환되지 않습니다. 최신 버전으로 업데이트해주세요.\n\nInvalid format.\n- 유효하지 않은 형식입니다.\n    ID & Password: 4~12자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    Name: 1~20자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    E-mail: 네이버 E-mail만 사용 가능합니다.\n\nInvalid number.\n- 유효하지 않은 숫자입니다. 정수를 입력해주세요.\n\nInvalid parameters.\n- 스크립트 오류. 해당 스크립트 개발자에게 문의하세요.\n\nInvalid version format.\n- 유효하지 않은 버전 형식입니다. 1.0과 같은 형식으로 입력해주세요.\n\nNo Internet.\n- 인터넷에 연결해주세요.\n\nThe password is incorrect.\n- 비밀번호가 올바르지 않습니다.\n\nThis e-mail is already used.\n-이미 사용중인 E-mail입니다. 다른 E-mail를 입력하세요.\n\nThis ID is already used.\n- 이미 사용중인 아이디입니다. 다른 아이디를 입력하세요.\n\nThis ID is not accepted.\n- 아이디가 아직 승인되지 않았습니다. 개발자가 아이디를 사용 허가할 때까지 기다려주세요.\n\nThis ID is not signed up the server.\n- 서버에 가입하지 않은 아이디입니다. 서버에 가입해주세요.")
+                                    .show())
+                                .show())
                             .setFocusable(true)
                             .show();
                     } catch (e) {
@@ -3197,7 +3281,7 @@ let me = this.me || {};
             isExists = true;
         for (let i = res.length; i--;) {
             if (!new File_(PATH, res[i]).exists()) {
-                File.download(PATH + res[i], "https://github.com/Astro36/AstroLibrary/raw/master/res/" + res[i]);
+                File.download(PATH + res[i], GITHUB_URL + "res/" + res[i]);
                 isExists = false;
             }
         }
@@ -3217,8 +3301,9 @@ let me = this.me || {};
             modernWrapFactory = modernWrapFactoryField.get(scriptManager);
             modernWrapFactory.popups.clear();
             if (new NetworkChecker().isConnected()) {
-                notice = readHtml("http://minedev.dothome.co.kr/deneb/notice.txt");
+                notice = readHtml(NOTICE_URL);
             }
+            preference = new Preference(PATH + "preference.json");
             scriptChecker = new ScriptChecker(new ScriptInfo(NAME, VERSION)
                 .setDeveloper(DEVELOPER)
                 .setHashUrl(HASH_URL)
@@ -3231,7 +3316,7 @@ let me = this.me || {};
                         .setEffectImage(Bitmap.createBitmap(PATH + "ic_account_circle.png", DP * 24, DP * 24))
                         .setImage(Bitmap.createBitmap(PATH + "ic_account_circle.png", DP * 24, DP * 24))
                         .show());
-                    verticalWindow.show();
+                    verticalWindow.show(preference.get("window_location_x"), preference.get("window_location_y"));
                 }
             });
             login();
@@ -3293,6 +3378,7 @@ let me = this.me || {};
     astro.utils = {
         AddonManager: AddonManager,
         File: File,
+        Preference: Preference,
         ScriptChecker: ScriptChecker,
         ScriptInfo: ScriptInfo,
         Text: Text
@@ -3315,10 +3401,14 @@ let me = this.me || {};
 
     $.selectLevelHook = () => {
         hasLevel = true;
+        preference.set("window_location_x", verticalWindow.getX());
+        preference.set("window_location_y", verticalWindow.getY());
     };
 
     $.leaveGame = () => {
         hasLevel = false;
+        preference.set("window_location_x", verticalWindow.getX());
+        preference.set("window_location_y", verticalWindow.getY());
     };
 
     init();

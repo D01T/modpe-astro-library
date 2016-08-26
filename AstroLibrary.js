@@ -1212,23 +1212,59 @@ let me = this.me || {};
         this._path = path;
         this._file = new File_(path);
         if (this._file.exists()) {
-            this._obj = JSON.stringify(File.read(path));
+            this._obj = JSON.parse(File.read(path));
         } else {
             this._obj = {};
         }
     }
 
-    Preference.prototype.exists = function (key) {
-        return key in this._obj;
-    };
-
+    /**
+     * Returns the value at key.
+     * @since 2016-08-26
+     * @param {String} key Key
+     * @returns {Object} Value
+     */
     Preference.prototype.get = function (key) {
         return this._obj[key];
     };
 
+    /**
+     * Returns true if this object has the value named the key. 
+     * @since 2016-08-26
+     * @param {String} key Key
+     * @returns {Boolean} If this object has the value named the key
+     */
+    Preference.prototype.has = function (key) {
+        return key in this._obj;
+    };
+
+    /**
+     * Save the preference.
+     * @since 2016-08-26
+     */
+    Preference.prototype.save = function () {
+        File.write(this._path, JSON.stringify(this._obj));
+        return this;
+    };
+
+    /**
+     * Sets the value at key.
+     * @since 2016-08-26
+     * @param {String} key Key
+     * @param {Object} value Value
+     */
     Preference.prototype.set = function (key, value) {
         this._obj[key] = value;
         return this;
+    };
+
+    /**
+     * Encodes and returns the preference as a human readable JSON string.
+     * @since 2016-08-26
+     * @returns {String} JSON string
+     */
+    Preference.prototype.toString = function () {
+        return JSON.stringify(this._obj);
     };
 
 
@@ -3231,7 +3267,7 @@ let me = this.me || {};
                                     .setEffect(() => window.dismiss())
                                     .show())
                                 .show())
-                        .addLayout(Bitmap.createBitmap(PATH + "ic_help_outline.png"), new Layout()
+                            .addLayout(Bitmap.createBitmap(PATH + "ic_help_outline.png"), new Layout()
                                 .addView(new TextView()
                                     .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
                                     .setText("Device Info")
@@ -3401,14 +3437,16 @@ let me = this.me || {};
 
     $.selectLevelHook = () => {
         hasLevel = true;
-        preference.set("window_location_x", verticalWindow.getX());
-        preference.set("window_location_y", verticalWindow.getY());
+        preference.set("window_location_x", verticalWindow.getX())
+            .set("window_location_y", verticalWindow.getY())
+            .save();
     };
 
     $.leaveGame = () => {
         hasLevel = false;
-        preference.set("window_location_x", verticalWindow.getX());
-        preference.set("window_location_y", verticalWindow.getY());
+        preference.set("window_location_x", verticalWindow.getX())
+            .set("window_location_y", verticalWindow.getY())
+            .save();
     };
 
     init();

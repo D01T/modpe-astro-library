@@ -89,6 +89,7 @@ let me = this.me || {};
         DEVICE_VERSION = Build_.VERSION.RELEASE;
 
     let hasLevel = false,
+        isDebugMode = true,
         preference,
         scriptChecker,
         verticalWindow,
@@ -1332,7 +1333,7 @@ let me = this.me || {};
                 return false;
             }
         }
-        return true;
+        return !isDebugMode;
     };
 
 

@@ -93,7 +93,6 @@ let me = this.me || {};
         preference,
         scriptChecker,
         verticalWindow,
-        modernWrapFactory,
         notice = "Error: No Internet.",
         user;
 
@@ -2621,7 +2620,6 @@ let me = this.me || {};
         thiz.addView(thiz._sensor.show());
         layouts[0].setVisibility(View_.VISIBLE);
         thiz._window.showAtLocation(SCREEN, Gravity_.BOTTOM | Gravity_.RIGHT, x || 0, y || 0);
-        modernWrapFactory.popups.clear();
         return this;
     };
 
@@ -2773,7 +2771,6 @@ let me = this.me || {};
         for (let i = 1, len = layouts.length; i < len; i++) {
             layouts[i].setVisibility(View_.GONE);
         }
-        modernWrapFactory.popups.clear();
         return this;
     };
 
@@ -3323,20 +3320,6 @@ let me = this.me || {};
             }
         }
         if (isExists) {
-            let scriptManager = new ScriptManager_(),
-                nativeJavaMethod = Class_.forName("org.mozilla.javascript.NativeJavaMethod", true, CONTEXT.getClass().getClassLoader()),
-                blockLauncherMethodWatcherField = nativeJavaMethod.getDeclaredField("blockLauncherMethodWatcher"),
-                modernWrapFactoryField = scriptManager.getClass().getDeclaredField("modernWrapFactory"),
-                scriptingEnabledField = scriptManager.getClass().getDeclaredField("scriptingEnabled"),
-                Clazz = function () {};
-            Clazz.prototype.canCall = function () {
-                return true;
-            };
-            AccessibleObject_.setAccessible([blockLauncherMethodWatcherField, modernWrapFactoryField, scriptingEnabledField], true);
-            blockLauncherMethodWatcherField.set(null, null);
-            NativeJavaMethod_.setMethodWatcher(new Clazz());
-            modernWrapFactory = modernWrapFactoryField.get(scriptManager);
-            modernWrapFactory.popups.clear();
             if (new NetworkChecker().isConnected()) {
                 new Thread_({
                     run() {

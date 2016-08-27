@@ -2842,6 +2842,8 @@ let me = this.me || {};
                     if (code === Account.LOGIN_FAIL) {
                         user = null;
                         showWindow();
+                    } else if (code === Account.LOGIN_SUCCESS) {
+                        showWindowAccount();
                     }
                     if (typeof $.onLoginListener === "function") {
                         $.onLoginListener(code);
@@ -3313,7 +3315,7 @@ let me = this.me || {};
                 }
             });
         } else {
-            showWindow();
+            login();
         }
     }
 
@@ -3363,7 +3365,6 @@ let me = this.me || {};
                     verticalWindow.show(preference.get("window_location_x"), preference.get("window_location_y"));
                 }
             });
-            login();
         } else {
             if (new NetworkChecker().isConnected()) {
                 let progressWindow;

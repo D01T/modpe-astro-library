@@ -2140,8 +2140,9 @@ let me = this.me || {};
      * @class
      * @memberOf me.astro.widget
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
+     * @param {Boolean} [canForceShutdown=true] Enables force shutdown
      */
-    function ProgressWindow(theme) {
+    function ProgressWindow(theme, canForceShutdown) {
         theme = theme || Theme.DEFAULT;
         let thiz = this,
             gradientDrawable = new GradientDrawable_(),
@@ -2174,40 +2175,42 @@ let me = this.me || {};
         layout.setGravity(Gravity_.CENTER);
         layout.setOrientation(1);
 
-        new Thread_({
-            run() {
-                let max = DP * 300,
-                    isIncreasing,
-                    canForceShutdown = false,
-                    time = 0,
-                    progress = 0;
-                while (thiz._isRunning) {
-                    Thread_.sleep(5);
-                    if (progress >= max) {
-                        isIncreasing = false;
-                    } else if (progress <= 0) {
-                        isIncreasing = true;
-                    }
-                    time += 5;
-                    progress += isIncreasing ? DP : -DP;
-                    CONTEXT.runOnUiThread({
-                        run() {
-                            if (time >= 5000 && !canForceShutdown) {
-                                canForceShutdown = true;
-                                thiz._textView.setText(thiz._textView.getText() + "\n\n[Force shutdown]");
-                                thiz._textView.setOnClickListener(new View_.OnClickListener({
-                                    onClick(view) {
-                                        thiz._isRunning = false;
-                                        thiz._window.dismiss();
-                                    }
-                                }));
-                            }
-                            thiz._effect.setLayoutParams(LinearLayout_.LayoutParams(progress, DP * 24));
+        if (typeof canForceShutdown === "undefined" || canForceShutdown) {
+            new Thread_({
+                run() {
+                    let max = DP * 300,
+                        isIncreasing,
+                        canForceShutdown = false,
+                        time = 0,
+                        progress = 0;
+                    while (thiz._isRunning) {
+                        Thread_.sleep(5);
+                        if (progress >= max) {
+                            isIncreasing = false;
+                        } else if (progress <= 0) {
+                            isIncreasing = true;
                         }
-                    });
+                        time += 5;
+                        progress += isIncreasing ? DP : -DP;
+                        CONTEXT.runOnUiThread({
+                            run() {
+                                if (time >= 5000 && !canForceShutdown) {
+                                    canForceShutdown = true;
+                                    thiz._textView.setText(thiz._textView.getText() + "\n\n[Force shutdown]");
+                                    thiz._textView.setOnClickListener(new View_.OnClickListener({
+                                        onClick(view) {
+                                            thiz._isRunning = false;
+                                            thiz._window.dismiss();
+                                        }
+                                    }));
+                                }
+                                thiz._effect.setLayoutParams(LinearLayout_.LayoutParams(progress, DP * 24));
+                            }
+                        });
+                    }
                 }
-            }
-        }).start();
+            }).start();
+        }
     }
 
     /**
@@ -3327,7 +3330,7 @@ let me = this.me || {};
      * @memberOf me.astro
      */
     function init() {
-        let res = ["ic_account_circle.png", "ic_edit.png", "ic_help_outline.png", "ic_info_outline.png", "ic_open_with.png", "ic_person.png", "ic_person_add.png", "ic_swap_horiz.png"],
+        let res = ["ic_account_circle.png", "ic_colorize.png","ic_edit.png", "ic_help_outline.png", "ic_info_outline.png", "ic_open_with.png", "ic_palette.png", "ic_person.png", "ic_person_add.png", "ic_settings.png", "ic_swap_horiz.png"],
             isExists = true;
         for (let i = res.length; i--;) {
             if (!new File_(PATH, res[i]).exists()) {

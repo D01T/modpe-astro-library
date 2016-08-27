@@ -1174,7 +1174,7 @@ let me = this.me || {};
                 bufferedReader = new BufferedReader_(inputStreamReader),
                 arr = [],
                 line;
-            while ((line = bufferedReader.readLine()) !== -1) {
+            while ((line = bufferedReader.readLine()) !== null) {
                 arr.push(line);
             }
             bufferedReader.close();

@@ -327,6 +327,20 @@ let me = this.me || {};
     Theme.HINT_TEXT_COLOR = 3;
 
     /**
+     * Returns the theme from the file path.
+     * @since 2016-08-27
+     * @param {String} path File path
+     * @returns {me.astro.design.Theme} Theme
+     */
+    Theme.parse = function (path) {
+        if (new File_(path).exists()) {
+            return new Theme(JSON.parse(File.read(path)));
+        } else {
+            return Theme.DEFAULT;
+        }
+    };
+
+    /**
      * Returns a color of TextView theme.
      * @since 2016-05-28
      * @param {Number} type Type of color

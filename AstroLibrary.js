@@ -1327,7 +1327,7 @@ let me = this.me || {};
      */
     ScriptChecker.prototype.isModified = function () {
         let hash = readHtml(this._info.getHashUrl()),
-            iterator = ScriptManager_.enabledScripts.interator();
+            iterator = ScriptManager_.enabledScripts.iterator();
         while (iterator.hasNext()) {
             if (hash === ScriptChecker.getHash(File.read(CONTEXT.getDir("modpescripts", 0) + "/" + iterator.next()))) {
                 return false;

@@ -2146,7 +2146,7 @@ let me = this.me || {};
     /**
      * Sets the displayed text on the link.
      * @since 2016-08-28
-     * @param {[type]} text Displayed text
+     * @param {String} text Displayed text
      */
     KakaoLink.prototype.setLinkText = function (text) {
         this._linkText = text.toString();

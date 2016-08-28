@@ -3433,6 +3433,39 @@ let me = this.me || {};
 
 
     /**
+     * Shows the window about the settings.
+     * @since 2016-08-28
+     * @private
+     * @memberOf me.astro
+     */
+    function showWindowSettings() {
+        CONTEXT.runOnUiThread({
+            run() {
+                let window = new Window();
+                window.addLayout(Bitmap.createBitmap(PATH + "ic_settings.png"), new Layout()
+                        .addView(new TextView()
+                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                            .setText("Settings")
+                            .setTextSize(24)
+                            .show())
+                        .addView(new TextView()
+                            .setText("Settings")
+                            .show())
+                        .addView(new Button()
+                            .setText("Close")
+                            .setEffect(() => window.dismiss())
+                            .show())
+                        .setOrientation(0)
+                        .show())
+                    .setFocusable(true)
+                    .show();
+            }
+        });
+    }
+
+
+
+    /**
      * Initializes the library.
      * @since 2016-05-03
      * @memberOf me.astro
@@ -3469,11 +3502,16 @@ let me = this.me || {};
             CONTEXT.runOnUiThread({
                 run() {
                     verticalWindow.addView(new ImageButton(Shape.CIRCLE)
-                        .setEffect(showWindowAccount)
-                        .setEffectImage(Bitmap.createBitmap(PATH + "ic_account_circle.png", DP * 24, DP * 24))
-                        .setImage(Bitmap.createBitmap(PATH + "ic_account_circle.png", DP * 24, DP * 24))
-                        .show());
-                    verticalWindow.show(preference.get("window_location_x"), preference.get("window_location_y"));
+                            .setEffect(showWindowAccount)
+                            .setEffectImage(Bitmap.createBitmap(PATH + "ic_account_circle.png", DP * 24, DP * 24))
+                            .setImage(Bitmap.createBitmap(PATH + "ic_account_circle.png", DP * 24, DP * 24))
+                            .show())
+                        .addView(new ImageButton(Shape.CIRCLE)
+                            .setEffect(showWindowSettings)
+                            .setEffectImage(Bitmap.createBitmap(PATH + "ic_settings.png", DP * 24, DP * 24))
+                            .setImage(Bitmap.createBitmap(PATH + "ic_settings.png", DP * 24, DP * 24))
+                            .show())
+                        .show(preference.get("window_location_x"), preference.get("window_location_y"));
                 }
             });
         } else {

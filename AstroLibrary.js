@@ -58,18 +58,15 @@ let me = this.me || {};
         FileOutputStream_ = java.io.FileOutputStream,
         InputStreamReader_ = java.io.InputStreamReader,
         Byte_ = java.lang.Byte,
-        Class_ = java.lang.Class,
         Integer_ = java.lang.Integer,
         String_ = java.lang.String,
         StringBuffer_ = java.lang.StringBuffer,
         Thread_ = java.lang.Thread,
         Array_ = java.lang.reflect.Array,
-        AccessibleObject_ = java.lang.reflect.AccessibleObject,
         MessageDigest_ = java.security.MessageDigest,
         URL_ = java.net.URL,
         ScriptManager_ = net.zhuoweizhang.mcpelauncher.ScriptManager,
         HttpGet_ = org.apache.http.client.methods.HttpGet,
-        NativeJavaMethod_ = org.mozilla.javascript.NativeJavaMethod,
         CONTEXT = MainActivity_.currentMainActivity.get(),
         DP = CONTEXT.getResources().getDisplayMetrics().density,
         RESOURCE = CONTEXT.getResources(),
@@ -87,7 +84,9 @@ let me = this.me || {};
         DEVICE_WIDTH = CONTEXT.getScreenWidth(),
         DEVICE_HEIGHT = CONTEXT.getScreenHeight(),
         DEVICE_MODEL = Build_.MODEL,
-        DEVICE_VERSION = Build_.VERSION.RELEASE;
+        DEVICE_VERSION = Build_.VERSION.RELEASE,
+        TRANSLATION_TEXT = "Cannot connect to the server.\n- 서버 오류. 이 오류를 발견한다면 즉시 개발자에게 알려주세요.\n\nCan not find player.\n- 맵 안에서만 사용 가능한 기능입니다.\n\nCannot find the user.\n- 서버에 올바르지 않은 계정 아이디가 입력되었습니다.\n\nIncompatible version. (Library version ≥ {version})\n- 라이브러리의 버전이 호환되지 않습니다. 최신 버전으로 업데이트해주세요.\n\nInvalid format.\n- 유효하지 않은 형식입니다.\n    ID & Password: 4~12자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    Name: 1~20자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    E-mail: 네이버 E-mail만 사용 가능합니다.\n\nInvalid number.\n- 유효하지 않은 숫자입니다. 정수를 입력해주세요.\n\nInvalid parameters.\n- 스크립트 오류. 해당 스크립트 개발자에게 문의하세요.\n\nInvalid version format.\n- 유효하지 않은 버전 형식입니다. 1.0과 같은 형식으로 입력해주세요.\n\nNo Internet.\n- 인터넷에 연결해주세요.\n\nTampered script.\n- 무단수정된 스크립트\n\nThe password is incorrect.\n- 비밀번호가 올바르지 않습니다.\n\nThis e-mail is already used.\n-이미 사용중인 E-mail입니다. 다른 E-mail를 입력하세요.\n\nThis ID is already used.\n- 이미 사용중인 아이디입니다. 다른 아이디를 입력하세요.\n\nThis ID is not accepted.\n- 아이디가 아직 승인되지 않았습니다. 개발자가 아이디를 사용 허가할 때까지 기다려주세요.\n\nThis ID is not signed up the server.\n- 서버에 가입하지 않은 아이디입니다. 서버에 가입해주세요.\n\n",
+        SHARE_TEXT = "Hello world";
 
     let hasLevel = false,
         isDebugMode = true,
@@ -916,10 +915,10 @@ let me = this.me || {};
                         thiz._isAvailable = true;
                         thiz.getDataFromServer("name", (code, str) => code === Account.GET_SUCCESS && (thiz._name = str));
                         thiz.getDataFromServer("email", (code, str) => {
-                        if(code === Account.GET_SUCCESS) {
-                            thiz._email = str;
-                            Toast.show(arr[0]);
-                        response(Account.LOGIN_SUCCESS);
+                            if (code === Account.GET_SUCCESS) {
+                                thiz._email = str;
+                                Toast.show(arr[0]);
+                                response(Account.LOGIN_SUCCESS);
                             }
                         });
                     }
@@ -2081,51 +2080,81 @@ let me = this.me || {};
 
 
 
+    /**
+     * Class representing a kakao link button.
+     * @since 2016-08-28
+     * @class
+     * @extends me.astro.widget.TextView
+     * @memberOf me.astro.widget
+     */
     function KakaoLink() {
-        var thiz = this;
-        thiz._html = ["<!DOCTYPE html><html lang=en><head></head><body><a id=kakao-link href=javascript:><img src=http://dn.api1.kage.kakao.co.kr/14/dn/btqa9B90G1b/GESkkYjKCwJdYOkLvIBKZ0/o.jpg width=100% height=100%/></a><script src=https://developers.kakao.com/sdk/js/kakao.min.js></script><script>try{Kakao.init(\"b6e0efee83173a1dcfdd8ab552e2dbbe\");Kakao.Link.createTalkLinkButton({container:\"#kakao-link\",label:\"", "TEXT", "\"", "", "", "", "", "", ",webButton:{text:\"", "URL_TEXT", "\",url:\"", "URL", "\"}});}catch(e){alert(e)}</script></body></html>"];
-        thiz._params = new LinearLayout_.LayoutParams(DP * 40, DP * 44);
-        thiz._view = new WebView_(CONTEXT);
-        thiz._params.setMargins(DP * 4, DP * 2, DP * 4, DP * 2);
-        thiz._view.setInitialScale(100);
-        thiz._view.setLayoutParams(thiz._params);
-        thiz._view.getSettings().setJavaScriptEnabled(true);
+        this._params = new LinearLayout_.LayoutParams(DP * 40, DP * 44);
+        this._view = new WebView_(CONTEXT);
+        this._params.setMargins(DP * 4, DP * 2, DP * 4, DP * 2);
+        this._view.setInitialScale(100);
+        this._view.setLayoutParams(this._params);
+        this._view.getSettings().setJavaScriptEnabled(true);
     }
+
     KakaoLink.prototype = Object.create(TextView.prototype);
     KakaoLink.prototype.constructor = KakaoLink;
-    KakaoLink.prototype.setButtonText = function (text) {
-        this._html[9] = text.toString();
+
+    /**
+     * Sets the displayed text on the link button.
+     * @since 2016-08-28
+     * @param {String} text Displayed text
+     */
+    KakaoLink.prototype.setLinkButtonText = function (text) {
+        this._linkButtonText = text.toString();
         return this;
     };
-    KakaoLink.prototype.setButtonUrl = function (url) {
-        this._html[11] = url.toString();
+
+    /**
+     * Sets the url on the link button.
+     * @since 2016-08-28
+     * @param {String} url URL
+     */
+    KakaoLink.prototype.setLinkButtonUrl = function (url) {
+        this._linkButtonUrl = url.toString();
         return this;
     };
-    KakaoLink.prototype.setImage = function (url) {
-        var thiz = this;
-        thiz._html[2] = "\",image:{src:\"";
-        thiz._html[3] = url.toString();
-        thiz._html[4] = "\",width:";
-        thiz._html[6] = ",height:";
-        thiz._html[8] = "},webButton:{text:\"";
+
+    /**
+     * Sets the displayed image on the link. 
+     * @since 2016-08-28
+     * @param {String} url Image url
+     */
+    KakaoLink.prototype.setLinkImage = function (url) {
+        this._linkImage = url.toString();
+        this._linkImageWidth = "300";
+        this._linkImageHeight = "200";
         return this;
     };
-    KakaoLink.prototype.setImageWH = function (width, height) {
-        this._html[5] = width.toString();
-        this._html[7] = height.toString();
+
+    /**
+     * Sets the size of displayed image on the link.
+     * @since 2016-08-28
+     * @param {Number} width Width of the image
+     * @param {Number} height Height of the image
+     */
+    KakaoLink.prototype.setLinkImageWH = function (width, height) {
+        this._linkImageWidth = width.toString();
+        this._linkImageHeight = height.toString();
         return this;
     };
-    KakaoLink.prototype.setText = function (text) {
-        this._html[1] = text.toString();
+
+    /**
+     * Sets the displayed text on the link.
+     * @since 2016-08-28
+     * @param {[type]} text Displayed text
+     */
+    KakaoLink.prototype.setLinkText = function (text) {
+        this._linkText = text.toString();
         return this;
     };
+
     KakaoLink.prototype.show = function () {
-        var thiz = this;
-        if (DEVICE_VERSION < 4.0) {
-            thiz._view.loadData(thiz._html.join(""), "text/html", "UTF-8");
-        } else {
-            thiz._view.loadData(thiz._html.join(""), "text/html;charset=UTF-8", null);
-        }
+        this._view.loadUrl("http://minedev.dothome.co.kr/library/kakaolink.php?text=" + this._linkText + "&image_url=" + this._linkImage + "&image_width=" + this._linkImageWidth + "&image_height=" + this._linkImageHeight + "&button_text=" + this._linkButtonText + "&button_url=" + this._linkButtonUrl);
         return this._view;
     };
 
@@ -3092,7 +3121,17 @@ let me = this.me || {};
                             .setTextSize(24)
                             .show())
                         .addView(new TextView()
-                            .setText("Cannot connect to the server.\n- 서버 오류. 이 오류를 발견한다면 즉시 개발자에게 알려주세요.\n\nCan not find player.\n- 맵 안에서만 사용 가능한 기능입니다.\n\nCannot find the user.\n- 서버에 올바르지 않은 계정 아이디가 입력되었습니다.\n\nIncompatible version. (Library version ≥ {version})\n- 라이브러리의 버전이 호환되지 않습니다. 최신 버전으로 업데이트해주세요.\n\nInvalid format.\n- 유효하지 않은 형식입니다.\n    ID & Password: 4~12자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    Name: 1~20자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    E-mail: 네이버 E-mail만 사용 가능합니다.\n\nInvalid number.\n- 유효하지 않은 숫자입니다. 정수를 입력해주세요.\n\nInvalid parameters.\n- 스크립트 오류. 해당 스크립트 개발자에게 문의하세요.\n\nInvalid version format.\n- 유효하지 않은 버전 형식입니다. 1.0과 같은 형식으로 입력해주세요.\n\nNo Internet.\n- 인터넷에 연결해주세요.\n\nTampered script.\n- 무단수정된 스크립트\n\nThe password is incorrect.\n- 비밀번호가 올바르지 않습니다.\n\nThis e-mail is already used.\n-이미 사용중인 E-mail입니다. 다른 E-mail를 입력하세요.\n\nThis ID is already used.\n- 이미 사용중인 아이디입니다. 다른 아이디를 입력하세요.\n\nThis ID is not accepted.\n- 아이디가 아직 승인되지 않았습니다. 개발자가 아이디를 사용 허가할 때까지 기다려주세요.\n\nThis ID is not signed up the server.\n- 서버에 가입하지 않은 아이디입니다. 서버에 가입해주세요.")
+                            .setText(TRANSLATION_TEXT)
+                            .show())
+                        .addView(new TextView()
+                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                            .setText("Share with your friends")
+                            .setTextSize(24)
+                            .show())
+                        .addView(new KakaoLink()
+                            .setLinkButtonText("Github")
+                            .setLinkButtonUrl("https://github.com/Astro36/AstroLibrary")
+                            .setLinkText(SHARE_TEXT)
                             .show())
                         .addView(new Button()
                             .setText("Close")
@@ -3362,13 +3401,22 @@ let me = this.me || {};
                                     .setTextSize(24)
                                     .show())
                                 .addView(new TextView()
-                                    .setText("Cannot connect to the server.\n- 서버 오류. 이 오류를 발견한다면 즉시 개발자에게 알려주세요.\n\nCan not find player.\n- 맵 안에서만 사용 가능한 기능입니다.\n\nCannot find the user.\n- 서버에 올바르지 않은 계정 아이디가 입력되었습니다.\n\nIncompatible version. (Library version ≥ {version})\n- 라이브러리의 버전이 호환되지 않습니다. 최신 버전으로 업데이트해주세요.\n\nInvalid format.\n- 유효하지 않은 형식입니다.\n    ID & Password: 4~12자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    Name: 1~20자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    E-mail: 네이버 E-mail만 사용 가능합니다.\n\nInvalid number.\n- 유효하지 않은 숫자입니다. 정수를 입력해주세요.\n\nInvalid parameters.\n- 스크립트 오류. 해당 스크립트 개발자에게 문의하세요.\n\nInvalid version format.\n- 유효하지 않은 버전 형식입니다. 1.0과 같은 형식으로 입력해주세요.\n\nNo Internet.\n- 인터넷에 연결해주세요.\n\nTampered script.\n- 무단수정된 스크립트\n\nThe password is incorrect.\n- 비밀번호가 올바르지 않습니다.\n\nThis e-mail is already used.\n-이미 사용중인 E-mail입니다. 다른 E-mail를 입력하세요.\n\nThis ID is already used.\n- 이미 사용중인 아이디입니다. 다른 아이디를 입력하세요.\n\nThis ID is not accepted.\n- 아이디가 아직 승인되지 않았습니다. 개발자가 아이디를 사용 허가할 때까지 기다려주세요.\n\nThis ID is not signed up the server.\n- 서버에 가입하지 않은 아이디입니다. 서버에 가입해주세요.")
+                                    .setText(TRANSLATION_TEXT)
+                                    .show())
+                                .addView(new TextView()
+                                    .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                    .setText("Share with your friends")
+                                    .setTextSize(24)
                                     .show())
                                 .addView(new KakaoLink()
-                        .setButtonText("Share")
-                        .setButtonUrl("http://m.cafe.naver.com/minecraftdev/")
-                        .setText("Test")
-                        .show())
+                                    .setLinkButtonText("Github")
+                                    .setLinkButtonUrl("https://github.com/Astro36/AstroLibrary")
+                                    .setLinkText(SHARE_TEXT)
+                                    .show())
+                                .addView(new Button()
+                                    .setText("Close")
+                                    .setEffect(() => window.dismiss())
+                                    .show())
                                 .show())
                             .setFocusable(true)
                             .show();
@@ -3390,7 +3438,7 @@ let me = this.me || {};
      * @memberOf me.astro
      */
     function init() {
-        let res = ["ic_account_circle.png", "ic_colorize.png","ic_edit.png", "ic_help_outline.png", "ic_info_outline.png", "ic_open_with.png", "ic_palette.png", "ic_person.png", "ic_person_add.png", "ic_settings.png", "ic_swap_horiz.png"],
+        let res = ["ic_account_circle.png", "ic_colorize.png", "ic_edit.png", "ic_help_outline.png", "ic_info_outline.png", "ic_open_with.png", "ic_palette.png", "ic_person.png", "ic_person_add.png", "ic_settings.png", "ic_swap_horiz.png"],
             isExists = true;
         for (let i = res.length; i--;) {
             if (!new File_(PATH, res[i]).exists()) {
@@ -3498,6 +3546,7 @@ let me = this.me || {};
         EditText: EditText,
         ImageButton: ImageButton,
         ImageToggle: ImageToggle,
+        KakaoLink: KakaoLink,
         Layout: Layout,
         ProgressWindow: ProgressWindow,
         SensorButton: SensorButton,

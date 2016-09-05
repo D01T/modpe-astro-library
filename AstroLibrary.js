@@ -2210,6 +2210,10 @@ let me = this.me || {};
         if (typeof canScroll === "undefined" || canScroll) {
             let scrollView = new ScrollView_(CONTEXT);
             scrollView.addView(this._layout);
+            
+scrollView.setVerticalScrollBarEnabled(false); 
+scrollView.setHorizontalScrollBarEnabled(false); 
+scrollView.setOverScrollMode(View_.OVER_SCROLL_NEVER);
             return scrollView;
         } else {
             return this._layout;

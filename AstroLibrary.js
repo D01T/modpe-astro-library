@@ -2453,6 +2453,15 @@ let me = this.me || {};
     };
 
     /**
+     * Returns the theme of the view.
+     * @since 2016-09-06
+     * @returns {me.astro.design.Theme} Theme of the scroll view
+     */
+    ScrollView.prototype.getTheme = function () {
+        return this._theme;
+    };
+
+    /**
      * Sets the color of the thumb of the scroll view.
      * @since 2016-09-06
      * @param {Number} color Color of the thumb of the scroll view
@@ -3708,6 +3717,7 @@ let me = this.me || {};
         KakaoLink: KakaoLink,
         Layout: Layout,
         ProgressWindow: ProgressWindow,
+        ScrollView: ScrollView,
         SensorButton: SensorButton,
         SlideButton: SlideButton,
         Toast: Toast,

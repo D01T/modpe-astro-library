@@ -2487,7 +2487,7 @@ let me = this.me || {};
      * @param {Number} color Color of the track of the scroll view
      */
     ScrollView.prototype.setTrackColor = function (color) {
-        this._track.setBackgroundDrawable(new ColorDrawable_(color));
+        this._scroller.setBackgroundDrawable(new ColorDrawable_(color));
         return this;
     };
 
@@ -2497,7 +2497,7 @@ let me = this.me || {};
      * @param {android.graphics.drawable.Drawable} drawable Drawable of the track of the scroll view
      */
     ScrollView.prototype.setTrackDrawable = function (drawable) {
-        this._track.setBackgroundDrawable(drawable);
+        this._scroller.setBackgroundDrawable(drawable);
         return this;
     };
 

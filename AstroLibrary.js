@@ -1901,6 +1901,155 @@ let me = this.me || {};
 
 
     /**
+     * Class representing a grid layout.
+     * @since 2016-09-09
+     * @class
+     * @memberOf me.astro.widget
+     */
+    function GridLayout() {
+        this._layout = new LinearLayout_(CONTEXT);
+        this._views = [];
+        this._row = 5;
+        this._column = -1;
+        this._width = DP * 60;
+        this._height = DP * 60;
+        this._layout.setOrientation(1);
+    }
+
+    /**
+     * Adds a view on the layout.
+     * @since 2016-09-09
+     * @param {android.view.View} view View
+     */
+    GridLayout.prototype.addView = function (view) {
+        this._views.push(view);
+        return this;
+    };
+
+    /**
+     * Returns the column of the layout.
+     * @since 2016-09-09
+     * @returns {Number} Column of the layout
+     */
+    GridLayout.prototype.getColumn = function () {
+        return this._column;
+    };
+
+    /**
+     * Returns the height of the layout.
+     * @since 2016-09-09
+     * @returns {Number} Height of the layout
+     */
+    GridLayout.prototype.getHeight = function () {
+        return this._height;
+    };
+
+    /**
+     * Returns the layout.
+     * @since 2016-09-09
+     * @returns {android.widget.LinearLayout} Layout
+     */
+    GridLayout.prototype.getLayout = function () {
+        return this._layout;
+    };
+
+    /**
+     * Returns the row of the layout.
+     * @since 2016-09-09
+     * @returns {Number} Row of the layout
+     */
+    GridLayout.prototype.getRow = function () {
+        return this._row;
+    };
+
+    /**
+     * Returns the width of the layout.
+     * @since 2016-09-09
+     * @returns {Number} Width of the layout
+     */
+    GridLayout.prototype.getWidth = function () {
+        return this._width;
+    };
+
+    /**
+     * Sets the column of the layout.
+     * @since 2016-09-09
+     * @param {Number} column Column of the layout
+     */
+    GridLayout.prototype.setColumn = function (column) {
+        this._column = column;
+        return this;
+    };
+
+    /**
+     * Sets the height of the layout.
+     * @since 2016-09-09
+     * @param {Number} height Height of the layout
+     */
+    GridLayout.prototype.setHeight = function (height) {
+        this._height = height;
+        return this;
+    };
+
+    /**
+     * Sets the row of the layout.
+     * @since 2016-09-09
+     * @param {Number} row Row of the layout
+     */
+    GridLayout.prototype.setRow = function (row) {
+        this._row = row;
+        return this;
+    };
+
+    /**
+     * Sets the width of the layout.
+     * @since 2016-09-09
+     * @param {Number} width Width of the layout
+     */
+    GridLayout.prototype.setWidth = function (width) {
+        this._width = width;
+        return this;
+    };
+
+    /**
+     * Returns the layout.
+     * @since 2016-09-09
+     * @returns {android.widget.LinearLayout} Layout
+     */
+    GridLayout.prototype.show = function () {
+        let layout = this._layout,
+            views = this._views,
+            column = this._column,
+            row = this._row,
+            width = this._width * row,
+            height = this._height * column,
+            width2 = this._width,
+            height2 = this._height;
+
+        if (column < 0) {
+            column = Math.ceil(views.length / row);
+        }
+
+        layout.setLayoutParams(new LinearLayout_.LayoutParams(width, height));
+
+        for (let i = 0; i < column; i++) {
+            let temp = new LinearLayout_(CONTEXT);
+            temp.setLayoutParams(new LinearLayout_.LayoutParams(width, height2));
+            for (let j = 0; j < row; j++) {
+                if (row * i + j < views.length) {
+                    let view = views[row * i + j];
+                    view.setLayoutParams(new LinearLayout_.LayoutParams(width2, height2));
+                    temp.addView(view);
+                }
+            }
+            layout.addView(temp);
+        }
+        return layout;
+    };
+
+
+
+    /**
      * Class representing a image button.
      * @since 2016-05-27
      * @class
@@ -2166,7 +2315,6 @@ let me = this.me || {};
      * @class
      * @memberOf me.astro.widget
      */
-
     function Layout() {
         this._layout = new LinearLayout_(CONTEXT);
         this._layout.setOrientation(1);
@@ -2214,6 +2362,145 @@ let me = this.me || {};
         } else {
             return this._layout;
         }
+    };
+
+
+
+    /**
+     * Class representing a palette.
+     * @since 2016-09-09
+     * @class
+     * @memberOf me.astro.widget
+     */
+    function Palette() {
+        let thiz = this,
+            layout = this._layout = new GridLayout();
+        thiz._func = (() => {});
+        for (let i in Color) {
+            let color = Color[i];
+            if (typeof color === "number") {
+                let view = new TextView_(CONTEXT);
+                view.setBackgroundDrawable(new ColorDrawable_(color));
+                view.setOnClickListener(new View_.OnClickListener({
+                    onClick(view) {
+                        thiz._func(view.getTag());
+                    }
+                }));
+                view.setTag(color);
+                layout.addView(view);
+            }
+        }
+    }
+
+    /**
+     * Returns the effect function.
+     * @since 2016-09-09
+     * @returns {Function} Effect function
+     */
+    Palette.prototype.getEffect = function () {
+        return this._func;
+    };
+
+    /**
+     * Returns the view.
+     * @since 2016-09-09
+     * @returns {android.widget.LinearLayout} View
+     */
+    Palette.prototype.getView = function () {
+        return this._layout.getLayout();
+    };
+
+    /**
+     * Sets the effect function.
+     * @since 2016-09-09
+     * @param {Function} func Effect function
+     */
+    Palette.prototype.setEffect = function (func) {
+        this._func = func;
+        return this;
+    };
+
+    /**
+     * Returns the palette.
+     * @since 2016-09-09
+     * @returns {android.widget.LinearLayout} Palette
+     */
+    Palette.prototype.show = function () {
+        return this._layout.show();
+    };
+
+
+
+    /**
+     * Class representing a palette window.
+     * @since 2016-09-09
+     * @class
+     * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
+     */
+    function PaletteWindow(theme) {
+        theme = theme || Theme.DEFAULT;
+        let thiz = this;
+        thiz._theme = theme;
+        thiz._window = new PopupWindow_(CONTEXT);
+        thiz._layout = new ScrollView(theme);
+        thiz._palette = new Palette();
+        thiz._window.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.BACKGROUND_COLOR)));
+        thiz._window.setContentView(thiz._layout.show());
+        thiz._window.setWidth(DP * 340);
+        thiz._window.setHeight(DP * 340);
+        thiz._layout.addView(thiz._palette.show());
+    }
+
+    /**
+     * Disposes of the palette window.
+     * @since 2016-09-09
+     */
+    PaletteWindow.prototype.dismiss = function () {
+        let thiz = this;
+        CONTEXT.runOnUiThread({
+            run() {
+                thiz._window.dismiss();
+            }
+        });
+        return this;
+    };
+
+    /**
+     * Returns the theme of the palette window.
+     * @since 2016-09-09
+     * @returns {me.astro.design.Theme} Theme of the palette window
+     */
+    PaletteWindow.prototype.getTheme = function () {
+        return this._theme;
+    };
+
+    /**
+     * Returns the palette window.
+     * @since 2016-09-09
+     * @returns {android.widget.PopupWindow} Palette window
+     */
+    PaletteWindow.prototype.getWindow = function () {
+        return this._window;
+    };
+
+    /**
+     * Sets the color of the palette window.
+     * @since 2016-09-09
+     * @param {Number} color Color of the palette window
+     */
+    PaletteWindow.prototype.setColor = function (color) {
+        this._window.setBackgroundDrawable(new ColorDrawable_(color));
+        return this;
+    };
+
+    /**
+     * Show the palette window on the screen.
+     * @since 2016-09-09
+     */
+    PaletteWindow.prototype.show = function () {
+        this._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
+        return this;
     };
 
 
@@ -2310,6 +2597,15 @@ let me = this.me || {};
             }
         });
         return this;
+    };
+
+    /**
+     * Returns the theme of the progress window.
+     * @since 2016-09-09
+     * @returns {me.astro.design.Theme} Theme of the progress window
+     */
+    ProgressWindow.prototype.getTheme = function () {
+        return this._theme;
     };
 
     /**
@@ -2449,7 +2745,7 @@ let me = this.me || {};
      * @returns {android.widget.LinearLayout} Scroll view
      */
     ScrollView.prototype.getLayout = function () {
-        return this._layout;
+        return this._scrollView;
     };
 
     /**
@@ -2791,6 +3087,15 @@ let me = this.me || {};
     };
 
     /**
+     * Returns the theme of the vertical window.
+     * @since 2016-09-09
+     * @returns {me.astro.design.Theme} Theme of the vertical window
+     */
+    VerticalWindow.prototype.getTheme = function () {
+        return this._theme;
+    };
+
+    /**
      * Returns the vertical window.
      * @since 2016-08-04
      * @returns {android.widget.PopupWindow} Vertical window
@@ -2937,6 +3242,15 @@ let me = this.me || {};
             }
         });
         return this;
+    };
+
+    /**
+     * Returns the theme of the window.
+     * @since 2016-09-09
+     * @returns {me.astro.design.Theme} Theme of the window
+     */
+    Window.prototype.getTheme = function () {
+        return this._theme;
     };
 
     /**
@@ -3571,24 +3885,28 @@ let me = this.me || {};
     function showWindowSettings() {
         CONTEXT.runOnUiThread({
             run() {
-                let window = new Window();
-                window.addLayout(Bitmap.createBitmap(PATH + "ic_settings.png"), new Layout()
-                        .addView(new TextView()
-                            .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
-                            .setText("Settings")
-                            .setTextSize(24)
+                try {
+                    let window = new Window();
+                    window.addLayout(Bitmap.createBitmap(PATH + "ic_settings.png"), new Layout()
+                            .addView(new TextView()
+                                .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                .setText("Settings")
+                                .setTextSize(24)
+                                .show())
+                            .addView(new TextView()
+                                .setText("Settings")
+                                .show())
+                            .addView(new Palette().show())
+                            .addView(new Button()
+                                .setText("Close")
+                                .setEffect(() => window.dismiss())
+                                .show())
                             .show())
-                        .addView(new TextView()
-                            .setText("Settings")
-                            .show())
-                        .addView(new Button()
-                            .setText("Close")
-                            .setEffect(() => window.dismiss())
-                            .show())
-                        .setOrientation(0)
-                        .show())
-                    .setFocusable(true)
-                    .show();
+                        .setFocusable(true)
+                        .show();
+                } catch (e) {
+                    print(e)
+                }
             }
         });
     }
@@ -3712,10 +4030,13 @@ let me = this.me || {};
         TextView: TextView,
         Button: Button,
         EditText: EditText,
+        GridLayout: GridLayout,
         ImageButton: ImageButton,
         ImageToggle: ImageToggle,
         KakaoLink: KakaoLink,
         Layout: Layout,
+        Palette: Palette,
+        PaletteWindow: PaletteWindow,
         ProgressWindow: ProgressWindow,
         ScrollView: ScrollView,
         SensorButton: SensorButton,

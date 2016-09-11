@@ -84,6 +84,7 @@ let me = this.me || {};
         URL_ = java.net.URL,
         ScriptManager_ = net.zhuoweizhang.mcpelauncher.ScriptManager,
         HttpGet_ = org.apache.http.client.methods.HttpGet,
+        ScriptableObject_ = org.mozilla.javascript.ScriptableObject,
         CONTEXT = MainActivity_.currentMainActivity.get(),
         DP = CONTEXT.getResources().getDisplayMetrics().density,
         RESOURCE = CONTEXT.getResources(),
@@ -3394,9 +3395,7 @@ let me = this.me || {};
                     } else if (code === Account.LOGIN_SUCCESS) {
                         showWindowAccount();
                     }
-                    if (typeof $.onLoginListener === "function") {
-                        $.onLoginListener(code);
-                    }
+                    ScriptManager_.callScriptMethod("onLoginListener", [code]);
                     progressWindow.dismiss();
                 });
             } else {
@@ -3419,9 +3418,7 @@ let me = this.me || {};
         new File_(PATH, "user.dat").delete();
         if (user instanceof Account && user.isAvailable()) {
             user.logout();
-            if (typeof $.onLoginListener === "function") {
-                $.onLoginListener(Account.LOGOUT);
-            }
+            ScriptManager_.callScriptMethod("onLoginListener", [Account.LOGOUT]);
         }
         showWindow();
     }
@@ -3483,9 +3480,7 @@ let me = this.me || {};
                                             fileOutputStream.close();
                                             window.dismiss();
                                         }
-                                        if (typeof $.onLoginListener === "function") {
-                                            $.onLoginListener(code);
-                                        }
+                                        ScriptManager_.callScriptMethod("onLoginListener", [code]);
                                         progressWindow.dismiss();
                                     });
                                 })
@@ -3677,9 +3672,7 @@ let me = this.me || {};
                                                     fileOutputStream.close();
                                                     window.dismiss();
                                                 }
-                                                if (typeof $.onLoginListener === "function") {
-                                                    $.onLoginListener(code);
-                                                }
+                                                ScriptManager_.callScriptMethod("onLoginListener", [code]);
                                                 progressWindow.dismiss();
                                             });
                                         })
@@ -4002,6 +3995,26 @@ let me = this.me || {};
                         .show(preference.get("window_location_x"), preference.get("window_location_y"));
                 }
             });
+            new Thread_({
+                run() {
+                    Thread_.sleep(3000);
+                    let scripts = ScriptManager_.scripts;
+                    for (let i = scripts.size(); i--;) {
+                        let scope = scripts.get(i).scope,
+                            tmpObj;
+
+                        if (!ScriptableObject_.hasProperty(scope, "me")) {
+                            ScriptableObject_.putProperty(scope, "me", {
+                                astro: astro
+                            });
+                        } else if (typeof (tmpObj = ScriptableObject_.getProperty(scope, "me")).astro !== "object") {
+                            tmpObj.astro = astro;
+                            ScriptableObject_.putProperty(scope, "me", tmpObj);
+                        }
+                    }
+                    ScriptManager_.callScriptMethod("onLibraryLoaded", [NAME, NAME_CODE, VERSION]);
+                }
+            }).start();
         } else {
             if (new NetworkChecker().isConnected()) {
                 let progressWindow;

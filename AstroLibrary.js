@@ -931,11 +931,11 @@ let me = this.me || {};
                     } else {
                         let arr = str.split("#");
                         thiz._userId = arr[1];
-                        thiz._isAvailable = true;
                         thiz.getDataFromServer("name", (code, str) => code === Account.GET_SUCCESS && (thiz._name = str));
                         thiz.getDataFromServer("email", (code, str) => {
                             if (code === Account.GET_SUCCESS) {
                                 thiz._email = str;
+                                thiz._isAvailable = true;
                                 Toast.show(arr[0]);
                                 response(Account.LOGIN_SUCCESS);
                             }
@@ -3560,6 +3560,7 @@ let me = this.me || {};
                             .show())
                         .addView(new TextView()
                             .setText(notice)
+                            .setTextColor(Color.GREY_DARK)
                             .show())
                         .addView(new Button()
                             .setText("Close")
@@ -3574,6 +3575,7 @@ let me = this.me || {};
                             .show())
                         .addView(new TextView()
                             .setText("Device model: " + DEVICE_MODEL + "\nDevice version: " + DEVICE_VERSION + "\n\n")
+                            .setTextColor(Color.GREY_DARK)
                             .show())
                         .addView(new TextView()
                             .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
@@ -3582,6 +3584,7 @@ let me = this.me || {};
                             .show())
                         .addView(new TextView()
                             .setText(NAME + " " + VERSION + "\n\nName Code: " + NAME_CODE + "\nDeveleoper: " + DEVELOPER + "\n\n")
+                            .setTextColor(Color.GREY_DARK)
                             .show())
                         .addView(new TextView()
                             .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
@@ -3590,6 +3593,7 @@ let me = this.me || {};
                             .show())
                         .addView(new TextView()
                             .setText(TRANSLATION_TEXT)
+                            .setTextColor(Color.GREY_DARK)
                             .show())
                         .addView(new TextView()
                             .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
@@ -3598,6 +3602,7 @@ let me = this.me || {};
                             .show())
                         .addView(new TextView()
                             .setText(LICENSE_TEXT)
+                            .setTextColor(Color.GREY_DARK)
                             .show())
                         .addView(new TextView()
                             .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
@@ -3846,6 +3851,7 @@ let me = this.me || {};
                                     .show())
                                 .addView(new TextView()
                                     .setText(notice)
+                                    .setTextColor(Color.GREY_DARK)
                                     .show())
                                 .addView(new Button()
                                     .setText("Close")
@@ -3860,6 +3866,7 @@ let me = this.me || {};
                                     .show())
                                 .addView(new TextView()
                                     .setText("Device model: " + DEVICE_MODEL + "\nDevice version: " + DEVICE_VERSION + "\n\n")
+                                    .setTextColor(Color.GREY_DARK)
                                     .show())
                                 .addView(new TextView()
                                     .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
@@ -3868,6 +3875,7 @@ let me = this.me || {};
                                     .show())
                                 .addView(new TextView()
                                     .setText(NAME + " " + VERSION + "\n\nName Code: " + NAME_CODE + "\nDeveleoper: " + DEVELOPER + "\n\n")
+                                    .setTextColor(Color.GREY_DARK)
                                     .show())
                                 .addView(new TextView()
                                     .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
@@ -3876,6 +3884,7 @@ let me = this.me || {};
                                     .show())
                                 .addView(new TextView()
                                     .setText(TRANSLATION_TEXT)
+                                    .setTextColor(Color.GREY_DARK)
                                     .show())
                                 .addView(new TextView()
                                     .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
@@ -3884,6 +3893,7 @@ let me = this.me || {};
                                     .show())
                                 .addView(new TextView()
                                     .setText(LICENSE_TEXT)
+                                    .setTextColor(Color.GREY_DARK)
                                     .show())
                                 .addView(new TextView()
                                     .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
@@ -3932,10 +3942,12 @@ let me = this.me || {};
                                 .setTextSize(24)
                                 .show())
                             .addView(new TextView()
+                                .setPadding(DP * 12, 0, DP * 8, DP * 12)
                                 .setText("Settings")
+                                .setTextSize(14)
                                 .show())
                             .addView(new TextView()
-                                .setText("This function will bo update later.")
+                                .setText("This function will be update later.")
                                 .show())
                             .addView(new Button()
                                 .setText("Close")

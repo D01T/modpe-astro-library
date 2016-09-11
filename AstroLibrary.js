@@ -3930,7 +3930,9 @@ let me = this.me || {};
                             .addView(new TextView()
                                 .setText("Settings")
                                 .show())
-                            .addView(new Palette().show())
+                            .addView(new TextView()
+                                .setText("This function will bo update later.")
+                                .show())
                             .addView(new Button()
                                 .setText("Close")
                                 .setEffect(() => window.dismiss())
@@ -3939,7 +3941,7 @@ let me = this.me || {};
                         .setFocusable(true)
                         .show();
                 } catch (e) {
-                    print(e)
+                    print(e);
                 }
             }
         });

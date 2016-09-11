@@ -1051,6 +1051,17 @@ let me = this.me || {};
 
 
     /**
+     * Class representing a user server.
+     * @since 2016-09-11
+     * @class
+     * @memberOf me.astro.security
+     */
+    function UserServer() {
+    }
+
+
+
+    /**
      * Contains classes about utils.
      * @memberOf me.astro
      * @namespace utils

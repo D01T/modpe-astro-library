@@ -3947,7 +3947,7 @@ let me = this.me || {};
                                 .setTextSize(14)
                                 .show())
                             .addView(new TextView()
-                                .setText("This function will be update later.")
+                                .setText("This function will be updated later.")
                                 .show())
                             .addView(new Button()
                                 .setText("Close")

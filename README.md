@@ -12,5 +12,10 @@ Information for library API:
 
 [Documents](http://minedev.dothome.co.kr/docs/lib_astro/1.0/index.html)
 
+## Contributors
+Thanks to all contributors who helps to make AstroLibrary better.
+
+[https://github.com/Astro36/AstroLibrary/graphs/contributors](https://github.com/Astro36/AstroLibrary/graphs/contributors)
+
 ## License
 AstroLibrary is licensed under the [Apache 2.0](./LICENSE).

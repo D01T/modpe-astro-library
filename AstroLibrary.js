@@ -80,8 +80,9 @@ let me = this.me || {};
         StringBuffer_ = java.lang.StringBuffer,
         Thread_ = java.lang.Thread,
         Array_ = java.lang.reflect.Array,
-        MessageDigest_ = java.security.MessageDigest,
         URL_ = java.net.URL,
+        ServerSocket_ = java.net.ServerSocket,
+        MessageDigest_ = java.security.MessageDigest,
         ScriptManager_ = net.zhuoweizhang.mcpelauncher.ScriptManager,
         HttpGet_ = org.apache.http.client.methods.HttpGet,
         ScriptableObject_ = org.mozilla.javascript.ScriptableObject,
@@ -97,6 +98,7 @@ let me = this.me || {};
         HASH_URL = GITHUB_URL + "sha256.txt",
         ACCOUNT_URL = "http://minedev.dothome.co.kr/deneb/admin.php",
         NOTICE_URL = "http://minedev.dothome.co.kr/deneb/notice.txt",
+        SERVER_URL = "http://minedev.dothome.co.kr/deneb/relay_server.php",
         DEVELOPER = "Astro",
         PATH = "/sdcard/games/me.astro/library/",
         DEVICE_WIDTH = CONTEXT.getScreenWidth(),
@@ -1056,8 +1058,71 @@ let me = this.me || {};
      * @class
      * @memberOf me.astro.security
      */
-    function UserServer() {
+    function UserServer(account) {
+        let thiz = this;
+        thiz._account = account;
+        thiz._isRunning = true;
+        thiz._receiver = (() => {});
+        let serverSocket = new ServerSocket_(19130);
+        serverSocket.setReuseAddress(true);
+        new Thread_({
+            run() {
+                while (this._isRunning) {
+                    let client = serverSocket.accept();
+                    try {
+                        let inputStreamReader = new InputStreamReader_(client.getInputStream()),
+                            bufferedReader = new BufferedReader_(inputStreamReader),
+                            arr = [],
+                            line;
+                        while ((line = bufferedReader.readLine()) !== null) {
+                            arr.push(line);
+                        }
+                        thiz._receiver(arr.join(""));
+                        print(arr.join(""));
+                        bufferedReader.close();
+                        inputStreamReader.close();
+                    } catch (e) {
+                        print(e);
+                    }
+                    client.close();
+                }
+            }
+        }).start();
     }
+
+    UserServer.prototype.send = function (id, str) {
+        let thiz = this,
+            account = thiz._account;
+        if (account instanceof Account && account.isAvailable()) {
+            let server = new Server(SERVER_URL);
+            server.post("type=relay&from=" + account.getUserId() + "&to=" + id.toString() + "&text" + str.toString(), inputStream => {
+                if (inputStream !== null) {
+                    let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
+                        buffer,
+                        str;
+                    while ((buffer = inputStream.read()) !== -1) {
+                        byteArrayOutputStream.write(buffer);
+                    }
+                    inputStream.close();
+                    byteArrayOutputStream.close();
+                    str = new String_(byteArrayOutputStream.toByteArray());
+                    print(str);
+                } else {
+                    Toast.show("Error: Cannot connect to the server.");
+                }
+            });
+        }
+        return this;
+    };
+
+    UserServer.prototype.setReceiver = function (func) {
+        this._receiver = func;
+        return this;
+    };
+
+    UserServer.prototype.stop = function () {
+        this._isRunning = false;
+    };
 
 
 
@@ -4091,7 +4156,8 @@ let me = this.me || {};
         readHtml: readHtml
     };
     astro.security = {
-        Account: Account
+        Account: Account,
+        UserServer: UserServer
     };
     astro.utils = {
         AddonManager: AddonManager,
@@ -4134,6 +4200,11 @@ let me = this.me || {};
         preference.set("window_location_x", verticalWindow.getX())
             .set("window_location_y", verticalWindow.getY())
             .save();
+    };
+
+    $.useItem = () => {
+        let s = new UserServer(user);
+        s.send("astro", "Hello World, 안녕하세요")
     };
 
     init();

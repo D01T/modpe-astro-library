@@ -80,8 +80,10 @@ let me = this.me || {};
         StringBuffer_ = java.lang.StringBuffer,
         Thread_ = java.lang.Thread,
         Array_ = java.lang.reflect.Array,
+        DatagramSocket_ = java.net.DatagramSocket,
+        DatagramPacket_ = java.net.DatagramPacket,
+        InetSocketAddress_ = java.net.InetSocketAddress,
         URL_ = java.net.URL,
-        ServerSocket_ = java.net.ServerSocket,
         MessageDigest_ = java.security.MessageDigest,
         ScriptManager_ = net.zhuoweizhang.mcpelauncher.ScriptManager,
         HttpGet_ = org.apache.http.client.methods.HttpGet,
@@ -98,7 +100,6 @@ let me = this.me || {};
         HASH_URL = GITHUB_URL + "sha256.txt",
         ACCOUNT_URL = "http://minedev.dothome.co.kr/deneb/admin.php",
         NOTICE_URL = "http://minedev.dothome.co.kr/deneb/notice.txt",
-        SERVER_URL = "http://minedev.dothome.co.kr/deneb/relay_server.php",
         DEVELOPER = "Astro",
         PATH = "/sdcard/games/me.astro/library/",
         DEVICE_WIDTH = CONTEXT.getScreenWidth(),
@@ -1062,61 +1063,62 @@ let me = this.me || {};
         let thiz = this;
         thiz._account = account;
         thiz._isRunning = true;
-        thiz._receiver = (() => {});
-        let serverSocket = new ServerSocket_(19130);
-        serverSocket.setReuseAddress(true);
+        thiz._receivers = [];
+        thiz._response = (() => {});
         new Thread_({
             run() {
-                while (this._isRunning) {
-                    let client = serverSocket.accept();
-                    try {
-                        let inputStreamReader = new InputStreamReader_(client.getInputStream()),
-                            bufferedReader = new BufferedReader_(inputStreamReader),
-                            arr = [],
-                            line;
-                        while ((line = bufferedReader.readLine()) !== null) {
-                            arr.push(line);
-                        }
-                        thiz._receiver(arr.join(""));
-                        print(arr.join(""));
-                        bufferedReader.close();
-                        inputStreamReader.close();
-                    } catch (e) {
-                        print(e);
+                try {
+                    var buffer = Array_.newInstance(Byte_.TYPE, 128);
+                    var datagramSocket = new DatagramSocket_(19130);
+                    var datagramPacket = new DatagramPacket_(buffer, buffer.length);
+                    while (thiz._isRunning) {
+                        Thread_.sleep(1000);
+                        datagramSocket.receive(datagramPacket);
+                        let str = new String_(buffer, 0, datagramPacket.getLength());
+                        print(str);
+                        thiz._response(str);
                     }
-                    client.close();
+                } catch (e) {
+                    print(e);
                 }
             }
         }).start();
     }
 
-    UserServer.prototype.send = function (id, str) {
-        let thiz = this,
-            account = thiz._account;
-        if (account instanceof Account && account.isAvailable()) {
-            let server = new Server(SERVER_URL);
-            server.post("type=relay&from=" + account.getUserId() + "&to=" + id.toString() + "&text" + str.toString(), inputStream => {
-                if (inputStream !== null) {
-                    let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
-                        buffer,
-                        str;
-                    while ((buffer = inputStream.read()) !== -1) {
-                        byteArrayOutputStream.write(buffer);
-                    }
-                    inputStream.close();
-                    byteArrayOutputStream.close();
-                    str = new String_(byteArrayOutputStream.toByteArray());
-                    print(str);
-                } else {
-                    Toast.show("Error: Cannot connect to the server.");
-                }
-            });
+    UserServer.prototype.addReceiver = function (id) {
+        let receivers = this._receivers;
+        if (receivers.indexOf(id) < 0) {
+            receivers.push(id);
         }
         return this;
     };
 
-    UserServer.prototype.setReceiver = function (func) {
-        this._receiver = func;
+    UserServer.prototype.send = function (str) {
+        let thiz = this,
+            account = thiz._account,
+            receivers = this._receivers;
+        if (account instanceof Account && account.isAvailable()) {
+            new Thread_({
+                run() {
+                    try {
+                        let buffer = new String_(str).getBytes();
+                        for (let i = receivers.length; i--;) {
+                            let datagramSocket = new DatagramSocket_();
+                            datagramSocket.connect(new InetSocketAddress_(receivers[i], 19130));
+
+                            datagramSocket.send(new DatagramPacket_(buffer, buffer.length));
+                        }
+                    } catch (e) {
+                        print(e);
+                    }
+                }
+            }).start();
+        }
+        return this;
+    };
+
+    UserServer.prototype.setResponse = function (func) {
+        this._response = func;
         return this;
     };
 
@@ -4200,11 +4202,6 @@ let me = this.me || {};
         preference.set("window_location_x", verticalWindow.getX())
             .set("window_location_y", verticalWindow.getY())
             .save();
-    };
-
-    $.useItem = () => {
-        let s = new UserServer(user);
-        s.send("astro", "Hello World, 안녕하세요")
     };
 
     init();

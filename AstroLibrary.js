@@ -791,7 +791,7 @@ let me = this.me || {};
         let friends = this._friends;
         if (friends.indexOf(id) < 0) {
             friends.push(id);
-            this.modifyData("friends", JSON.stringify(friends), response);
+            this.modifyData("friends", friends.join(","), response);
         }
         return this;
     };
@@ -960,7 +960,7 @@ let me = this.me || {};
                         let arr = str.split("#");
                         thiz._userId = arr[1];
                         thiz.getDataFromServer("name", (code, str) => code === Account.GET_SUCCESS && (thiz._name = str));
-                        thiz.getDataFromServer("friends", (code, str) => code === Account.GET_SUCCESS && (thiz._friends = JSON.parse(str)));
+                        thiz.getDataFromServer("friends", (code, str) => code === Account.GET_SUCCESS && (thiz._friends = (str.indexOf(",") >= 0 ? str.toString().split(",") : (str ? [str] : []))));
                         thiz.getDataFromServer("email", (code, str) => {
                             if (code === Account.GET_SUCCESS) {
                                 thiz._email = str;
@@ -1002,7 +1002,7 @@ let me = this.me || {};
     Account.prototype.modifyData = function (key, value, response) {
         response = response || (() => {});
         let server = new Server(ACCOUNT_URL);
-        server.post("type=modify&userid=" + this._userId + "&key=" + key + "&value=" + value, inputStream => {
+        server.post("type=modify_user&userid=" + this._userId + "&key=" + key + "&value=" + value, inputStream => {
             if (inputStream !== null) {
                 let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
                     buffer,
@@ -1059,10 +1059,12 @@ let me = this.me || {};
                         Toast.show(str);
                         response(Account.EDIT_FAIL);
                     } else {
+                        let arr = str.split("#");
                         thiz._password = password;
                         thiz._name = name;
                         thiz._email = email;
-                        Toast.show(str);
+                        thiz._userId = arr[1];
+                        Toast.show(arr[0]);
                         response(Account.EDIT_SUCCESS);
                     }
                 } else {
@@ -1087,7 +1089,7 @@ let me = this.me || {};
         let friends = this._friends;
         if (friends.indexOf(id) >= 0) {
             friends.splice(friends.indexOf(id), 1);
-            this.modifyData("friends", JSON.stringify(friends), response);
+            this.modifyData("friends", friends.join(","), response);
         }
         return this;
     };
@@ -3859,7 +3861,7 @@ let me = this.me || {};
                                     .setOrientation(0)
                                     .show())
                                 .addView((() => {
-                                    let layout = new Layout(),
+                                    let layout = new LinearLayout_(CONTEXT),
                                         friends = user.getFriends(),
                                         len = friends.length;
                                     if (len > 0) {
@@ -3871,21 +3873,25 @@ let me = this.me || {};
                                     }
                                     for (let i = 0; i < len; i++) {
                                         layout.addView(new Button()
-                                            .setText(friends[i].name + "(" + friends[i].id + ")")
+                                            .setText(friends[i])
+                                            .setColor(Color.INDIGO_ACCENT)
                                             .setEffect(view => {
                                                 let progressWindow = new ProgressWindow();
                                                 progressWindow.setText("Removing...");
                                                 progressWindow.show();
-                                                user.removeFriend(view.getText().split("(").replace(")", ""), code => {
+                                                user.removeFriend(view.getText(), code => {
                                                     if (code === Account.EDIT_SUCCESS) {
                                                         window.dismiss();
                                                     }
                                                     progressWindow.dismiss();
                                                 });
                                             })
+                                            .setEffectColor(Color.INDIGO_ACCENT)
+                                            .setWH(-1, DP * 36)
                                             .show());
                                     }
-                                    return layout.show();
+                                    layout.setOrientation(1);
+                                    return layout;
                                 })())
                                 .addView(new Button()
                                     .setText("Close")

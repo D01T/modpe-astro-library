@@ -681,6 +681,7 @@ let me = this.me || {};
         this._name = "";
         this._password = password;
         this._userId = null;
+        this._friends = [];
         this._isAvailable = false;
     }
 
@@ -781,7 +782,22 @@ let me = this.me || {};
     };
 
     /**
-     * Get a data from the server.
+     * Adds a friend by Friend's ID.
+     * @since 2016-09-15
+     * @param {String} id Friend's ID
+     * @param {Function} [response=function(code){}] Callback to be invoked when you connected the server
+     */
+    Account.prototype.addFriend = function (id, response) {
+        let friends = this._friends;
+        if (friends.indexOf(id) < 0) {
+            friends.push(id);
+            this.modifyData("friends", JSON.stringify(friends), response);
+        }
+        return this;
+    };
+
+    /**
+     * Gets a data from the server.
      * @since 2016-07-04
      * @param {String} key Key of data
      * @param {Function} [response=function(code,str){}] Callback to be invoked when you connected the server.
@@ -821,6 +837,15 @@ let me = this.me || {};
      */
     Account.prototype.getEmail = function () {
         return this._email;
+    };
+
+    /**
+     * Returns user's friends.
+     * @since 2016-09-15
+     * @returns {String} User's friends
+     */
+    Account.prototype.getFriends = function () {
+        return this._friends;
     };
 
     /**
@@ -935,6 +960,7 @@ let me = this.me || {};
                         let arr = str.split("#");
                         thiz._userId = arr[1];
                         thiz.getDataFromServer("name", (code, str) => code === Account.GET_SUCCESS && (thiz._name = str));
+                        thiz.getDataFromServer("friends", (code, str) => code === Account.GET_SUCCESS && (thiz._friends = JSON.parse(str)));
                         thiz.getDataFromServer("email", (code, str) => {
                             if (code === Account.GET_SUCCESS) {
                                 thiz._email = str;
@@ -1051,6 +1077,21 @@ let me = this.me || {};
         return this;
     };
 
+    /**
+     * Removes a friend by Friend's ID.
+     * @since 2016-09-15
+     * @param {String} id Friend's ID
+     * @param {Function} [response=function(code){}] Callback to be invoked when you connected the server
+     */
+    Account.prototype.removeFriend = function (id, response) {
+        let friends = this._friends;
+        if (friends.indexOf(id) >= 0) {
+            friends.splice(friends.indexOf(id), 1);
+            this.modifyData("friends", JSON.stringify(friends), response);
+        }
+        return this;
+    };
+
 
 
     /**
@@ -1105,7 +1146,6 @@ let me = this.me || {};
                         for (let i = receivers.length; i--;) {
                             let datagramSocket = new DatagramSocket_();
                             datagramSocket.connect(new InetSocketAddress_(receivers[i], 19130));
-
                             datagramSocket.send(new DatagramPacket_(buffer, buffer.length));
                         }
                     } catch (e) {
@@ -2437,6 +2477,16 @@ let me = this.me || {};
     };
 
     /**
+     * Sets a gravity for the layout.
+     * @since 2016-09-15
+     * @param {Number} gravity Gravity for the layout
+     */
+    Layout.prototype.setGravity = function (gravity) {
+        this._layout.setGravity(gravity);
+        return this;
+    };
+
+    /**
      * Sets the orientation of the layout.
      * @since 2016-07-14
      * @param {Number} orientation Orientation of the layout
@@ -3708,7 +3758,8 @@ let me = this.me || {};
                         let window = new Window(),
                             password = new EditText(),
                             name = new EditText(),
-                            email = new EditText();
+                            email = new EditText(),
+                            friendId = new EditText();
                         window.addLayout(Bitmap.createBitmap(PATH + "ic_person.png"), new Layout()
                                 .addView(new TextView()
                                     .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
@@ -3736,7 +3787,7 @@ let me = this.me || {};
                                     .show())
                                 .addView(new TextView()
                                     .setPadding(DP * 8, DP * 12, DP * 8, DP * 12)
-                                    .setText("E-mail: ")
+                                    .setText("E-mail")
                                     .show())
                                 .addView(email.setHint("E-mail")
                                     .setText(user.getEmail())
@@ -3773,8 +3824,74 @@ let me = this.me || {};
                                         .show())
                                     .setOrientation(0)
                                     .show())
-                                .show()
-                            )
+                                .show())
+                            .addLayout(Bitmap.createBitmap(PATH + "ic_group.png"), new Layout()
+                                .addView(new TextView()
+                                    .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
+                                    .setText("Friends")
+                                    .setTextSize(24)
+                                    .show())
+                                .addView(new TextView()
+                                    .setPadding(DP * 12, 0, DP * 8, DP * 12)
+                                    .setText("Your friends")
+                                    .setTextSize(14)
+                                    .show())
+                                .addView(new Layout()
+                                    .addView(friendId.setHint("Friend ID")
+                                        .setWH(DP * 220, DP * 40)
+                                        .show())
+                                    .addView(new Button()
+                                        .setText("Add")
+                                        .setEffect(() => {
+                                            let progressWindow = new ProgressWindow();
+                                            progressWindow.setText("Adding...");
+                                            progressWindow.show();
+                                            user.addFriend(friendId.getText(), code => {
+                                                if (code === Account.EDIT_SUCCESS) {
+                                                    window.dismiss();
+                                                }
+                                                progressWindow.dismiss();
+                                            });
+                                        })
+                                        .setPadding(0,0,0,0)
+                                        .show())
+                                    .setGravity(Gravity_.CENTER | Gravity_.LEFT)
+                                    .setOrientation(0)
+                                    .show())
+                                .addView((() => {
+                                    let layout = new Layout(),
+                                        friends = user.getFriends(),
+                                        len = friends.length;
+                                    if (len > 0) {
+                                        layout.addView(new TextView()
+                                            .setPadding(DP * 12, DP * 24, DP * 8, DP * 12)
+                                            .setText("Click to remove your friends")
+                                            .setTextSize(14)
+                                            .show());
+                                    }
+                                    for (let i = 0; i < len; i++) {
+                                        layout.addView(new Button()
+                                            .setText(friends[i].name + "(" + friends[i].id + ")")
+                                            .setEffect(view => {
+                                                let progressWindow = new ProgressWindow();
+                                                progressWindow.setText("Removing...");
+                                                progressWindow.show();
+                                                user.removeFriend(view.getText().split("(").replace(")", ""), code => {
+                                                    if (code === Account.EDIT_SUCCESS) {
+                                                        window.dismiss();
+                                                    }
+                                                    progressWindow.dismiss();
+                                                });
+                                            })
+                                            .show());
+                                    }
+                                    return layout.show();
+                                })())
+                                .addView(new Button()
+                                    .setText("Close")
+                                    .setEffect(() => window.dismiss())
+                                    .show())
+                                .show())
                             .addLayout(Bitmap.createBitmap(PATH + "ic_edit.png"), (() => {
                                 if (hasLevel) {
                                     let health = new EditText(),
@@ -4038,7 +4155,7 @@ let me = this.me || {};
      * @memberOf me.astro
      */
     function init() {
-        let res = ["ic_account_circle.png", "ic_colorize.png", "ic_edit.png", "ic_help_outline.png", "ic_info_outline.png", "ic_open_with.png", "ic_palette.png", "ic_person.png", "ic_person_add.png", "ic_settings.png", "ic_swap_horiz.png"],
+        let res = ["ic_account_circle.png", "ic_colorize.png", "ic_edit.png", "ic_group.png", "ic_help_outline.png", "ic_info_outline.png", "ic_open_with.png", "ic_palette.png", "ic_person.png", "ic_person_add.png", "ic_settings.png", "ic_swap_horiz.png"],
             isExists = true;
         for (let i = res.length; i--;) {
             if (!new File_(PATH, res[i]).exists()) {

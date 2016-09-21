@@ -53,6 +53,7 @@ let me = this.me || {};
         Uri_ = android.net.Uri,
         Build_ = android.os.Build,
         StrictMode_ = android.os.StrictMode,
+        Patterns_ = android.util.Patterns,
         Gravity_ = android.view.Gravity,
         MotionEvent_ = android.view.MotionEvent,
         View_ = android.view.View,
@@ -1619,7 +1620,7 @@ let me = this.me || {};
      * @returns {Boolean} Validation
      */
     Text.verifyEmail = function (str) {
-        return /^.+\@naver\.com$/i.test(str);
+        return new RegExp(Patterns_.EMAIL_ADDRESS.toString()).test(str);
     };
 
     /**
@@ -3874,7 +3875,8 @@ let me = this.me || {};
                                     for (let i = 0; i < len; i++) {
                                         layout.addView(new Button()
                                             .setText(friends[i])
-                                            .setColor(Color.INDIGO_ACCENT)
+                                            .setTextColor(Color.INDIGO)
+                                            .setColor(Color.WHITE)
                                             .setEffect(view => {
                                                 let progressWindow = new ProgressWindow();
                                                 progressWindow.setText("Removing...");
@@ -3886,7 +3888,7 @@ let me = this.me || {};
                                                     progressWindow.dismiss();
                                                 });
                                             })
-                                            .setEffectColor(Color.INDIGO_ACCENT)
+                                            .setEffectColor(Color.WHITE)
                                             .setWH(-1, DP * 36)
                                             .show());
                                     }

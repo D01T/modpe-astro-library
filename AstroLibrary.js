@@ -2,23 +2,7 @@
  * @file ModPE integrated library
  * @author Astro <astr36@naver.com>
  * @version 1.0
- * @license Apache-2.0
- */
-
-/*
- *  Copyright 2016 Astro
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
-limitations under the License.
+ * @license LGPL-3.0
  */
 
 /**
@@ -109,7 +93,7 @@ let me = this.me || {};
         DEVICE_VERSION = Build_.VERSION.RELEASE,
         TRANSLATION_TEXT = "Cannot connect to the server.\n- 서버 오류. 이 오류를 발견한다면 즉시 개발자에게 알려주세요.\n\nCan not find player.\n- 맵 안에서만 사용 가능한 기능입니다.\n\nCannot find the user.\n- 서버에 올바르지 않은 계정 아이디가 입력되었습니다.\n\nIncompatible version. (Library version ≥ {version})\n- 라이브러리의 버전이 호환되지 않습니다. 최신 버전으로 업데이트해주세요.\n\nInvalid format.\n- 유효하지 않은 형식입니다.\n    ID & Password: 4~12자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    Name: 1~20자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    E-mail: 네이버 E-mail만 사용 가능합니다.\n\nInvalid number.\n- 유효하지 않은 숫자입니다. 정수를 입력해주세요.\n\nInvalid parameters.\n- 스크립트 오류. 해당 스크립트 개발자에게 문의하세요.\n\nInvalid version format.\n- 유효하지 않은 버전 형식입니다. 1.0과 같은 형식으로 입력해주세요.\n\nNo Internet.\n- 인터넷에 연결해주세요.\n\nTampered script.\n- 무단수정된 스크립트\n\nThe password is incorrect.\n- 비밀번호가 올바르지 않습니다.\n\nThis e-mail is already used.\n-이미 사용중인 E-mail입니다. 다른 E-mail를 입력하세요.\n\nThis ID is already used.\n- 이미 사용중인 아이디입니다. 다른 아이디를 입력하세요.\n\nThis ID is not accepted.\n- 아이디가 아직 승인되지 않았습니다. 개발자가 아이디를 사용 허가할 때까지 기다려주세요.\n\nThis ID is not signed up the server.\n- 서버에 가입하지 않은 아이디입니다. 서버에 가입해주세요.",
         SHARE_TEXT = "Hello world",
-        LICENSE_TEXT = "Copyright 2016 Astro\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.\n\n";
+        LICENSE_TEXT = "AstroLibrary is licensed under the GNU Lesser General Public License, Version 3 (LGPL-3.0).";
 
     let hasLevel = false,
         isDebugMode = true,

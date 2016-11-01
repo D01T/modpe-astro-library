@@ -1134,7 +1134,7 @@ let me = this.me || {};
 
     UserServer.prototype.send = function (str) {
         let thiz = this,
-            account = thiz._account,
+            account = this._account,
             receivers = this._receivers;
         if (account instanceof Account && account.isAvailable()) {
             new Thread_({

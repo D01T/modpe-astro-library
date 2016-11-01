@@ -774,9 +774,10 @@ let me = this.me || {};
      */
     Account.prototype.addFriend = function (id, response) {
         let friends = this._friends;
+        id = id + "";
         if (friends.indexOf(id) < 0) {
             friends.push(id);
-            this.modifyData("friends", friends.join(","), response);
+            this.modifyData("friends", encodeURIComponent(JSON.stringify(friends)), response);
         }
         return this;
     };
@@ -945,7 +946,16 @@ let me = this.me || {};
                         let arr = str.split("#");
                         thiz._userId = arr[1];
                         thiz.getDataFromServer("name", (code, str) => code === Account.GET_SUCCESS && (thiz._name = str));
-                        thiz.getDataFromServer("friends", (code, str) => code === Account.GET_SUCCESS && (thiz._friends = (str.indexOf(",") >= 0 ? str.toString().split(",") : (str ? [str] : []))));
+                        thiz.getDataFromServer("friends", (code, str) => {
+                            if (code === Account.GET_SUCCESS) {
+                                str = str + "";
+                                if (typeof str === "string") {
+                                    thiz._friends = JSON.parse(decodeURIComponent(str));
+                                } else {
+                                    thiz._friends = [];
+                                }
+                            }
+                        });
                         thiz.getDataFromServer("email", (code, str) => {
                             if (code === Account.GET_SUCCESS) {
                                 thiz._email = str;
@@ -1071,10 +1081,11 @@ let me = this.me || {};
      * @param {Function} [response=function(code){}] Callback to be invoked when you connected the server
      */
     Account.prototype.removeFriend = function (id, response) {
-        let friends = this._friends;
-        if (friends.indexOf(id) >= 0) {
-            friends.splice(friends.indexOf(id), 1);
-            this.modifyData("friends", friends.join(","), response);
+        let friends = this._friends,
+            index = friends.indexOf(id + "");
+        if (index >= 0) {
+            friends.splice(index, 1);
+            this.modifyData("friends", encodeURIComponent(JSON.stringify(friends)), response);
         }
         return this;
     };
@@ -3773,7 +3784,7 @@ let me = this.me || {};
                                                 progressWindow.dismiss();
                                             });
                                         })
-                                        .setPadding(0,0,0,0)
+                                        .setPadding(0, 0, 0, 0)
                                         .show())
                                     .setGravity(Gravity_.CENTER | Gravity_.LEFT)
                                     .setOrientation(0)

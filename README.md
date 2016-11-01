@@ -1,4 +1,5 @@
 # AstroLibrary
+![logo](https://github.com/Astro36/AstroLibrary/blob/master/res/img_astro_library.png)
 ModPE integrated library
 
 ## Introduction

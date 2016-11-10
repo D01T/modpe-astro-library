@@ -69,7 +69,9 @@ let me = this.me || {};
         DatagramPacket_ = java.net.DatagramPacket,
         InetSocketAddress_ = java.net.InetSocketAddress,
         URL_ = java.net.URL,
+        ByteBuffer_ = java.nio.ByteBuffer,
         MessageDigest_ = java.security.MessageDigest,
+        ZipInputStream_ = java.util.zip.ZipInputStream,
         ScriptManager_ = net.zhuoweizhang.mcpelauncher.ScriptManager,
         HttpGet_ = org.apache.http.client.methods.HttpGet,
         ScriptableObject_ = org.mozilla.javascript.ScriptableObject,
@@ -1336,6 +1338,29 @@ let me = this.me || {};
         } else {
             return "";
         }
+    };
+
+    /**
+     * Unzips a file.
+     * @since 2016-11-10
+     * @param {String} path File path
+     */
+    File.unzip = function (path) {
+        let file = new File_(path),
+            zipInputStream = new ZipInputStream_(new FileInputStream_(file)),
+            parentPath = file.getParent(),
+            entry;
+        while ((entry = zipInputStream.getNextEntry()) !== null) {
+            let fileOutputStream = new FileOutputStream_(parentPath + entry.getName()),
+                buffer = new ByteBuffer_.allocate(1024).array(),
+                len;
+            while ((len = zipInputStream.read(buffer)) !== -1) {
+                fileOutputStream.write(buffer, 0, len);
+            }
+            zipInputStream.closeEntry();
+            fileOutputStream.close();
+        }
+        zipInputStream.close();
     };
 
     /**

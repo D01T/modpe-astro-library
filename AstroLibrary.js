@@ -84,7 +84,6 @@ let me = this.me || {};
         NAME_CODE = "me_astro_library",
         VERSION = "1.0",
         VERSION_URL = GITHUB_URL + "version.txt",
-        HASH_URL = GITHUB_URL + "sha256.txt",
         ACCOUNT_URL = "http://minedev.dothome.co.kr/deneb/admin.php",
         NOTICE_URL = "http://minedev.dothome.co.kr/deneb/notice.txt",
         DEVELOPER = "Astro",
@@ -98,7 +97,6 @@ let me = this.me || {};
         LICENSE_TEXT = "AstroLibrary is licensed under the GNU Lesser General Public License, Version 3 (LGPL-3.0).";
 
     let hasLevel = false,
-        isDebugMode = true,
         preference,
         scriptChecker,
         verticalWindow,
@@ -1503,14 +1501,19 @@ let me = this.me || {};
      * @returns {Boolean} If the script is modified, returns true
      */
     ScriptChecker.prototype.isModified = function () {
-        let hash = readHtml(this._info.getHashUrl()),
-            iterator = ScriptManager_.enabledScripts.iterator();
-        while (iterator.hasNext()) {
-            if (hash === ScriptChecker.getHash(File.read(CONTEXT.getDir("modpescripts", 0) + "/" + iterator.next()))) {
-                return false;
+        let url = this._info.getHashUrl();
+        if (typeof url === "string") {
+            let hash = readHtml(url),
+                iterator = ScriptManager_.enabledScripts.iterator();
+            while (iterator.hasNext()) {
+                if (hash === ScriptChecker.getHash(File.read(CONTEXT.getDir("modpescripts", 0) + "/" + iterator.next()))) {
+                    return false;
+                }
             }
+            return true;
+        } else {
+            return false;
         }
-        return !isDebugMode;
     };
 
 
@@ -4141,7 +4144,6 @@ let me = this.me || {};
                         notice = readHtml(NOTICE_URL);
                         scriptChecker = new ScriptChecker(new ScriptInfo(NAME, VERSION)
                             .setDeveloper(DEVELOPER)
-                            .setHashUrl(HASH_URL)
                             .setVersionUrl(VERSION_URL));
                         if (!scriptChecker.isLastVersion()) {
                             Toast.show("New update available.");

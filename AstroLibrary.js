@@ -1311,6 +1311,15 @@ let me = this.me || {};
             Toast.show(e);
         }
     };
+    
+    /**
+     * Prevent media scanning on the directory.
+     * @since 2016-12-14
+     * @param {String} path Directory path
+     */
+    File.preventMediaScanning = function (path) {
+        new File_(path + (path.endsWith("/") ? ".nomedia" : "/.nomedia")).createNewFile();
+    };
 
     /**
      * Reads a file and returns the contents of the file.

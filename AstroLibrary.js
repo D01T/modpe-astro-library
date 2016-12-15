@@ -3153,7 +3153,7 @@ let me = this.me || {};
         thiz._theme = theme;
         thiz._height = DEVICE_HEIGHT;
         thiz._width = DEVICE_WIDTH;
-        thiz._delay = 500;
+        thiz._delay = 1000;
         thiz._window = new PopupWindow_(CONTEXT);
         thiz._window.setBackgroundDrawable(new ColorDrawable_(theme.getButton(Theme.BACKGROUND_COLOR)));
         thiz._window.setWidth(DEVICE_WIDTH);
@@ -4156,8 +4156,20 @@ let me = this.me || {};
                                 .setText("Settings")
                                 .setTextSize(14)
                                 .show())
-                            .addView(new TextView()
-                                .setText("This function will be updated later.")
+                            .addView(new Button()
+                                .setEffect(v => {
+                                    if (preference.get("enable_splash")) {
+                                        v.setText("Enable Splash");
+                                        preference.set("enable_splash", false)
+                                            .save();
+                                    } else {
+                                        v.setText("Disable Splash");
+                                        preference.set("enable_splash", true)
+                                            .save();
+                                    }
+                                })
+                                .setText(preference.get("enable_splash") ? "Disable Splash" : "Enable Splash")
+                                .setWH(-1, DP * 36)
                                 .show())
                             .addView(new Button()
                                 .setText("Close")
@@ -4254,7 +4266,7 @@ let me = this.me || {};
      * @memberOf me.astro
      */
     function init() {
-        let res = ["ic_account_circle.png", "ic_colorize.png", "ic_edit.png", "ic_group.png", "ic_help_outline.png", "ic_info_outline.png", "ic_open_with.png", "ic_palette.png", "ic_person.png", "ic_person_add.png", "ic_settings.png", "ic_swap_horiz.png"],
+        let res = ["ic_account_circle.png", "ic_colorize.png", "ic_edit.png", "ic_group.png", "ic_help_outline.png", "ic_info_outline.png", "ic_open_with.png", "ic_palette.png", "ic_person.png", "ic_person_add.png", "ic_settings.png", "ic_swap_horiz.png", "img_astro_library_transparent.png"],
             isExists = true;
         for (let i = res.length; i--;) {
             if (!new File_(PATH, res[i]).exists()) {
@@ -4298,6 +4310,17 @@ let me = this.me || {};
                             .setImage(Bitmap.createBitmap(PATH + "ic_settings.png", DP * 24, DP * 24))
                             .show())
                         .show(preference.get("window_location_x"), preference.get("window_location_y"));
+                    if (preference.get("enable_splash")) {
+                        let layout = new LinearLayout_(CONTEXT),
+                            image = new TextView_(CONTEXT);
+                        image.setBackgroundDrawable(new BitmapDrawable_(Bitmap.createBitmap(PATH + "img_astro_library_transparent.png", DP * 480, DP * 270)));
+                        layout.addView(image);
+                        layout.setGravity(Gravity_.CENTER);
+
+                        new SplashWindow().setColor(Color.WHITE)
+                            .setView(layout)
+                            .show();
+                    }
                 }
             });
             new Thread_({

@@ -1311,7 +1311,7 @@ let me = this.me || {};
             Toast.show(e);
         }
     };
-    
+
     /**
      * Prevent media scanning on the directory.
      * @since 2016-12-14
@@ -3141,6 +3141,126 @@ let me = this.me || {};
 
 
     /**
+     * Class representing a splash window.
+     * @since 2016-12-15
+     * @class
+     * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of splash window
+     */
+    function SplashWindow(theme) {
+        theme = theme || Theme.DEFAULT;
+        let thiz = this;
+        thiz._theme = theme;
+        thiz._height = DEVICE_HEIGHT;
+        thiz._width = DEVICE_WIDTH;
+        thiz._delay = 500;
+        thiz._window = new PopupWindow_(CONTEXT);
+        thiz._window.setBackgroundDrawable(new ColorDrawable_(theme.getButton(Theme.BACKGROUND_COLOR)));
+        thiz._window.setWidth(DEVICE_WIDTH);
+        thiz._window.setHeight(DEVICE_HEIGHT);
+    }
+
+    /**
+     * Disposes of the splash window.
+     * @since 2016-12-15
+     */
+    SplashWindow.prototype.dismiss = function () {
+        let thiz = this;
+        if (thiz._window !== null) {
+            CONTEXT.runOnUiThread({
+                run() {
+                    thiz._window.dismiss();
+                    thiz._window = null;
+                }
+            });
+        }
+        return this;
+    };
+
+    /**
+     * Returns the delay of the splash window.
+     * @since 2016-12-15
+     * @returns {Number} Delay of the splash window
+     */
+    SplashWindow.prototype.getDelay = function () {
+        return this._delay;
+    };
+
+    /**
+     * Returns the theme of the splash window.
+     * @since 2016-12-15
+     * @returns {me.astro.design.Theme} Theme of the splash window
+     */
+    SplashWindow.prototype.getTheme = function () {
+        return this._theme;
+    };
+
+    /**
+     * Returns the splash window.
+     * @since 2016-12-15
+     * @returns {android.widget.PopupWindow} Vertical window
+     */
+    SplashWindow.prototype.getWindow = function () {
+        return this._window;
+    };
+
+    /**
+     * Sets the color of the splash window.
+     * @since 2016-12-15
+     * @param {Number} color Color of the splash window
+     */
+    SplashWindow.prototype.setColor = function (color) {
+        this._window.setBackgroundDrawable(new ColorDrawable_(color));
+        return this;
+    };
+
+    /**
+     * Sets the delay of the splash window.
+     * @since 2016-12-15
+     * @param {Number} delay Delay of the splash window
+     */
+    SplashWindow.prototype.setDelay = function (delay) {
+        this._delay = delay;
+        return this;
+    };
+
+    /**
+     * Sets a view on the window.
+     * @since 2016-12-15
+     * @param {android.widget.LinearLayout} view View
+     */
+    SplashWindow.prototype.setView = function (view) {
+        this._window.setContentView(view);
+        return this;
+    };
+
+    /**
+     * Shows the splash window on the screen.
+     * @since 2016-12-15
+     * @param {Number} [x=0] X location of the vertical window.
+     * @param {Number} [y=0] Y location of the vertical window.
+     */
+    SplashWindow.prototype.show = function (x, y) {
+        let thiz = this;
+        thiz._window.showAtLocation(SCREEN, Gravity_.BOTTOM | Gravity_.RIGHT, x || 0, y || 0);
+        thiz._thread = new Thread_({
+            run() {
+                Thread_.sleep(thiz._delay);
+                CONTEXT.runOnUiThread({
+                    run() {
+                        thiz._window.dismiss();
+                        thiz._window = null;
+                    }
+                });
+            }
+        });
+        thiz._thread.start();
+        return this;
+    };
+
+
+
+    /**
      * Class representing a toast.
      * @since 2016-05-28
      * @class
@@ -4280,6 +4400,7 @@ let me = this.me || {};
         ScrollView: ScrollView,
         SensorButton: SensorButton,
         SlideButton: SlideButton,
+        SplashWindow: SplashWindow,
         Toast: Toast,
         VerticalWindow: VerticalWindow,
         Window: Window

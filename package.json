@@ -3,7 +3,7 @@
     "version": "1.0",
     "description": "ModPE integrated library",
     "homepage": "http://minedev.dothome.co.kr/docs/lib_astro/1.0/index.html",
-    "license": "Apache-2.0",
+    "license": "LGPL-3.0",
     "author": "Astro <astr36@naver.com>",
     "repository": {
         "type": "git",

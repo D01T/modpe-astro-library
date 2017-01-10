@@ -37,6 +37,10 @@ let me = this.me || {};
         Uri_ = android.net.Uri,
         Build_ = android.os.Build,
         StrictMode_ = android.os.StrictMode,
+        Allocation_ = android.renderscript.Allocation,
+        Element_ = android.renderscript.Element,
+        RenderScript_ = android.renderscript.RenderScript,
+        ScriptIntrinsicBlur_ = android.renderscript.ScriptIntrinsicBlur,
         Patterns_ = android.util.Patterns,
         Gravity_ = android.view.Gravity,
         MotionEvent_ = android.view.MotionEvent,
@@ -118,6 +122,31 @@ let me = this.me || {};
      * @memberOf me.astro.design
      */
     function Bitmap() {}
+
+    /**
+     * Creates a blurred bitmap.
+     * @since 2017-01-10
+     * @param {android.graphics.Bitmap} bitmap Original bitmap
+     * @param {Number} radius Blurred radius
+     * @returns {android.graphics.Bitmap} Blurred bitmap
+     */
+    Bitmap.blur = function (bitmap, radius) {
+        if (Build_.VERSION.SDK_INT >= Build_.VERSION_CODES.JELLY_BEAN_MR1) {
+            let renderScript = RenderScript_.create(CONTEXT),
+                input = 
+Allocation_.createFromBitmap(renderScript, bitmap),
+                output = 
+Allocation_.createTyped(renderScript, input.getType()),
+                script = ScriptIntrinsicBlur_.create(renderScript,
+ Element_.U8_4(renderScript));
+            script.setRadius(radius);
+            script.setInput(input);
+            script.forEach(output);
+            output.copyTo(bitmap);
+            return bitmap
+        }
+        return bitmap;
+    }
 
     /**
      * Creates a bitmap from a image.

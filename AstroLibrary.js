@@ -133,20 +133,17 @@ let me = this.me || {};
     Bitmap.blur = function (bitmap, radius) {
         if (Build_.VERSION.SDK_INT >= Build_.VERSION_CODES.JELLY_BEAN_MR1) {
             let renderScript = RenderScript_.create(CONTEXT),
-                input = 
-Allocation_.createFromBitmap(renderScript, bitmap),
-                output = 
-Allocation_.createTyped(renderScript, input.getType()),
-                script = ScriptIntrinsicBlur_.create(renderScript,
- Element_.U8_4(renderScript));
+                input = Allocation_.createFromBitmap(renderScript, bitmap),
+                output = Allocation_.createTyped(renderScript, input.getType()),
+                script = ScriptIntrinsicBlur_.create(renderScript, Element_.U8_4(renderScript));
             script.setRadius(radius);
             script.setInput(input);
             script.forEach(output);
             output.copyTo(bitmap);
-            return bitmap
+            return bitmap;
         }
         return bitmap;
-    }
+    };
 
     /**
      * Creates a bitmap from a image.
@@ -4472,6 +4469,6 @@ Allocation_.createTyped(renderScript, input.getType()),
             .save();
     };
 
-    init();
-
 })(this, (typeof me.astro === "object" ? me.astro : (me.astro = {})));
+
+me.astro.init();

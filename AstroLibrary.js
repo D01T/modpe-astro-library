@@ -1,7 +1,7 @@
 /**
  * @file ModPE integrated library
  * @author Astro <astr36@naver.com>
- * @version 1.0
+ * @version 1.1
  * @license LGPL-3.0
  */
 

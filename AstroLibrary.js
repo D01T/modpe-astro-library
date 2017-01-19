@@ -1323,16 +1323,36 @@ let me = this.me || {};
      * @since 2016-07-08
      * @param {String} path File path
      * @param {String} url URL
+     * @param {Function} [response] Callback to be invoked when finished downloading the file.
      */
-    File.download = function (path, url) {
+    File.download = function (path, url, response) {
         try {
             let file = new File_(path),
                 filename = file.getName(),
-                downloadManager = new DownloadManager_.Request(new Uri_.parse(url));
-            downloadManager.setTitle(filename);
-            downloadManager.setNotificationVisibility(0);
-            downloadManager.setDestinationInExternalPublicDir(file.getParent().replace("/sdcard", ""), filename);
-            CONTEXT.getSystemService(Context_.DOWNLOAD_SERVICE).enqueue(downloadManager);
+                downloadManager = CONTEXT.getSystemService(Context_.DOWNLOAD_SERVICE),
+                request = new DownloadManager_.Request(new Uri_.parse(url));
+            request.setTitle(filename);
+            request.setNotificationVisibility(0);
+            request.setDestinationInExternalPublicDir(file.getParent().replace("/sdcard", ""), filename);
+            downloadManager.enqueue(request);
+            if (typeof response === "function") {
+                let query = new DownloadManager_.Query();
+                let cursor = downloadManager.query(query);
+                print(cursor.getCount())
+                if (cursor.getCount() > 0) {
+                    cursor.moveToLast();
+                    new Thread_({
+                        run() {
+                            let index = cursor.getColumnIndex(DownloadManager_.COLUMN_STATUS);
+                            while (cursor.getInt(index) !== DownloadManager_.STATUS_SUCCESSFUL) {
+                                Thread_.sleep(1000);
+                            }
+                            cursor.close();
+                            response();
+                        }
+                    }).start();
+                }
+            }
         } catch (e) {
             Toast.show(e);
         }

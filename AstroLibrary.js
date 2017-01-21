@@ -1339,11 +1339,11 @@ let me = this.me || {};
                     new Thread_({
                         run() {
                             let index = cursor.getColumnIndex(DownloadManager_.COLUMN_STATUS);
-                            while (cursor.getInt(index) !== DownloadManager_.STATUS_SUCCESSFUL) {
+                            while (cursor.getInt(index) !== DownloadManager_.STATUS_SUCCESSFUL && cursor.getInt(index) !== DownloadManager_.STATUS_FAILED) {
                                 Thread_.sleep(1000);
                             }
                             cursor.close();
-                            response();
+                            response(cursor.getInt(index));
                         }
                     }).start();
                 }

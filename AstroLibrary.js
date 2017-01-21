@@ -1338,7 +1338,6 @@ let me = this.me || {};
             if (typeof response === "function") {
                 let query = new DownloadManager_.Query();
                 let cursor = downloadManager.query(query);
-                print(cursor.getCount())
                 if (cursor.getCount() > 0) {
                     cursor.moveToLast();
                     new Thread_({

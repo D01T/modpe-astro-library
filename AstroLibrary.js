@@ -1,7 +1,7 @@
 /**
  * @file ModPE integrated library
  * @author Astro <astr36@naver.com>
- * @version 1.1
+ * @version 1.2
  * @license LGPL-3.0
  */
 
@@ -86,7 +86,7 @@ let me = this.me || {};
         GITHUB_URL = "https://github.com/Astro36/AstroLibrary/raw/master/",
         NAME = "Astro Library",
         NAME_CODE = "me_astro_library",
-        VERSION = "1.0",
+        VERSION = "1.2",
         VERSION_URL = GITHUB_URL + "version.txt",
         ACCOUNT_URL = "http://minedev.dothome.co.kr/deneb/admin.php",
         NOTICE_URL = "http://minedev.dothome.co.kr/deneb/notice.txt",

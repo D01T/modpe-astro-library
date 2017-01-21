@@ -1232,21 +1232,17 @@ let me = this.me || {};
     AddonManager.prototype.download = function (path, url, downloadType) {
         let thiz = this,
             file = new File_(path.toString());
-        if (!file.exists()) {
-            File.download(path, url);
+        if (file.exists()) {
+            file.delete();
         }
-        if (typeof downloadType === "undefined" || downloadType === 0) {
-            new Thread_({
-                run() {
-                    while (true) {
-                        Thread_.sleep(500);
-                        if (file.exists()) {
-                            thiz.install(path);
-                            break;
-                        }
-                    }
+        if (typeof downloadType === "undefined" || downloadType === AddonManager.DOWNLOAD_INSTALL) {
+            File.download(path, url, () => {
+                if (file.exists()) {
+                    thiz.install(path);
                 }
-            }).start();
+            });
+        } else {
+            File.download(path, url);
         }
         return this;
     };

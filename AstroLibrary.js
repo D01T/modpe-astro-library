@@ -1330,23 +1330,31 @@ let me = this.me || {};
             request.setTitle(filename);
             request.setNotificationVisibility(0);
             request.setDestinationInExternalPublicDir(file.getParent().replace("/sdcard", ""), filename);
-            downloadManager.enqueue(request);
+            let id = downloadManager.enqueue(request);
             if (typeof response === "function") {
-                let query = new DownloadManager_.Query();
-                let cursor = downloadManager.query(query);
-                if (cursor.getCount() > 0) {
-                    cursor.moveToLast();
-                    new Thread_({
-                        run() {
-                            let index = cursor.getColumnIndex(DownloadManager_.COLUMN_STATUS);
-                            while (cursor.getInt(index) !== DownloadManager_.STATUS_SUCCESSFUL && cursor.getInt(index) !== DownloadManager_.STATUS_FAILED) {
-                                Thread_.sleep(1000);
+                let query = new DownloadManager_.Query(),
+                    cursor = downloadManager.query(query),
+                    idIndex = cursor.getColumnIndex(DownloadManager_.COLUMN_ID),
+                    statusIndex = cursor.getColumnIndex(DownloadManager_.COLUMN_STATUS);
+                new Thread_({
+                    run() {
+                        while (true) {
+                            Thread_.sleep(1000);
+                            cursor = downloadManager.query(query);
+                            for (let i = 0; i < cursor.getCount(); i++) {
+                                cursor.moveToPosition(i);
+                                if (cursor.getLong(idIndex) === id) {
+                                    break;
+                                }
                             }
-                            cursor.close();
-                            response(cursor.getInt(index));
+                            if (cursor.getInt(statusIndex) === DownloadManager_.STATUS_SUCCESSFUL || cursor.getInt(statusIndex) === DownloadManager_.STATUS_FAILED) {
+                                break;
+                            }
                         }
-                    }).start();
-                }
+                        response(cursor.getInt(statusIndex));
+                        cursor.close();
+                    }
+                }).start();
             }
         } catch (e) {
             Toast.show(e);

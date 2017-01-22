@@ -3697,6 +3697,16 @@ let me = this.me || {};
 
 
     /**
+     * Returns the resource path.
+     * @since 2017-01-22
+     * @memberOf me.astro
+     * @returns {String} Resource path
+     */
+    const getPath = () => PATH;
+
+
+
+    /**
      * Returns the account instance.
      * @since 2016-07-05
      * @memberOf me.astro
@@ -4452,6 +4462,7 @@ let me = this.me || {};
 
 
     astro.getContext = getContext;
+    astro.getPath = getPath;
     astro.getUser = getUser;
     astro.getWindow = getWindow;
     astro.init = init;

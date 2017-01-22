@@ -255,6 +255,38 @@ let me = this.me || {};
 
 
     /**
+     * Class representing color utils.
+     * @since 2017-01-22
+     * @class
+     * @memberOf me.astro.design
+     */
+    function ColorUtils() {}
+
+    /**
+     * Blends the colors
+     * @since 2017-01-22
+     * @param {Array.<Number>} colors Colors
+     * @returns {Number} color Color
+     */
+    ColorUtils.blendColors = function (colors) {
+        let len = colors.length,
+            r = 0,
+            g = 0,
+            b = 0,
+            a = 0;
+        for (let i = len; i--;) {
+            let color = colors[i];
+            r += Color_.red(color);
+            g += Color_.green(color);
+            b += Color_.blue(color);
+            a += Color_.alpha(color);
+        }
+        return Color_.argb(Math.floor(a / len), Math.floor(r / len), Math.floor(g / len), Math.floor(b / len));
+    };
+
+
+
+    /**
      * Class representing a drawable.
      * @since 2016-05-03
      * @class
@@ -4469,6 +4501,7 @@ let me = this.me || {};
     astro.design = {
         Bitmap: Bitmap,
         Color: Color,
+        ColorUtils: ColorUtils,
         Drawable: Drawable,
         ShadowDrawable: ShadowDrawable,
         Shape: Shape,

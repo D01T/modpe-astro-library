@@ -158,6 +158,17 @@ let me = this.me || {};
     };
 
     /**
+     * Creates a bitmap from a Base64 string.
+     * @since 2017-01-22
+     * @param {String} res Base64 string
+     * @returns {android.graphics.Bitmap} Bitmap
+     */
+    Bitmap.decodeBase64 = function (res) {
+        let bytes = Base64_.decode(res, 0);
+        return BitmapFactory_.decodeByteArray(bytes, 0, bytes.length);
+    };
+
+    /**
      * Resizes a bitmap.
      * @since 2016-05-03
      * @param {android.graphics.Bitmap} bitmap Bitmap to be resized

@@ -1373,7 +1373,7 @@ let me = this.me || {};
     };
 
     /**
-     * Prevent media scanning on the directory.
+     * Prevents media scanning on the directory.
      * @since 2016-12-14
      * @param {String} path Directory path
      */
@@ -3684,6 +3684,16 @@ let me = this.me || {};
 
 
     /**
+     * Returns the context.
+     * @since 2017-01-22
+     * @memberOf me.astro
+     * @returns {android.content.Context} Context
+     */
+    const getContext = () => CONTEXT;
+
+
+
+    /**
      * Returns the account instance.
      * @since 2016-07-05
      * @memberOf me.astro
@@ -4438,6 +4448,7 @@ let me = this.me || {};
 
 
 
+    astro.getContext = getContext;
     astro.getUser = getUser;
     astro.getWindow = getWindow;
     astro.init = init;

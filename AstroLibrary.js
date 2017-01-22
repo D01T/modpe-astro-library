@@ -1901,7 +1901,7 @@ let me = this.me || {};
      * @param {me.astro.design.Theme} theme Theme to be set at the view
      */
     ViewUtils.setTheme = function (view, theme) {
-        if ("setTag" in view) {
+        if ("setTag" in view && theme instanceof Theme) {
             view.setTag("theme:" + JSON.stringify(theme.getThemeObject()));
         }
     };
@@ -2030,6 +2030,7 @@ let me = this.me || {};
     };
 
     TextView.prototype.show = function () {
+        ViewUtils.setTheme(this._view, this._theme);
         return this._view;
     };
 
@@ -2690,8 +2691,11 @@ let me = this.me || {};
         if (this._layout.getOrientation() === 1 && (typeof canScroll === "undefined" || canScroll)) {
             let scrollView = new ScrollView(this._theme);
             scrollView.addView(this._layout);
-            return scrollView.show();
+            scrollView = scrollView.show();
+            ViewUtils.setTheme(scrollView, this._theme);
+            return scrollView;
         } else {
+            ViewUtils.setTheme(this._layout, this._theme);
             return this._layout;
         }
     };
@@ -3139,6 +3143,7 @@ let me = this.me || {};
         mainLayout.addView(this._scrollView);
         mainLayout.addView(this._scroller);
         mainLayout.setLayoutParams(new LinearLayout_.LayoutParams(this._width, -1));
+        ViewUtils.setTheme(mainLayout, this._theme);
         return mainLayout;
     };
 
@@ -3481,10 +3486,10 @@ let me = this.me || {};
      */
     VerticalWindow.prototype.addView = function (view) {
         let thiz = this,
-            theme = ("getTheme" in view) ? view.getTheme() : thiz._theme,
             layouts = thiz._layouts;
         if (typeof layouts[0] === "undefined" || layouts[layouts.length - 1].getChildCount() >= 3) {
-            let slideButton = new SlideButton(Shape.CIRCLE, theme);
+            let theme = ViewUtils.getTheme(view) || thiz._theme,
+                slideButton = new SlideButton(Shape.CIRCLE, theme);
             slideButton.getView().setId(layouts.length);
             slideButton.setEffect((view, direction) => {
                     let id = 0;
@@ -3500,8 +3505,8 @@ let me = this.me || {};
                         layouts[id].setVisibility(View_.VISIBLE);
                     }
                 })
-                .setEffectImage(Bitmap.createBitmap(PATH + "ic_swap_horiz.png", DP * 24, DP * 24), theme.getButton(Theme.EFFECT_COLOR))
-                .setImage(Bitmap.createBitmap(PATH + "ic_swap_horiz.png", DP * 24, DP * 24), theme.getButton(Theme.BACKGROUND_COLOR));
+                .setEffectImage(Bitmap.createBitmap(PATH + "ic_swap_horiz.png", DP * 24, DP * 24), ColorUtils.blendColors([theme.getButton(Theme.EFFECT_COLOR), thiz._theme.getButton(Theme.EFFECT_COLOR)]))
+                .setImage(Bitmap.createBitmap(PATH + "ic_swap_horiz.png", DP * 24, DP * 24), ColorUtils.blendColors([theme.getButton(Theme.BACKGROUND_COLOR), thiz._theme.getButton(Theme.BACKGROUND_COLOR)]));
             thiz._slides.push(slideButton);
             let layout = new LinearLayout_(CONTEXT);
             layout.addView(view, 0);
@@ -3513,6 +3518,10 @@ let me = this.me || {};
             thiz._layouts.push(layout);
             thiz._windowLayout.addView(layout);
         } else {
+            let theme0 = ViewUtils.getTheme(layouts[layouts.length - 1].getChildAt(0)) || thiz._theme,
+                theme1 = ViewUtils.getTheme(view) || thiz._theme;
+            thiz._slides[thiz._slides.length - 1].setEffectImage(Bitmap.createBitmap(PATH + "ic_swap_horiz.png", DP * 24, DP * 24), ColorUtils.blendColors([theme0.getButton(Theme.EFFECT_COLOR), theme1.getButton(Theme.EFFECT_COLOR), thiz._theme.getButton(Theme.EFFECT_COLOR)]))
+                .setImage(Bitmap.createBitmap(PATH + "ic_swap_horiz.png", DP * 24, DP * 24), ColorUtils.blendColors([theme0.getButton(Theme.BACKGROUND_COLOR), theme1.getButton(Theme.BACKGROUND_COLOR), thiz._theme.getButton(Theme.BACKGROUND_COLOR)]));
             layouts[layouts.length - 1].addView(view, 1);
         }
         return this;

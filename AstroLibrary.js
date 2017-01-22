@@ -41,6 +41,7 @@ let me = this.me || {};
         Element_ = android.renderscript.Element,
         RenderScript_ = android.renderscript.RenderScript,
         ScriptIntrinsicBlur_ = android.renderscript.ScriptIntrinsicBlur,
+        Base64_ = android.util.Base64,
         Patterns_ = android.util.Patterns,
         Gravity_ = android.view.Gravity,
         MotionEvent_ = android.view.MotionEvent,

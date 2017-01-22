@@ -2546,8 +2546,10 @@ let me = this.me || {};
      * @since 2016-07-14
      * @class
      * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of layout
      */
-    function Layout() {
+    function Layout(theme) {
+        this._theme = theme || Theme.DEFAULT;
         this._layout = new LinearLayout_(CONTEXT);
         this._layout.setOrientation(1);
     }
@@ -2598,7 +2600,7 @@ let me = this.me || {};
      */
     Layout.prototype.show = function (canScroll) {
         if (this._layout.getOrientation() === 1 && (typeof canScroll === "undefined" || canScroll)) {
-            let scrollView = new ScrollView();
+            let scrollView = new ScrollView(this._theme);
             scrollView.addView(this._layout);
             return scrollView.show();
         } else {

@@ -23,6 +23,7 @@ let me = this.me || {};
         PackageManager_ = android.content.pm.PackageManager,
         Bitmap_ = android.graphics.Bitmap,
         BitmapFactory_ = android.graphics.BitmapFactory,
+        Color_ = android.graphics.Color,
         BitmapDrawable_ = android.graphics.drawable.BitmapDrawable,
         ColorDrawable_ = android.graphics.drawable.ColorDrawable,
         GradientDrawable_ = android.graphics.drawable.GradientDrawable,
@@ -1849,6 +1850,44 @@ let me = this.me || {};
      */
     View.prototype.show = function () {
         return this._view;
+    };
+
+
+
+    /**
+     * Class representing view utils.
+     * @since 2017-01-23
+     * @class
+     * @memberOf me.astro.widget
+     */
+    function ViewUtils() {}
+
+    /**
+     * Returns the theme from the view.
+     * @since 2016-01-23
+     * @param {android.view.View} view View
+     * @returns {?me.astro.design.Theme} Theme of the view
+     */
+    ViewUtils.getTheme = function (view) {
+        if ("getTag" in view) {
+            let tag = view.getTag();
+            if (tag.contains("theme:")) {
+                return new Theme(JSON.parse(tag.replace("theme:", "").toString()));
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Sets the theme at the view.
+     * @since 2016-01-23
+     * @param {android.view.View} view View
+     * @param {me.astro.design.Theme} theme Theme to be set at the view
+     */
+    ViewUtils.setTheme = function (view, theme) {
+        if ("setTag" in view) {
+            view.setTag("theme:" + JSON.stringify(theme.getThemeObject()));
+        }
     };
 
 
@@ -4527,6 +4566,7 @@ let me = this.me || {};
     };
     astro.widget = {
         View: View,
+        ViewUtils: ViewUtils,
         TextView: TextView,
         Button: Button,
         EditText: EditText,

@@ -656,7 +656,7 @@ let me = this.me || {};
                         dataOutputStream.writeBytes("--*****\r\n");
                         dataOutputStream.writeBytes("Content-Disposition: form-data;name=\"uploaded_file\";filename=\"" + path + "\"\r\n");
                         dataOutputStream.writeBytes("\r\n");
-                        buffer = new Array_.newInstance(Byte_.TYPE, bufferSize = Math.min(fileInputStream.available(), 1048576));
+                        buffer = Array_.newInstance(Byte_.TYPE, bufferSize = Math.min(fileInputStream.available(), 1048576));
                         fileInputStream.read(buffer, 0, bufferSize);
                         dataOutputStream.write(buffer, 0, bufferSize);
                         dataOutputStream.writeBytes("\r\n");

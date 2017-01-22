@@ -431,6 +431,22 @@ let me = this.me || {};
     };
 
     /**
+     * Returns the theme object.
+     * @since 2017-01-23
+     * @returns {Object} Theme object
+     */
+    Theme.prototype.getThemeObject = function () {
+        return {
+            primary: this._colorPrimary,
+            primaryDark: this._colorPrimaryDark,
+            accent: this._colorAccent,
+            textBlack: this._colorTextBlack,
+            textWhite: this._colorTextWhite,
+            textGrey: this._colorTextGrey
+        };
+    };
+
+    /**
      * Returns a color of Button theme.
      * @since 2016-05-28
      * @param {Number} type Type of color

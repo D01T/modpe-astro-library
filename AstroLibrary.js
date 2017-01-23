@@ -267,7 +267,7 @@ let me = this.me || {};
      * Blends the colors
      * @since 2017-01-22
      * @param {Array.<Number>} colors Colors
-     * @returns {Number} color Color
+     * @returns {Number} Color
      */
     ColorUtils.blendColors = function (colors) {
         let len = colors.length,

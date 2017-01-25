@@ -37,6 +37,7 @@ let me = this.me || {};
         AndroidHttpClient_ = android.net.http.AndroidHttpClient,
         Uri_ = android.net.Uri,
         Build_ = android.os.Build,
+        Environment_ = android.os.Environment,
         StrictMode_ = android.os.StrictMode,
         Allocation_ = android.renderscript.Allocation,
         Element_ = android.renderscript.Element,
@@ -93,7 +94,7 @@ let me = this.me || {};
         ACCOUNT_URL = "http://minedev.dothome.co.kr/deneb/admin.php",
         NOTICE_URL = "http://minedev.dothome.co.kr/deneb/notice.txt",
         DEVELOPER = "Astro",
-        PATH = "/sdcard/games/me.astro/library/",
+        PATH = Environment_.getExternalStroageDirectory().getAbsolutePath() + "/games/me.astro/library/",
         DEVICE_WIDTH = CONTEXT.getScreenWidth(),
         DEVICE_HEIGHT = CONTEXT.getScreenHeight(),
         DEVICE_MODEL = Build_.MODEL,
@@ -1390,7 +1391,7 @@ let me = this.me || {};
                 request = new DownloadManager_.Request(new Uri_.parse(url));
             request.setTitle(filename);
             request.setNotificationVisibility(0);
-            request.setDestinationInExternalPublicDir(file.getParent().replace("/sdcard", ""), filename);
+            request.setDestinationInExternalPublicDir(file.getParent().replace(Environment_.getExternalStroageDirectory().getAbsolutePath(), ""), filename);
             let id = downloadManager.enqueue(request);
             if (typeof response === "function") {
                 let query = new DownloadManager_.Query(),

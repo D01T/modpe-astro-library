@@ -3635,7 +3635,8 @@ let me = this.me || {};
     VerticalWindow.prototype.setColor = function (color) {
         this._sensor.setImage(Bitmap.createBitmap(PATH + "ic_open_with.png", DP * 24, DP * 24), color);
         for (let i = this._slides.length; i--;) {
-            this._slides[i].setImage(Bitmap.createBitmap(PATH + "ic_swap_horiz.png", DP * 24, DP * 24), color);
+            this._slides[i].setEffectImage(Bitmap.createBitmap(PATH + "ic_swap_horiz.png", DP * 24, DP * 24), color)
+                .setImage(Bitmap.createBitmap(PATH + "ic_swap_horiz.png", DP * 24, DP * 24), color);
         }
         return this;
     };

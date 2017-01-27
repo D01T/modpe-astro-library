@@ -260,163 +260,6 @@ let me = this.me || {};
 
 
     /**
-     * Class representing a color picker.
-     * @since 2017-01-26
-     * @class
-     * @memberOf me.astro.design
-     * @param {Number} [r=255] Red
-     * @param {Number} [g=0] Blue
-     * @param {Number} [b=0] Green
-     * @param {Function} [func=function(){}] Callback to be invoked when color was changed
-     */
-    function ColorPicker(r, g, b, func) {
-        r = r || 255;
-        g = g || 0;
-        b = b || 0;
-        func = func || (() => {});
-        let controller = this._controller = new TextView_(CONTEXT),
-            picker = this._picker = new TextView_(CONTEXT),
-            paint = new Paint_(),
-            bitmapC = Bitmap_.createBitmap(40, 240, Bitmap_.Config.ARGB_8888),
-            bitmapP = Bitmap_.createBitmap(240, 240, Bitmap_.Config.ARGB_8888),
-            canvasC = new Canvas_(bitmapC),
-            canvasP = new Canvas_(bitmapP),
-            pickerX = 120,
-            pickerY = 1;
-
-        paint.setShader(new LinearGradient_(0, 0, 0, 40, Color_.rgb(255, 0, 0), Color_.rgb(255, 255, 0), Shader_.TileMode.CLAMP));
-        canvasC.drawRect(0, 0, 40, 40, paint);
-        paint.setShader(new LinearGradient_(0, 40, 0, 80, Color_.rgb(255, 255, 0), Color_.rgb(0, 255, 0), Shader_.TileMode.CLAMP));
-        canvasC.drawRect(0, 40, 40, 80, paint);
-        paint.setShader(new LinearGradient_(0, 80, 0, 120, Color_.rgb(0, 255, 0), Color_.rgb(0, 255, 255), Shader_.TileMode.CLAMP));
-        canvasC.drawRect(0, 80, 40, 120, paint);
-        paint.setShader(new LinearGradient_(0, 120, 0, 160, Color_.rgb(0, 255, 255), Color_.rgb(0, 0, 255), Shader_.TileMode.CLAMP));
-        canvasC.drawRect(0, 120, 40, 160, paint);
-        paint.setShader(new LinearGradient_(0, 160, 0, 200, Color_.rgb(0, 0, 255), Color_.rgb(255, 0, 255), Shader_.TileMode.CLAMP));
-        canvasC.drawRect(0, 160, 40, 200, paint);
-        paint.setShader(new LinearGradient_(0, 200, 0, 240, Color_.rgb(255, 0, 255), Color_.rgb(255, 0, 0), Shader_.TileMode.CLAMP));
-        canvasC.drawRect(0, 200, 40, 240, paint);
-        paint.setShader(new LinearGradient_(240, 0, 0, 0, Color_.rgb(r, g, b), Color_.WHITE, Shader_.TileMode.CLAMP));
-        canvasP.drawRect(0, 0, 240, 240, paint);
-        paint.setShader(new LinearGradient_(0, 0, 0, 240, Color_.TRANSPARENT, Color_.BLACK, Shader_.TileMode.CLAMP));
-        canvasP.drawRect(0, 0, 240, 240, paint);
-
-        controller.setBackgroundDrawable(new BitmapDrawable_(bitmapC));
-        controller.setOnTouchListener(new View_.OnTouchListener({
-            onTouch(view, event) {
-                let action = event.getAction();
-                if (action === MotionEvent_.ACTION_DOWN || action === MotionEvent_.ACTION_MOVE || action === MotionEvent_.ACTION_UP) {
-                    let x = Math.floor(event.getX() / DP),
-                        y = Math.floor(event.getY() / DP);
-                    if (x > 0 && x < 40 && y > 0 && y < 240) {
-                        paint.setShader(new LinearGradient_(240, 0, 0, 0, bitmapC.getPixel(0, y), Color_.WHITE, Shader_.TileMode.CLAMP));
-                        canvasP.drawRect(0, 0, 240, 240, paint);
-                        paint.setShader(new LinearGradient_(0, 0, 0, 240, Color_.TRANSPARENT, Color_.BLACK, Shader_.TileMode.CLAMP));
-                        canvasP.drawRect(0, 0, 240, 240, paint);
-                        picker.setBackgroundDrawable(new BitmapDrawable_(bitmapP));
-                        func(bitmapP.getPixel(pickerX, pickerY));
-                    }
-                }
-                return true;
-            }
-        }));
-
-        picker.setBackgroundDrawable(new BitmapDrawable_(bitmapP));
-        picker.setOnTouchListener(new View_.OnTouchListener({
-            onTouch(view, event) {
-                let action = event.getAction();
-                if (action === MotionEvent_.ACTION_DOWN || action === MotionEvent_.ACTION_MOVE || action === MotionEvent_.ACTION_UP) {
-                    let x = Math.floor(event.getX() / DP),
-                        y = Math.floor(event.getY() / DP);
-                    if (x > 0 && x < 240 && y > 0 && y < 240) {
-                        pickerX = x;
-                        pickerY = y;
-                        func(bitmapP.getPixel(x, y));
-                    }
-                }
-                return true;
-            }
-        }));
-    }
-
-    /**
-     * Returns the widget of color picker.
-     * @since 2017-01-26
-     * @returns {android.widget.LinearLayout} the widget of color picker
-     */
-    ColorPicker.prototype.show = function () {
-        let layout = new LinearLayout_(CONTEXT);
-        layout.addView(this._picker, DP * 240, DP * 240);
-        layout.addView(this._controller, DP * 40, DP * 240);
-        return layout;
-    };
-
-
-
-    /**
-     * Class representing a window that shows a color picker.
-     * @since 2017-01-26
-     * @class
-     * @memberOf me.astro.design
-     * @param {Number} [r=255] Red
-     * @param {Number} [g=0] Green
-     * @param {Number} [b=0] Blue
-     * @param {Function} [func=function(){}] Callback to be invoked when color was changed
-     */
-    function ColorPickerWindow(r, g, b, func) {
-        r = r || 255;
-        g = g || 0;
-        b = b || 0;
-        func = func || (() => {});
-        let viewer = this._viewer = new TextView_(CONTEXT);
-        this._picker = new ColorPicker(r, g, b, color => {
-            viewer.setBackgroundDrawable(new ColorDrawable_(color));
-            func(color);
-        });
-        viewer.setBackgroundDrawable(new ColorDrawable_(Color_.rgb(r, g, b)));
-        viewer.setGravity(Gravity_.CENTER);
-        viewer.setText("Click to close");
-        viewer.setTextColor(Color_.rgb(r, g, b));
-        viewer.setTextSize(1, 18);
-    }
-
-    /**
-     * Display the window of color picker.
-     * @since 2017-01-26
-     */
-    ColorPickerWindow.prototype.show = function () {
-        let thiz = this;
-        CONTEXT.runOnUiThread({
-            run() {
-                let drawable = new GradientDrawable_(),
-                    layout = new LinearLayout_(CONTEXT),
-                    window = new PopupWindow_(layout, -2, -2);
-                thiz._viewer.setOnClickListener(new View_.OnClickListener({
-                    onClick(view) {
-                        CONTEXT.runOnUiThread({
-                            run() {
-                                window.dismiss();
-                                window = null;
-                            }
-                        });
-                    }
-                }));
-                drawable.setColor(Color_.rgb(97, 97, 97));
-                drawable.setCornerRadius(DP * 4);
-                layout.addView(thiz._picker.show(), DP * 280, DP * 240);
-                layout.addView(thiz._viewer, DP * 280, DP * 60);
-                layout.setBackgroundDrawable(drawable);
-                layout.setOrientation(1);
-                layout.setPadding(DP * 24, DP * 24, DP * 24, DP * 24);
-                window.setBackgroundDrawable(new ColorDrawable_(0));
-                window.showAtLocation(CONTEXT.getWindow().getDecorView(), Gravity_.CENTER, 0, 0);
-            }
-        });
-    };
-
-
-
-    /**
      * Class representing color utils.
      * @since 2017-01-22
      * @class
@@ -2331,6 +2174,163 @@ let me = this.me || {};
     Button.prototype.setEffectColor = function (color) {
         this._pressedDrawable = new ColorDrawable_(color);
         return this;
+    };
+
+
+
+    /**
+     * Class representing a color picker.
+     * @since 2017-01-26
+     * @class
+     * @memberOf me.astro.widget
+     * @param {Number} [r=255] Red
+     * @param {Number} [g=0] Blue
+     * @param {Number} [b=0] Green
+     * @param {Function} [func=function(){}] Callback to be invoked when color was changed
+     */
+    function ColorPicker(r, g, b, func) {
+        r = r || 255;
+        g = g || 0;
+        b = b || 0;
+        func = func || (() => {});
+        let controller = this._controller = new TextView_(CONTEXT),
+            picker = this._picker = new TextView_(CONTEXT),
+            paint = new Paint_(),
+            bitmapC = Bitmap_.createBitmap(40, 240, Bitmap_.Config.ARGB_8888),
+            bitmapP = Bitmap_.createBitmap(240, 240, Bitmap_.Config.ARGB_8888),
+            canvasC = new Canvas_(bitmapC),
+            canvasP = new Canvas_(bitmapP),
+            pickerX = 120,
+            pickerY = 1;
+
+        paint.setShader(new LinearGradient_(0, 0, 0, 40, Color_.rgb(255, 0, 0), Color_.rgb(255, 255, 0), Shader_.TileMode.CLAMP));
+        canvasC.drawRect(0, 0, 40, 40, paint);
+        paint.setShader(new LinearGradient_(0, 40, 0, 80, Color_.rgb(255, 255, 0), Color_.rgb(0, 255, 0), Shader_.TileMode.CLAMP));
+        canvasC.drawRect(0, 40, 40, 80, paint);
+        paint.setShader(new LinearGradient_(0, 80, 0, 120, Color_.rgb(0, 255, 0), Color_.rgb(0, 255, 255), Shader_.TileMode.CLAMP));
+        canvasC.drawRect(0, 80, 40, 120, paint);
+        paint.setShader(new LinearGradient_(0, 120, 0, 160, Color_.rgb(0, 255, 255), Color_.rgb(0, 0, 255), Shader_.TileMode.CLAMP));
+        canvasC.drawRect(0, 120, 40, 160, paint);
+        paint.setShader(new LinearGradient_(0, 160, 0, 200, Color_.rgb(0, 0, 255), Color_.rgb(255, 0, 255), Shader_.TileMode.CLAMP));
+        canvasC.drawRect(0, 160, 40, 200, paint);
+        paint.setShader(new LinearGradient_(0, 200, 0, 240, Color_.rgb(255, 0, 255), Color_.rgb(255, 0, 0), Shader_.TileMode.CLAMP));
+        canvasC.drawRect(0, 200, 40, 240, paint);
+        paint.setShader(new LinearGradient_(240, 0, 0, 0, Color_.rgb(r, g, b), Color_.WHITE, Shader_.TileMode.CLAMP));
+        canvasP.drawRect(0, 0, 240, 240, paint);
+        paint.setShader(new LinearGradient_(0, 0, 0, 240, Color_.TRANSPARENT, Color_.BLACK, Shader_.TileMode.CLAMP));
+        canvasP.drawRect(0, 0, 240, 240, paint);
+
+        controller.setBackgroundDrawable(new BitmapDrawable_(bitmapC));
+        controller.setOnTouchListener(new View_.OnTouchListener({
+            onTouch(view, event) {
+                let action = event.getAction();
+                if (action === MotionEvent_.ACTION_DOWN || action === MotionEvent_.ACTION_MOVE || action === MotionEvent_.ACTION_UP) {
+                    let x = Math.floor(event.getX() / DP),
+                        y = Math.floor(event.getY() / DP);
+                    if (x > 0 && x < 40 && y > 0 && y < 240) {
+                        paint.setShader(new LinearGradient_(240, 0, 0, 0, bitmapC.getPixel(0, y), Color_.WHITE, Shader_.TileMode.CLAMP));
+                        canvasP.drawRect(0, 0, 240, 240, paint);
+                        paint.setShader(new LinearGradient_(0, 0, 0, 240, Color_.TRANSPARENT, Color_.BLACK, Shader_.TileMode.CLAMP));
+                        canvasP.drawRect(0, 0, 240, 240, paint);
+                        picker.setBackgroundDrawable(new BitmapDrawable_(bitmapP));
+                        func(bitmapP.getPixel(pickerX, pickerY));
+                    }
+                }
+                return true;
+            }
+        }));
+
+        picker.setBackgroundDrawable(new BitmapDrawable_(bitmapP));
+        picker.setOnTouchListener(new View_.OnTouchListener({
+            onTouch(view, event) {
+                let action = event.getAction();
+                if (action === MotionEvent_.ACTION_DOWN || action === MotionEvent_.ACTION_MOVE || action === MotionEvent_.ACTION_UP) {
+                    let x = Math.floor(event.getX() / DP),
+                        y = Math.floor(event.getY() / DP);
+                    if (x > 0 && x < 240 && y > 0 && y < 240) {
+                        pickerX = x;
+                        pickerY = y;
+                        func(bitmapP.getPixel(x, y));
+                    }
+                }
+                return true;
+            }
+        }));
+    }
+
+    /**
+     * Returns the widget of color picker.
+     * @since 2017-01-26
+     * @returns {android.widget.LinearLayout} the widget of color picker
+     */
+    ColorPicker.prototype.show = function () {
+        let layout = new LinearLayout_(CONTEXT);
+        layout.addView(this._picker, DP * 240, DP * 240);
+        layout.addView(this._controller, DP * 40, DP * 240);
+        return layout;
+    };
+
+
+
+    /**
+     * Class representing a window that shows a color picker.
+     * @since 2017-01-26
+     * @class
+     * @memberOf me.astro.widget
+     * @param {Number} [r=255] Red
+     * @param {Number} [g=0] Green
+     * @param {Number} [b=0] Blue
+     * @param {Function} [func=function(){}] Callback to be invoked when color was changed
+     */
+    function ColorPickerWindow(r, g, b, func) {
+        r = r || 255;
+        g = g || 0;
+        b = b || 0;
+        func = func || (() => {});
+        let viewer = this._viewer = new TextView_(CONTEXT);
+        this._picker = new ColorPicker(r, g, b, color => {
+            viewer.setBackgroundDrawable(new ColorDrawable_(color));
+            func(color);
+        });
+        viewer.setBackgroundDrawable(new ColorDrawable_(Color_.rgb(r, g, b)));
+        viewer.setGravity(Gravity_.CENTER);
+        viewer.setText("Click to close");
+        viewer.setTextColor(Color_.rgb(r, g, b));
+        viewer.setTextSize(1, 18);
+    }
+
+    /**
+     * Display the window of color picker.
+     * @since 2017-01-26
+     */
+    ColorPickerWindow.prototype.show = function () {
+        let thiz = this;
+        CONTEXT.runOnUiThread({
+            run() {
+                let drawable = new GradientDrawable_(),
+                    layout = new LinearLayout_(CONTEXT),
+                    window = new PopupWindow_(layout, -2, -2);
+                thiz._viewer.setOnClickListener(new View_.OnClickListener({
+                    onClick(view) {
+                        CONTEXT.runOnUiThread({
+                            run() {
+                                window.dismiss();
+                                window = null;
+                            }
+                        });
+                    }
+                }));
+                drawable.setColor(Color_.rgb(97, 97, 97));
+                drawable.setCornerRadius(DP * 4);
+                layout.addView(thiz._picker.show(), DP * 280, DP * 240);
+                layout.addView(thiz._viewer, DP * 280, DP * 60);
+                layout.setBackgroundDrawable(drawable);
+                layout.setOrientation(1);
+                layout.setPadding(DP * 24, DP * 24, DP * 24, DP * 24);
+                window.setBackgroundDrawable(new ColorDrawable_(0));
+                window.showAtLocation(CONTEXT.getWindow().getDecorView(), Gravity_.CENTER, 0, 0);
+            }
+        });
     };
 
 
@@ -4783,8 +4783,6 @@ let me = this.me || {};
     astro.design = {
         Bitmap: Bitmap,
         Color: Color,
-        ColorPicker: ColorPicker,
-        ColorPickerWindow: ColorPickerWindow,
         ColorUtils: ColorUtils,
         Drawable: Drawable,
         ShadowDrawable: ShadowDrawable,
@@ -4815,6 +4813,8 @@ let me = this.me || {};
         ViewUtils: ViewUtils,
         TextView: TextView,
         Button: Button,
+        ColorPicker: ColorPicker,
+        ColorPickerWindow: ColorPickerWindow,
         Divider: Divider,
         EditText: EditText,
         GridLayout: GridLayout,

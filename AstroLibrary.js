@@ -2336,6 +2336,28 @@ let me = this.me || {};
 
 
     /**
+     * Class representing a divider.
+     * @since 2017-01-27
+     * @class
+     * @extends me.astro.widget.TextView
+     * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of divider
+     */
+    function Divider(theme) {
+        theme = theme || Theme.DEFAULT;
+        let params = this._params = new LinearLayout_.LayoutParams(-1, DP * 1),
+            view = this._view = new TextView_(CONTEXT);
+        this._theme = theme;
+        params.setMargins(DP * 8, DP * 8, DP * 8, DP * 7);
+        view.setBackgroundDrawable(new ColorDrawable_(theme.getEditText(Theme.HINT_TEXT_COLOR)));
+        view.setLayoutParams(params);
+    }
+
+    Divider.prototype = Object.create(TextView.prototype);
+
+
+
+    /**
      * Class representing a edit text.
      * @since 2016-05-27
      * @class
@@ -4573,7 +4595,7 @@ let me = this.me || {};
                                 .setTextSize(24)
                                 .show())
                             .addView(new TextView()
-                                .setText("Device model: " + DEVICE_MODEL + "\nDevice version: " + DEVICE_VERSION + "\n\n")
+                                .setText("Device model: " + DEVICE_MODEL + "\nDevice version: " + DEVICE_VERSION)
                                 .setTextColor(Color.GREY_DARK)
                                 .show())
                             .addView(new TextView()
@@ -4582,7 +4604,7 @@ let me = this.me || {};
                                 .setTextSize(24)
                                 .show())
                             .addView(new TextView()
-                                .setText(NAME + " " + VERSION + "\n\nName Code: " + NAME_CODE + "\nDeveleoper: " + DEVELOPER + "\n\n")
+                                .setText(NAME + " " + VERSION + "\n\nName Code: " + NAME_CODE + "\nDeveleoper: " + DEVELOPER)
                                 .setTextColor(Color.GREY_DARK)
                                 .show())
                             .addView(new TextView()
@@ -4793,6 +4815,7 @@ let me = this.me || {};
         ViewUtils: ViewUtils,
         TextView: TextView,
         Button: Button,
+        Divider: Divider,
         EditText: EditText,
         GridLayout: GridLayout,
         ImageButton: ImageButton,

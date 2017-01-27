@@ -4171,6 +4171,34 @@ let me = this.me || {};
 
 
     /**
+     * Loads the library.
+     * @since 2016-01-28
+     * @memberOf me.astro
+     * @param {org.mozilla.javascript.Scriptable} scope Javascript object
+     */
+    function loadLibrary(scope) {
+        if (!ScriptableObject_.hasProperty(scope, "me")) {
+            ScriptableObject_.putProperty(scope, "me", {
+                astro: astro
+            });
+            if (ScriptableObject_.hasProperty(scope, "onLibraryLoaded")) {
+                ScriptableObject_.callMethod(scope, "onLibraryLoaded", [NAME, NAME_CODE, VERSION]);
+            }
+        } else {
+            let tmpObj = ScriptableObject_.getProperty(scope, "me");
+            if (typeof tmpObj.astro !== "object") {
+                tmpObj.astro = astro;
+                ScriptableObject_.putProperty(scope, "me", tmpObj);
+                if (ScriptableObject_.hasProperty(scope, "onLibraryLoaded")) {
+                    ScriptableObject_.callMethod(scope, "onLibraryLoaded", [NAME, NAME_CODE, VERSION]);
+                }
+            }
+        }
+    }
+
+
+
+    /**
      * Sign in the server.
      * @since 2016-06-04
      * @private
@@ -4852,22 +4880,18 @@ let me = this.me || {};
             });
             new Thread_({
                 run() {
-                    Thread_.sleep(3000);
-                    let scripts = ScriptManager_.scripts;
-                    for (let i = scripts.size(); i--;) {
-                        let scope = scripts.get(i).scope,
-                            tmpObj;
-
-                        if (!ScriptableObject_.hasProperty(scope, "me")) {
-                            ScriptableObject_.putProperty(scope, "me", {
-                                astro: astro
-                            });
-                        } else if (typeof (tmpObj = ScriptableObject_.getProperty(scope, "me")).astro !== "object") {
-                            tmpObj.astro = astro;
-                            ScriptableObject_.putProperty(scope, "me", tmpObj);
+                    let scripts = ScriptManager_.scripts,
+                        scriptSize = 0;
+                    while (true) {
+                        let size = scripts.size();
+                        if (size > scriptSize) {
+                            for (let i = size - scriptSize; i--;) {
+                                loadLibrary(scripts.get(scriptSize + i).scope);
+                            }
                         }
+                        scriptSize = size;
+                        Thread_.sleep(1000);
                     }
-                    ScriptManager_.callScriptMethod("onLibraryLoaded", [NAME, NAME_CODE, VERSION]);
                 }
             }).start();
         } else {
@@ -4910,6 +4934,7 @@ let me = this.me || {};
     astro.getUser = getUser;
     astro.getWindow = getWindow;
     astro.init = init;
+    astro.loadLibrary = loadLibrary;
     astro.design = {
         Bitmap: Bitmap,
         Color: Color,
@@ -4964,6 +4989,7 @@ let me = this.me || {};
         VerticalWindow: VerticalWindow,
         Window: Window
     };
+    Object.freeze(astro);
 
     $.selectLevelHook = () => {
         hasLevel = true;

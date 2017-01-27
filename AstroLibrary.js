@@ -29,6 +29,7 @@ let me = this.me || {};
         Paint_ = android.graphics.Paint,
         PorterDuff_ = android.graphics.PorterDuff,
         PorterDuffColorFilter_ = android.graphics.PorterDuffColorFilter,
+        PorterDuffXfermode_ = android.graphics.PorterDuffXfermode,
         Shader_ = android.graphics.Shader,
         BitmapDrawable_ = android.graphics.drawable.BitmapDrawable,
         ColorDrawable_ = android.graphics.drawable.ColorDrawable,
@@ -287,6 +288,17 @@ let me = this.me || {};
             a += Color_.alpha(color);
         }
         return Color_.argb(Math.floor(a / len), Math.floor(r / len), Math.floor(g / len), Math.floor(b / len));
+    };
+
+    /**
+     * Sets alpha component of the color.
+     * @since 2017-01-27
+     * @param {Number} color Color
+     * @param {Number} alpha Alpha component
+     * @returns {Number} Color
+     */
+    ColorUtils.setAlpha = function (color, alpha) {
+        return Color_.argb(alpha, Color_.red(color), Color_.green(color), Color_.blue(color));
     };
 
 
@@ -2354,6 +2366,7 @@ let me = this.me || {};
     }
 
     Divider.prototype = Object.create(TextView.prototype);
+    Divider.prototype.constructor = Divider;
 
 
 
@@ -3436,6 +3449,123 @@ let me = this.me || {};
 
     SensorButton.prototype = Object.create(ImageButton.prototype);
     SensorButton.prototype.constructor = SensorButton;
+
+
+
+    /**
+     * Class representing a showcase window.
+     * @since 2017-01-27
+     * @class
+     * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of showcase window
+     */
+    function ShowcaseWindow(theme) {
+        theme = theme || Theme.DEFAULT;
+        let thiz = this;
+        thiz._theme = theme;
+        thiz._color = ColorUtils.setAlpha(theme.getButton(Theme.BACKGROUND_COLOR), 204);
+        thiz._radius = DP * 50;
+        thiz._itemXY = [DP * 100, DP * 100];
+        thiz._window = new PopupWindow_(CONTEXT);
+        thiz._window.setWidth(DEVICE_WIDTH);
+        thiz._window.setHeight(DEVICE_HEIGHT);
+    }
+
+    /**
+     * Disposes of the showcase window.
+     * @since 2017-01-27
+     */
+    ShowcaseWindow.prototype.dismiss = function () {
+        let thiz = this;
+        if (thiz._window !== null) {
+            CONTEXT.runOnUiThread({
+                run() {
+                    thiz._window.dismiss();
+                    thiz._window = null;
+                }
+            });
+        }
+        return this;
+    };
+
+    /**
+     * Returns the theme of the showcase window.
+     * @since 2017-01-27
+     * @returns {me.astro.design.Theme} Theme of the showcase window
+     */
+    ShowcaseWindow.prototype.getTheme = function () {
+        return this._theme;
+    };
+
+    /**
+     * Returns the showcase window.
+     * @since 2017-01-27
+     * @returns {android.widget.PopupWindow} Showcase window
+     */
+    ShowcaseWindow.prototype.getWindow = function () {
+        return this._window;
+    };
+
+    /**
+     * Sets the color of the showcase window.
+     * @since 2017-01-27
+     * @param {Number} color Color of the showcase window
+    ShowcaseWindow.prototype.setColor = function (color) {
+        this._color = color;
+        return this;
+    };
+
+    /**
+     * Sets the item location.
+     * @since 2017-01-27
+     * @param {Number} x X location of the item
+     * @param {Number} y Y location of the item
+     */
+    ShowcaseWindow.prototype.setItemXY = function (x, y) {
+        this._itemXY = [x, y];
+        return this;
+    };
+
+    /**
+     * Sets the circle radius that emphasizes the item.
+     * @since 2017-01-27
+     * @param {Number} radius
+     */
+    ShowcaseWindow.prototype.setRadius = function (radius) {
+        this._radius = radius;
+        return this;
+    };
+
+    /**
+     * Sets a view on the window.
+     * @since 2017-01-27
+     * @param {android.widget.LinearLayout} view View
+     */
+    ShowcaseWindow.prototype.setView = function (view) {
+        this._window.setContentView(view);
+        return this;
+    };
+
+    /**
+     * Shows the showcase window on the screen.
+     * @since 2017-01-27
+     */
+    ShowcaseWindow.prototype.show = function () {
+        let itemXY = this._itemXY,
+            radius = this._radius,
+            bitmap = Bitmap_.createBitmap(DEVICE_WIDTH, DEVICE_HEIGHT, Bitmap_.Config.ARGB_8888),
+            canvas = new Canvas_(bitmap),
+            paint = new Paint_(),
+            drawable = new BitmapDrawable_(bitmap);
+        paint.setAntiAlias(true);
+        paint.setColor(this._color);
+        canvas.drawPaint(paint);
+        paint.setXfermode(new PorterDuffXfermode_(PorterDuff_.Mode.CLEAR));
+        canvas.drawCircle(itemXY[0], itemXY[1], radius, paint);
+        this._window.setBackgroundDrawable(drawable);
+        this._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
+        return this;
+    };
 
 
 
@@ -4827,6 +4957,7 @@ let me = this.me || {};
         ProgressWindow: ProgressWindow,
         ScrollView: ScrollView,
         SensorButton: SensorButton,
+        ShowcaseWindow: ShowcaseWindow,
         SlideButton: SlideButton,
         SplashWindow: SplashWindow,
         Toast: Toast,

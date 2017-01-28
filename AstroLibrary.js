@@ -52,6 +52,8 @@ let me = this.me || {};
         Gravity_ = android.view.Gravity,
         MotionEvent_ = android.view.MotionEvent,
         View_ = android.view.View,
+        AlphaAnimation_ = android.view.animation.AlphaAnimation,
+        DecelerateInterpolator_ = android.view.animation.DecelerateInterpolator,
         WebView_ = android.webkit.WebView,
         CompoundButton_ = android.widget.CompoundButton,
         EditText_ = android.widget.EditText,
@@ -3656,8 +3658,12 @@ let me = this.me || {};
         thiz._height = DEVICE_HEIGHT;
         thiz._width = DEVICE_WIDTH;
         thiz._delay = 1000;
+        thiz._layout = new LinearLayout_(CONTEXT);
+        thiz._layout.setBackgroundDrawable(new ColorDrawable_(theme.getButton(Theme.BACKGROUND_COLOR)));
+        thiz._layout.setGravity(Gravity_.CENTER);
         thiz._window = new PopupWindow_(CONTEXT);
-        thiz._window.setBackgroundDrawable(new ColorDrawable_(theme.getButton(Theme.BACKGROUND_COLOR)));
+        thiz._window.setBackgroundDrawable(new ColorDrawable_(0));
+        this._window.setContentView(thiz._layout);
         thiz._window.setWidth(DEVICE_WIDTH);
         thiz._window.setHeight(DEVICE_HEIGHT);
     }
@@ -3712,7 +3718,7 @@ let me = this.me || {};
      * @param {Number} color Color of the splash window
      */
     SplashWindow.prototype.setColor = function (color) {
-        this._window.setBackgroundDrawable(new ColorDrawable_(color));
+        this._layout.setBackgroundDrawable(new ColorDrawable_(color));
         return this;
     };
 
@@ -3732,7 +3738,7 @@ let me = this.me || {};
      * @param {android.widget.LinearLayout} view View
      */
     SplashWindow.prototype.setView = function (view) {
-        this._window.setContentView(view);
+        this._layout.addView(view);
         return this;
     };
 
@@ -3743,11 +3749,24 @@ let me = this.me || {};
      * @param {Number} [y=0] Y location of the vertical window.
      */
     SplashWindow.prototype.show = function (x, y) {
-        let thiz = this;
+        let thiz = this,
+            anim = new AlphaAnimation_(0, 1);
         thiz._window.showAtLocation(SCREEN, Gravity_.BOTTOM | Gravity_.RIGHT, x || 0, y || 0);
+        anim.setDuration(Math.floor(thiz._delay / 4));
+        anim.setInterpolator(new DecelerateInterpolator_());
+        thiz._layout.startAnimation(anim);
         thiz._thread = new Thread_({
             run() {
-                Thread_.sleep(thiz._delay);
+                Thread_.sleep(Math.floor(thiz._delay / 2));
+                CONTEXT.runOnUiThread({
+                    run() {
+                        let anim = new AlphaAnimation_(1, 0);
+                        anim.setDuration(Math.floor(thiz._delay / 4));
+                        anim.setInterpolator(new DecelerateInterpolator_());
+                        thiz._layout.startAnimation(anim);
+                    }
+                });
+                Thread_.sleep(Math.floor(thiz._delay / 4));
                 CONTEXT.runOnUiThread({
                     run() {
                         thiz._window.dismiss();
@@ -4706,25 +4725,28 @@ let me = this.me || {};
                                 .setText("Settings")
                                 .setTextSize(24)
                                 .show())
-                            .addView(new TextView()
-                                .setPadding(DP * 12, 0, DP * 8, DP * 12)
-                                .setText("Settings")
+                            .addView(new me.astro.widget.TextView()
+                                .setText("Show splash screen")
                                 .setTextSize(14)
                                 .show())
-                            .addView(new Button()
-                                .setEffect(v => {
-                                    if (preference.get("enable_splash")) {
-                                        v.setText("Enable Splash");
-                                        preference.set("enable_splash", false)
-                                            .save();
-                                    } else {
-                                        v.setText("Disable Splash");
+                            .addView(new me.astro.widget.Layout()
+                                .addView(new me.astro.widget.Button()
+                                    .setText("On")
+                                    .setEffect(() => {
                                         preference.set("enable_splash", true)
                                             .save();
-                                    }
-                                })
-                                .setText(preference.get("enable_splash") ? "Disable Splash" : "Enable Splash")
-                                .setWH(-1, DP * 36)
+                                        Toast.show("Enable splash screen");
+                                    })
+                                    .show())
+                                .addView(new me.astro.widget.Button()
+                                    .setText("Off")
+                                    .setEffect(() => {
+                                        preference.set("enable_splash", false)
+                                            .save();
+                                        Toast.show("Disable splash screen");
+                                    })
+                                    .show())
+                                .setOrientation(0)
                                 .show())
                             .addView(new Button()
                                 .setText("Close")
@@ -4873,6 +4895,7 @@ let me = this.me || {};
                         layout.setGravity(Gravity_.CENTER);
 
                         new SplashWindow().setColor(Color.WHITE)
+                            .setDelay(3000)
                             .setView(layout)
                             .show();
                     }

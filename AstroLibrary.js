@@ -54,6 +54,7 @@ let me = this.me || {};
         View_ = android.view.View,
         AlphaAnimation_ = android.view.animation.AlphaAnimation,
         DecelerateInterpolator_ = android.view.animation.DecelerateInterpolator,
+        TranslateAnimation_ = android.view.animation.TranslateAnimation,
         WebView_ = android.webkit.WebView,
         CompoundButton_ = android.widget.CompoundButton,
         EditText_ = android.widget.EditText,
@@ -110,8 +111,10 @@ let me = this.me || {};
         LICENSE_TEXT = "AstroLibrary is licensed under the GNU Lesser General Public License, Version 3 (LGPL-3.0).";
 
     let hasLevel = false,
+        notiWindowInstance,
         preference,
         scriptChecker,
+        notificationWindow,
         verticalWindow,
         notice = "Error: No Internet.",
         user;
@@ -2935,6 +2938,106 @@ let me = this.me || {};
 
 
     /**
+     * Class representing a notification window.
+     * @since 2017-01-29
+     * @class
+     * @memberOf me.astro.widget
+     */
+    function NotificationWindow() {}
+
+    NotificationWindow.getInstance = function () {
+        if (typeof notiWindowInstance === "undefined") {
+            function NotiWindowInstance() {
+                this._isRunning = false;
+            }
+            NotiWindowInstance.prototype = {
+                constructor: NotificationWindow,
+                dismissHistoryWindow() {
+                    let layout = this._layout,
+                        window = this._window;
+                    new Thread_({
+                        run() {
+                            CONTEXT.runOnUiThread({
+                                run() {
+                                    let anim = new TranslateAnimation_(0, DP * -200, 0, 0);
+                                    anim.setDuration(500);
+                                    anim.setInterpolator(new DecelerateInterpolator_());
+                                    layout.startAnimation(anim);
+                                }
+                            });
+                            Thread_.sleep(500);
+                            CONTEXT.runOnUiThread({
+                                run() {
+                                    if (window instanceof PopupWindow_) {
+                                        window.dismiss();
+                                        window = null;
+                                    }
+                                }
+                            });
+                        }
+                    }).start();
+                },
+                showHistoryWindow() {
+                    let thiz = this;
+                    CONTEXT.runOnUiThread({
+                        run() {
+                            let anim = new TranslateAnimation_(DP * -200, 0, 0, 0),
+                                drawable = new GradientDrawable_(),
+                                layout = thiz._layout = new LinearLayout_(CONTEXT),
+                                window = thiz._window = new PopupWindow_(layout, DP * 200, -1);
+                            anim.setDuration(500);
+                            anim.setInterpolator(new DecelerateInterpolator_());
+                            drawable.setColors([Color.WHITE, 0]);
+                            drawable.setOrientation(GradientDrawable_.Orientation.LEFT_RIGHT);
+                            layout.addView(new Button()
+                                .setEffect(() => thiz.dismissHistoryWindow())
+                                .setText("Close")
+                                .show());
+                            layout.setBackgroundDrawable(drawable);
+                            layout.startAnimation(anim);
+                            window.showAtLocation(SCREEN, Gravity_.CENTER | Gravity_.LEFT, 0, 0);
+                        }
+                    });
+                },
+                start() {
+                    let thiz = this;
+                    CONTEXT.runOnUiThread({
+                        run() {
+                            let touchX;
+                            SCREEN.setOnTouchListener(new View_.OnTouchListener({
+                                onTouch(v, event) {
+                                    switch (event.getAction()) {
+                                    case MotionEvent_.ACTION_DOWN:
+                                        touchX = event.getX();
+                                        break;
+                                    case MotionEvent_.ACTION_CANCEL:
+                                    case MotionEvent_.ACTION_UP:
+                                        if (event.getX() - touchX > DP * 16 && touchX >= 0 && touchX <= DP * 16) {
+                                            thiz.showHistoryWindow();
+                                        }
+                                        break;
+                                    }
+                                    return true;
+                                }
+                            }));
+                        }
+                    });
+                    this._isRunning = true;
+                },
+                stop() {
+                    this._isRunning = false;
+                }
+            };
+            notiWindowInstance = new NotiWindowInstance();
+            return notiWindowInstance;
+        } else {
+            return notiWindowInstance;
+        }
+    };
+
+
+
+    /**
      * Class representing a palette.
      * @since 2016-09-09
      * @class
@@ -4873,6 +4976,8 @@ let me = this.me || {};
                 }).start();
             }
             preference = new Preference(PATH + "preference.json");
+            notificationWindow = NotificationWindow.getInstance();
+            notificationWindow.start();
             verticalWindow = new VerticalWindow();
             CONTEXT.runOnUiThread({
                 run() {

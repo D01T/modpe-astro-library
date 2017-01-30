@@ -474,18 +474,6 @@ let me = this.me || {};
     };
 
     /**
-     * Returns a color of TextView theme.
-     * @since 2016-05-28
-     * @param {Number} type Type of color
-     * @returns {Number} Color
-     */
-    Theme.prototype.getTextView = function (type) {
-        if (type === Theme.TEXT_COLOR) {
-            return this._colorTextBlack;
-        }
-    };
-
-    /**
      * Returns the theme object.
      * @since 2017-01-23
      * @returns {Object} Theme object
@@ -499,6 +487,18 @@ let me = this.me || {};
             textWhite: this._colorTextWhite,
             textGrey: this._colorTextGrey
         };
+    };
+
+    /**
+     * Returns a color of TextView theme.
+     * @since 2016-05-28
+     * @param {Number} type Type of color
+     * @returns {Number} Color
+     */
+    Theme.prototype.getTextView = function (type) {
+        if (type === Theme.TEXT_COLOR) {
+            return this._colorTextBlack;
+        }
     };
 
     /**
@@ -519,6 +519,18 @@ let me = this.me || {};
     };
 
     /**
+     * Returns a color of Divider theme.
+     * @since 2017-01-30
+     * @param {Number} type Type of color
+     * @returns {Number} Color
+     */
+    Theme.prototype.getDivider = function (type) {
+        if (type === Theme.BACKGROUND_COLOR) {
+            return this._colorTextGrey;
+        }
+    };
+
+    /**
      * Returns a color of EditText theme.
      * @since 2016-05-28
      * @param {Number} type Type of color
@@ -532,6 +544,23 @@ let me = this.me || {};
             return this._colorTextBlack;
         case Theme.HINT_TEXT_COLOR:
             return this._colorTextGrey;
+        }
+    };
+
+    /**
+     * Returns a color of NotificationWindow theme.
+     * @since 2017-01-30
+     * @param {Number} type Type of color
+     * @returns {Number} Color
+     */
+    Theme.prototype.getNotificationWindow = function (type) {
+        switch (type) {
+        case Theme.BACKGROUND_COLOR:
+            return this._colorTextWhite;
+        case Theme.EFFECT_COLOR:
+            return this._colorPrimary;
+        case Theme.TEXT_COLOR:
+            return this._colorTextBlack;
         }
     };
 
@@ -564,6 +593,42 @@ let me = this.me || {};
             return this._colorPrimary;
         case Theme.TEXT_COLOR:
             return this._colorTextWhite;
+        }
+    };
+
+    /**
+     * Returns a color of ScrollView theme.
+     * @since 2017-01-30
+     * @param {Number} type Type of color
+     * @returns {Number} Color
+     */
+    Theme.prototype.getScrollView = function (type) {
+        if (type === Theme.BACKGROUND_COLOR) {
+            return this._colorAccent;
+        }
+    };
+
+    /**
+     * Returns a color of ShowcaseWindow theme.
+     * @since 2017-01-30
+     * @param {Number} type Type of color
+     * @returns {Number} Color
+     */
+    Theme.prototype.getShowcaseWindow = function (type) {
+        if (type === Theme.BACKGROUND_COLOR) {
+            return this._colorPrimary;
+        }
+    };
+
+    /**
+     * Returns a color of SplashWindow theme.
+     * @since 2017-01-30
+     * @param {Number} type Type of color
+     * @returns {Number} Color
+     */
+    Theme.prototype.getSplashWindow = function (type) {
+        if (type === Theme.BACKGROUND_COLOR) {
+            return this._colorPrimary;
         }
     };
 
@@ -2366,7 +2431,7 @@ let me = this.me || {};
             view = this._view = new TextView_(CONTEXT);
         this._theme = theme;
         params.setMargins(DP * 8, DP * 8, DP * 8, DP * 7);
-        view.setBackgroundDrawable(new ColorDrawable_(theme.getEditText(Theme.HINT_TEXT_COLOR)));
+        view.setBackgroundDrawable(new ColorDrawable_(theme.getDivider(Theme.BACKGROUND_COLOR)));
         view.setLayoutParams(params);
     }
 
@@ -2948,6 +3013,7 @@ let me = this.me || {};
     NotificationWindow.getInstance = function () {
         if (typeof notiWindowInstance === "undefined") {
             function NotiWindowInstance() {
+                this._theme = Theme.DEFAULT;
                 this._isRunning = false;
             }
             NotiWindowInstance.prototype = {
@@ -2976,28 +3042,35 @@ let me = this.me || {};
                             });
                         }
                     }).start();
+                    return this;
+                },
+                getTheme() {
+                    return this._theme;
+                },
+                setTheme(theme) {
+                    this._theme = theme;
+                    return this;
                 },
                 showHistoryWindow() {
-                    let thiz = this;
+                    let thiz = this,
+                        theme = thiz._theme;
                     CONTEXT.runOnUiThread({
                         run() {
                             let anim = new TranslateAnimation_(DP * -200, 0, 0, 0),
-                                drawable = new GradientDrawable_(),
                                 layout = thiz._layout = new LinearLayout_(CONTEXT),
                                 window = thiz._window = new PopupWindow_(layout, DP * 200, -1);
                             anim.setDuration(500);
                             anim.setInterpolator(new DecelerateInterpolator_());
-                            drawable.setColors([Color.WHITE, 0]);
-                            drawable.setOrientation(GradientDrawable_.Orientation.LEFT_RIGHT);
                             layout.addView(new Button()
                                 .setEffect(() => thiz.dismissHistoryWindow())
                                 .setText("Close")
                                 .show());
-                            layout.setBackgroundDrawable(drawable);
+                            layout.setBackgroundDrawable(new ColorDrawable_(theme.getNotificationWindow(Theme.BACKGROUND_COLOR)));
                             layout.startAnimation(anim);
                             window.showAtLocation(SCREEN, Gravity_.CENTER | Gravity_.LEFT, 0, 0);
                         }
                     });
+                    return this;
                 },
                 start() {
                     let thiz = this;
@@ -3023,9 +3096,11 @@ let me = this.me || {};
                         }
                     });
                     this._isRunning = true;
+                    return this;
                 },
                 stop() {
                     this._isRunning = false;
+                    return this;
                 }
             };
             notiWindowInstance = new NotiWindowInstance();
@@ -3386,7 +3461,7 @@ let me = this.me || {};
         this._scroller.addView(this._thumb);
         this._scroller.setOrientation(1);
         this._track.setLayoutParams(new LinearLayout_.LayoutParams(DP * 6, 0));
-        this._thumb.setBackgroundDrawable(new ColorDrawable_(theme.getProgressWindow(Theme.EFFECT_COLOR)));
+        this._thumb.setBackgroundDrawable(new ColorDrawable_(theme.getScrollView(Theme.BACKGROUND_COLOR)));
         this._thumb.setLayoutParams(new LinearLayout_.LayoutParams(DP * 6, DP * 36));
         this._thumb.setOnTouchListener(new View_.OnTouchListener({
             onTouch(v, event) {
@@ -3568,7 +3643,7 @@ let me = this.me || {};
         theme = theme || Theme.DEFAULT;
         let thiz = this;
         thiz._theme = theme;
-        thiz._color = ColorUtils.setAlpha(theme.getButton(Theme.BACKGROUND_COLOR), 204);
+        thiz._color = ColorUtils.setAlpha(theme.getShowcaseWindow(Theme.BACKGROUND_COLOR), 204);
         thiz._radius = DP * 50;
         thiz._itemXY = [DP * 100, DP * 100];
         thiz._window = new PopupWindow_(CONTEXT);
@@ -3762,7 +3837,7 @@ let me = this.me || {};
         thiz._width = DEVICE_WIDTH;
         thiz._delay = 1000;
         thiz._layout = new LinearLayout_(CONTEXT);
-        thiz._layout.setBackgroundDrawable(new ColorDrawable_(theme.getButton(Theme.BACKGROUND_COLOR)));
+        thiz._layout.setBackgroundDrawable(new ColorDrawable_(theme.getSplashWindow(Theme.BACKGROUND_COLOR)));
         thiz._layout.setGravity(Gravity_.CENTER);
         thiz._window = new PopupWindow_(CONTEXT);
         thiz._window.setBackgroundDrawable(new ColorDrawable_(0));
@@ -5105,6 +5180,7 @@ let me = this.me || {};
         ImageToggle: ImageToggle,
         KakaoLink: KakaoLink,
         Layout: Layout,
+        NotificationWindow: NotificationWindow,
         Palette: Palette,
         PaletteWindow: PaletteWindow,
         ProgressWindow: ProgressWindow,

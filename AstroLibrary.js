@@ -351,7 +351,7 @@ let me = this.me || {};
      */
     ShadowDrawable.create = function () {
         let shadowDrawable = new LayerDrawable_([ShadowDrawable.RESOURCE, new ColorDrawable_(-1)]);
-        shadowDrawable.setLayerInset(0, DP * 3, DP * 6, DP * 3, DP * 2);
+        shadowDrawable.setLayerInset(0, DP * 3, DP * 6, DP * 3, DP * 3);
         return shadowDrawable;
     };
 
@@ -3060,8 +3060,10 @@ let me = this.me || {};
                     CONTEXT.runOnUiThread({
                         run() {
                             let anim = new TranslateAnimation_(DP * -200, 0, 0, 0),
+                                drawable = new GradientDrawable_(GradientDrawable_.Orientation.LEFT_RIGHT, [Color.BLACK, 0]),
                                 layout = thiz._layout = new LinearLayout_(CONTEXT),
-                                window = thiz._window = new PopupWindow_(layout, DP * 200, -1);
+                                windowLayout = thiz._layout = new LinearLayout_(CONTEXT),
+                                window = thiz._window = new PopupWindow_(windowLayout, DP * 208, -1);
                             anim.setDuration(500);
                             anim.setInterpolator(new DecelerateInterpolator_());
                             layout.addView(new Button()
@@ -3069,7 +3071,10 @@ let me = this.me || {};
                                 .setText("Close")
                                 .show());
                             layout.setBackgroundDrawable(new ColorDrawable_(theme.getNotificationWindow(Theme.BACKGROUND_COLOR)));
-                            layout.startAnimation(anim);
+                            windowLayout.addView(layout, -1, -1);
+                            windowLayout.setBackgroundDrawable(drawable);
+                            windowLayout.setPadding(0, 0, DP * 8, 0);
+                            windowLayout.startAnimation(anim);
                             window.showAtLocation(SCREEN, Gravity_.CENTER | Gravity_.LEFT, 0, 0);
                         }
                     });
@@ -4186,11 +4191,13 @@ let me = this.me || {};
         thiz._layouts = [];
         thiz._toggles = [];
         thiz._window = new PopupWindow_(CONTEXT);
-        thiz._windowLayout = new LinearLayout_(CONTEXT);
+        thiz._windowLayout = new 
+LinearLayout_(CONTEXT);
         thiz._sideBarLayout = new LinearLayout_(CONTEXT);
         thiz._contentLayout = new FrameLayout_(CONTEXT);
         thiz._windowLayout.addView(thiz._sideBarLayout, DP * 60, thiz._height);
         thiz._windowLayout.addView(thiz._contentLayout, thiz._width - DP * 60, thiz._height);
+        thiz._windowLayout.setBackgroundDrawable(ShadowDrawable.create());
         thiz._windowLayout.setGravity(Gravity_.CENTER);
         thiz._sideBarLayout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.BACKGROUND_COLOR)));
         thiz._sideBarLayout.setOrientation(1);

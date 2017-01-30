@@ -3047,6 +3047,9 @@ let me = this.me || {};
                 getTheme() {
                     return this._theme;
                 },
+                isRunning() {
+                    return this._isRunning;
+                },
                 setTheme(theme) {
                     this._theme = theme;
                     return this;
@@ -3085,7 +3088,7 @@ let me = this.me || {};
                                         break;
                                     case MotionEvent_.ACTION_CANCEL:
                                     case MotionEvent_.ACTION_UP:
-                                        if (event.getX() - touchX > DP * 16 && touchX >= 0 && touchX <= DP * 16) {
+                                        if (thiz._isRunning && event.getX() - touchX > DP * 16 && touchX >= 0 && touchX <= DP * 16) {
                                             thiz.showHistoryWindow();
                                         }
                                         break;
@@ -4926,6 +4929,31 @@ let me = this.me || {};
                                     .show())
                                 .setOrientation(0)
                                 .show())
+                            .addView(new me.astro.widget.TextView()
+                                .setText("Open notifications with gestures")
+                                .setTextSize(14)
+                                .show())
+                            .addView(new me.astro.widget.Layout()
+                                .addView(new me.astro.widget.Button()
+                                    .setText("On")
+                                    .setEffect(() => {
+                                        preference.set("enable_notifications", true)
+                                            .save();
+                                        notificationWindow.start();
+                                        Toast.show("Enable opening notifications with gestures");
+                                    })
+                                    .show())
+                                .addView(new me.astro.widget.Button()
+                                    .setText("Off")
+                                    .setEffect(() => {
+                                        preference.set("enable_notifications", false)
+                                            .save();
+                                        notificationWindow.stop();
+                                        Toast.show("Disable opening notifications with gestures");
+                                    })
+                                    .show())
+                                .setOrientation(0)
+                                .show())
                             .addView(new Button()
                                 .setText("Close")
                                 .setEffect(() => window.dismiss())
@@ -5052,8 +5080,10 @@ let me = this.me || {};
             }
             preference = new Preference(PATH + "preference.json");
             notificationWindow = NotificationWindow.getInstance();
-            notificationWindow.start();
             verticalWindow = new VerticalWindow();
+            if (preference.get("enable_notifications")) {
+                notificationWindow.start();
+            }
             CONTEXT.runOnUiThread({
                 run() {
                     verticalWindow.addView(new ImageButton(Shape.CIRCLE)

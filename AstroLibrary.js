@@ -98,7 +98,7 @@ let me = this.me || {};
         NAME_CODE = "me_astro_library",
         VERSION = "2.0",
         VERSION_URL = GITHUB_URL + "version.txt",
-        ACCOUNT_URL = "http://minedev.dothome.co.kr/deneb/admin.php",
+        ACCOUNT_URL = "http://minedev.dothome.co.kr/deneb/server.php",
         NOTICE_URL = "http://minedev.dothome.co.kr/deneb/notice.txt",
         DEVELOPER = "Astro",
         PATH = Environment_.getExternalStorageDirectory().getAbsolutePath() + "/games/me.astro/library/",
@@ -872,7 +872,7 @@ let me = this.me || {};
         this._id = id;
         this._name = "";
         this._password = password;
-        this._userId = null;
+        this._userCode = null;
         this._friends = [];
         this._isAvailable = false;
     }
@@ -998,7 +998,7 @@ let me = this.me || {};
     Account.prototype.getDataFromServer = function (key, response) {
         response = response || (() => {});
         let server = new Server(ACCOUNT_URL);
-        server.post("type=get&userid=" + this._userId + "&key=" + key, inputStream => {
+        server.post("type=get&user_code=" + this._userCode + "&key=" + key, inputStream => {
             if (inputStream !== null) {
                 let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
                     buffer,
@@ -1078,7 +1078,7 @@ let me = this.me || {};
     Account.prototype.getRank = function (key, response) {
         response = response || (() => {});
         let server = new Server(ACCOUNT_URL);
-        server.post("type=rank&key=" + key, inputStream => {
+        server.post("type=sort&key=" + key, inputStream => {
             if (inputStream !== null) {
                 let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
                     buffer,
@@ -1112,8 +1112,8 @@ let me = this.me || {};
      * @since 2016-05-29
      * @returns {String} Returns User's ID.
      */
-    Account.prototype.getUserId = function () {
-        return this._userId;
+    Account.prototype.getUserCode = function () {
+        return this._userCode;
     };
 
     /**
@@ -1135,7 +1135,7 @@ let me = this.me || {};
         if (Text.verifyId(this._id) && Text.verifyPassword(this._password)) {
             let thiz = this,
                 server = new Server(ACCOUNT_URL);
-            server.post("type=sign_in&id=" + thiz._id + "&pw=" + thiz._password, inputStream => {
+            server.post("type=login&id=" + thiz._id + "&password=" + thiz._password, inputStream => {
                 if (inputStream !== null) {
                     let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
                         buffer,
@@ -1151,7 +1151,7 @@ let me = this.me || {};
                         response(Account.LOGIN_FAIL);
                     } else {
                         let arr = str.split("#");
-                        thiz._userId = arr[1];
+                        thiz._userCode = arr[1];
                         thiz.getDataFromServer("name", (code, str) => code === Account.GET_SUCCESS && (thiz._name = str));
                         thiz.getDataFromServer("friends", (code, str) => {
                             if (code === Account.GET_SUCCESS) {
@@ -1189,7 +1189,7 @@ let me = this.me || {};
      * @since 2016-05-29
      */
     Account.prototype.logout = function () {
-        this._userId = null;
+        this._userCode = null;
         this._isAvailable = false;
         return this;
     };
@@ -1204,7 +1204,7 @@ let me = this.me || {};
     Account.prototype.modifyData = function (key, value, response) {
         response = response || (() => {});
         let server = new Server(ACCOUNT_URL);
-        server.post("type=modify_user&userid=" + this._userId + "&key=" + key + "&value=" + value, inputStream => {
+        server.post("type=set&user_code=" + this._userCode + "&key=" + key + "&value=" + value, inputStream => {
             if (inputStream !== null) {
                 let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
                     buffer,
@@ -1246,7 +1246,7 @@ let me = this.me || {};
         if (Text.verifyPassword(password) && Text.verifyName(name) && Text.verifyEmail(email)) {
             let thiz = this,
                 server = new Server(ACCOUNT_URL);
-            server.post("type=modify_user&userid=" + this._userId + "&key=pw|name|email&value=" + [password, name, email].join("|"), inputStream => {
+            server.post("type=set&user_code=" + this._userCode + "&key=password|name|email&value=" + [password, name, email].join("|"), inputStream => {
                 if (inputStream !== null) {
                     let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
                         buffer,
@@ -1258,17 +1258,14 @@ let me = this.me || {};
                     byteArrayOutputStream.close();
                     str = new String_(byteArrayOutputStream.toByteArray());
                     if (str.contains("Error")) {
-                        Toast.show(str);
                         response(Account.EDIT_FAIL);
                     } else {
-                        let arr = str.split("#");
                         thiz._password = password;
                         thiz._name = name;
                         thiz._email = email;
-                        thiz._userId = arr[1];
-                        Toast.show(arr[0]);
                         response(Account.EDIT_SUCCESS);
                     }
+                    Toast.show((str + "").replace(/(.+)\1+/g, "$1"));
                 } else {
                     Toast.show("Error: Cannot connect to the server.");
                     response(Account.EDIT_FAIL);

@@ -2379,7 +2379,7 @@ let me = this.me || {};
     }
 
     /**
-     * Display the window of color picker.
+     * Shows the window of color picker.
      * @since 2017-01-26
      */
     ColorPickerWindow.prototype.show = function () {
@@ -3009,13 +3009,18 @@ let me = this.me || {};
 
     NotificationWindow.getInstance = function () {
         if (typeof notiWindowInstance === "undefined") {
+            /** @lends me.astro.widget.NotificationWindow */
             function NotiWindowInstance() {
                 this._theme = Theme.DEFAULT;
                 this._isRunning = false;
             }
             NotiWindowInstance.prototype = {
                 constructor: NotificationWindow,
-                dismissHistoryWindow() {
+                /**
+                 * Disposes of the notification window.
+                 * @since 2017-01-29
+                 */
+                dismiss() {
                     let layout = this._layout,
                         window = this._window;
                     new Thread_({
@@ -3041,17 +3046,36 @@ let me = this.me || {};
                     }).start();
                     return this;
                 },
+                /**
+                 * Returns the theme of the notification window.
+                 * @since 2017-01-29
+                 * @returns {me.astro.design.Theme} Theme of the notification window
+                 */
                 getTheme() {
                     return this._theme;
                 },
+                /**
+                 * Returns whether the notification window is currently running.
+                 * @since 2017-01-29
+                 * @returns {Boolean} Whether the notification window is running
+                 */
                 isRunning() {
                     return this._isRunning;
                 },
+                /**
+                 * Sets the theme of the notification window.
+                 * @since 2017-01-29
+                 * @param {me.astro.design.Theme} Theme of the notification window
+                 */
                 setTheme(theme) {
                     this._theme = theme;
                     return this;
                 },
-                showHistoryWindow() {
+                /**
+                 * Shows the window on the screen.
+                 * @since 2017-01-29
+                 */
+                show() {
                     let thiz = this,
                         theme = thiz._theme;
                     CONTEXT.runOnUiThread({
@@ -3064,7 +3088,7 @@ let me = this.me || {};
                             anim.setDuration(500);
                             anim.setInterpolator(new DecelerateInterpolator_());
                             layout.addView(new Button()
-                                .setEffect(() => thiz.dismissHistoryWindow())
+                                .setEffect(() => thiz.dismiss())
                                 .setText("Close")
                                 .show());
                             layout.setBackgroundDrawable(new ColorDrawable_(theme.getNotificationWindow(Theme.BACKGROUND_COLOR)));
@@ -3077,6 +3101,10 @@ let me = this.me || {};
                     });
                     return this;
                 },
+                /**
+                 * Starts the notification window.
+                 * @since 2017-01-29
+                 */
                 start() {
                     let thiz = this;
                     CONTEXT.runOnUiThread({
@@ -3091,7 +3119,7 @@ let me = this.me || {};
                                     case MotionEvent_.ACTION_CANCEL:
                                     case MotionEvent_.ACTION_UP:
                                         if (thiz._isRunning && event.getX() - touchX > DP * 16 && touchX >= 0 && touchX <= DP * 16) {
-                                            thiz.showHistoryWindow();
+                                            thiz.show();
                                         }
                                         break;
                                     }
@@ -3103,6 +3131,10 @@ let me = this.me || {};
                     this._isRunning = true;
                     return this;
                 },
+                /**
+                 * Stops the notification window.
+                 * @since 2017-01-29
+                 */
                 stop() {
                     this._isRunning = false;
                     return this;
@@ -3738,7 +3770,7 @@ let me = this.me || {};
     ShowcaseWindow.prototype.show = function () {
         let itemXY = this._itemXY,
             radius = this._radius,
-            bitmap = Bitmap_.createBitmap(DEVICE_WIDTH, DEVICE_HEIGHT, Bitmap_.Config.ARGB_8888),
+            bitmap = Bitmap_.createBitmap(DEVICE_WIDTH, DEVICE_HEIGHT,  Bitmap_.Config.ARGB_8888),
             canvas = new Canvas_(bitmap),
             paint = new Paint_(),
             drawable = new BitmapDrawable_(bitmap);
@@ -4188,8 +4220,7 @@ let me = this.me || {};
         thiz._layouts = [];
         thiz._toggles = [];
         thiz._window = new PopupWindow_(CONTEXT);
-        thiz._windowLayout = new 
-LinearLayout_(CONTEXT);
+        thiz._windowLayout = new LinearLayout_(CONTEXT);
         thiz._sideBarLayout = new LinearLayout_(CONTEXT);
         thiz._contentLayout = new FrameLayout_(CONTEXT);
         thiz._windowLayout.addView(thiz._sideBarLayout, DP * 60, thiz._height);
@@ -4238,7 +4269,7 @@ LinearLayout_(CONTEXT);
     };
 
     /**
-     * Disposes of the progress window.
+     * Disposes of the window.
      * @since 2016-05-27
      */
     Window.prototype.dismiss = function () {

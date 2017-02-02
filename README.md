@@ -3,9 +3,14 @@
 ModPE integrated library
 
 ## Introduction
-![main](https://github.com/Astro36/AstroLibrary/blob/master/res/img_main.png)
+![main](https://github.com/Astro36/AstroLibrary/blob/master/res/img_main_0.png)
+![main](https://github.com/Astro36/AstroLibrary/blob/master/res/img_main_1.png)
 ![login](https://github.com/Astro36/AstroLibrary/blob/master/res/img_login.png)
 ![sign up](https://github.com/Astro36/AstroLibrary/blob/master/res/img_sign_up.png)
+![account](https://github.com/Astro36/AstroLibrary/blob/master/res/img_account.png)
+![friends_manager](https://github.com/Astro36/AstroLibrary/blob/master/res/img_friends_manager.png)
+![player_manager](https://github.com/Astro36/AstroLibrary/blob/master/res/img_player_manager.png)
+![settings](https://github.com/Astro36/AstroLibrary/blob/master/res/img_settings.png)
 This is ModPE integrated library for BlockLauncher.
 
 ## ChangeLog

@@ -3065,7 +3065,7 @@ let me = this.me || {};
                 /**
                  * Sets the theme of the notification window.
                  * @since 2017-01-29
-                 * @param {me.astro.design.Theme} Theme of the notification window
+                 * @param {me.astro.design.Theme} theme Theme of the notification window
                  */
                 setTheme(theme) {
                     this._theme = theme;

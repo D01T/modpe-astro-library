@@ -3013,24 +3013,47 @@ let me = this.me || {};
             function NotiWindowInstance() {
                 this._theme = Theme.DEFAULT;
                 this._isRunning = false;
+                this._notifications = [];
+                this._unread = 0;
             }
             NotiWindowInstance.prototype = {
                 constructor: NotificationWindow,
+                /**
+                 * Adds a notification.
+                 * @since 2017-01-29
+                 * @param {String} title Title of notification
+                 * @param {String} text Text of notification
+                 * @param {String} [buttonText] Text of notification button
+                 * @param {Function} [func] Function of notification button
+                 */
+                addNotification(title, text, buttonText, func) {
+                    this._notifications.push({
+                        title: title,
+                        text: text,
+                        buttonText: buttonText,
+                        func: func
+                    });
+                    this._unread ++;
+                    return this;
+                },
                 /**
                  * Disposes of the notification window.
                  * @since 2017-01-29
                  */
                 dismiss() {
-                    let layout = this._layout,
+                    let windowLayout = this._windowLayout,
                         window = this._window;
                     new Thread_({
                         run() {
                             CONTEXT.runOnUiThread({
                                 run() {
-                                    let anim = new TranslateAnimation_(0, DP * -200, 0, 0);
-                                    anim.setDuration(500);
-                                    anim.setInterpolator(new DecelerateInterpolator_());
-                                    layout.startAnimation(anim);
+                                    if (windowLayout instanceof LinearLayout_) {
+                                        let anim = new TranslateAnimation_(0, DP * -200, 0, 0);
+                                        anim.setDuration(500);
+                                        anim.setInterpolator(new DecelerateInterpolator_());
+                                        windowLayout.startAnimation(anim);
+                                        windowLayout = null;
+                                    }
                                 }
                             });
                             Thread_.sleep(500);
@@ -3077,24 +3100,78 @@ let me = this.me || {};
                  */
                 show() {
                     let thiz = this,
-                        theme = thiz._theme;
+                        theme = thiz._theme,
+                        notifications = thiz._notifications,
+                        unread = thiz._unread;
                     CONTEXT.runOnUiThread({
                         run() {
-                            let anim = new TranslateAnimation_(DP * -200, 0, 0, 0),
+                            let touchX,
+                                anim = new TranslateAnimation_(DP * -200, 0, 0, 0),
                                 drawable = new GradientDrawable_(GradientDrawable_.Orientation.LEFT_RIGHT, [Color.BLACK, 0]),
-                                layout = thiz._layout = new LinearLayout_(CONTEXT),
-                                windowLayout = thiz._layout = new LinearLayout_(CONTEXT),
+                                layout = new LinearLayout_(CONTEXT),
+                                notiLayout = thiz._layout = new LinearLayout_(CONTEXT),
+                                windowLayout = thiz._windowLayout = new LinearLayout_(CONTEXT),
                                 window = thiz._window = new PopupWindow_(windowLayout, DP * 208, -1);
                             anim.setDuration(500);
                             anim.setInterpolator(new DecelerateInterpolator_());
-                            layout.addView(new Button()
-                                .setEffect(() => thiz.dismiss())
-                                .setText("Close")
+                            layout.addView(new ScrollView(theme)
+                                .addView(thiz._layout)
+                                .setWidth(DP * 192)
                                 .show());
                             layout.setBackgroundDrawable(new ColorDrawable_(theme.getNotificationWindow(Theme.BACKGROUND_COLOR)));
+                            for (let i = notifications.length; i--;) {
+                                let notification = notifications[i],
+                                    viewLayout = new LinearLayout_(CONTEXT);
+                                viewLayout.addView(new TextView(theme)
+                                    .setText(notification.title)
+                                    .setTextColor(unread > 0 ?theme.getNotificationWindow(Theme.EFFECT_COLOR) : theme.getNotificationWindow(Theme.TEXT_COLOR))
+                                    .setTextSize(18)
+                                    .show())
+                                viewLayout.addView(new TextView(theme)
+                                    .setText(notification.text)
+                                    .show())
+                                if (typeof notification.func === "function") {
+                                    viewLayout.addView(new Button(theme)
+                                    .setEffect(notification.func)
+                                    .setText(notification.buttonText)
+                                    .setWH(DP * 162, DP * 36)
+                                    .show())
+                                }
+                                viewLayout.addView(new Divider(theme).show());
+                                viewLayout.setOrientation(1);
+                                notiLayout.addView(viewLayout, -1, -2);
+                                if (unread > 0) {
+                                    unread --;
+                                }
+                            }
+                            thiz._unread = unread;
+                            notiLayout.addView(new TextView(theme)
+                                .setGravity(Gravity_.CENTER)
+                                .setText("Swipe the edge of the window to the left to close the window")
+                                .setTextColor(ColorUtils.setAlpha(theme.getNotificationWindow(Theme.TEXT_COLOR), 160))
+                                .setTextSize(10)
+                                .show())
+                            notiLayout.setOrientation(1);
+                            notiLayout.setPadding(DP * 4, DP * 4, DP * 4, DP * 4);
                             windowLayout.addView(layout, -1, -1);
                             windowLayout.setBackgroundDrawable(drawable);
-                            windowLayout.setPadding(0, 0, DP * 8, 0);
+                            windowLayout.setPadding(0, 0, DP * 16, 0);
+                            windowLayout.setOnTouchListener(new View_.OnTouchListener({
+                                onTouch(v, event) {
+                                    switch (event.getAction()) {
+                                    case MotionEvent_.ACTION_DOWN:
+                                        touchX = event.getX();
+                                        break;
+                                    case MotionEvent_.ACTION_CANCEL:
+                                    case MotionEvent_.ACTION_UP:
+                                        if (touchX - event.getX() > DP * 16 && touchX >= 0 && touchX <= DP * 208) {
+                                            thiz.dismiss();
+                                        }
+                                        break;
+                                    }
+                                    return true;
+                                }
+                            }));
                             windowLayout.startAnimation(anim);
                             window.showAtLocation(SCREEN, Gravity_.CENTER | Gravity_.LEFT, 0, 0);
                         }
@@ -3577,6 +3654,17 @@ let me = this.me || {};
      */
     ScrollView.prototype.setTrackDrawable = function (drawable) {
         this._scroller.setBackgroundDrawable(drawable);
+        return this;
+    };
+
+    /**
+     * Sets the width of scroll view.
+     * @since 2017-02-03
+     * @param {Number} width Width of scroll view
+     */
+    ScrollView.prototype.setWidth = function (width) {
+        this._width = width;
+        this._scrollView.setLayoutParams(new LinearLayout_.LayoutParams(this._width - DP * 6, -1));
         return this;
     };
 

@@ -97,7 +97,6 @@ let me = this.me || {};
         NAME = "Astro Library",
         NAME_CODE = "me_astro_library",
         VERSION = "2.0",
-        VERSION_URL = GITHUB_URL + "version.txt",
         ACCOUNT_URL = "http://minedev.dothome.co.kr/deneb/server.php",
         NOTICE_URL = "http://minedev.dothome.co.kr/deneb/notice.txt",
         DEVELOPER = "Astro",
@@ -106,14 +105,13 @@ let me = this.me || {};
         DEVICE_HEIGHT = CONTEXT.getScreenHeight(),
         DEVICE_MODEL = Build_.MODEL,
         DEVICE_VERSION = Build_.VERSION.RELEASE,
-        TRANSLATION_TEXT = "Cannot connect to the server.\n- 서버 오류. 이 오류를 발견한다면 즉시 개발자에게 알려주세요.\n\nCan not find player.\n- 맵 안에서만 사용 가능한 기능입니다.\n\nCannot find the user.\n- 서버에 올바르지 않은 계정 아이디가 입력되었습니다.\n\nIncompatible version. (Library version ≥ {version})\n- 라이브러리의 버전이 호환되지 않습니다. 최신 버전으로 업데이트해주세요.\n\nInvalid format.\n- 유효하지 않은 형식입니다.\n    ID & Password: 4~12자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    Name: 1~20자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    E-mail: 네이버 E-mail만 사용 가능합니다.\n\nInvalid number.\n- 유효하지 않은 숫자입니다. 정수를 입력해주세요.\n\nInvalid parameters.\n- 스크립트 오류. 해당 스크립트 개발자에게 문의하세요.\n\nInvalid version format.\n- 유효하지 않은 버전 형식입니다. 1.0과 같은 형식으로 입력해주세요.\n\nNo Internet.\n- 인터넷에 연결해주세요.\n\nTampered script.\n- 무단수정된 스크립트\n\nThe password is incorrect.\n- 비밀번호가 올바르지 않습니다.\n\nThis e-mail is already used.\n-이미 사용중인 E-mail입니다. 다른 E-mail를 입력하세요.\n\nThis ID is already used.\n- 이미 사용중인 아이디입니다. 다른 아이디를 입력하세요.\n\nThis ID is not accepted.\n- 아이디가 아직 승인되지 않았습니다. 개발자가 아이디를 사용 허가할 때까지 기다려주세요.\n\nThis ID is not signed up the server.\n- 서버에 가입하지 않은 아이디입니다. 서버에 가입해주세요.",
+        TRANSLATION_TEXT = "Cannot connect to the server.\n- 서버 오류. 이 오류를 발견한다면 즉시 개발자에게 알려주세요.\n\nCan not find player.\n- 맵 안에서만 사용 가능한 기능입니다.\n\nCannot find the user.\n- 서버에 올바르지 않은 계정 아이디가 입력되었습니다.\n\nIncompatible version. (Library version ≥ {version})\n- 라이브러리의 버전이 호환되지 않습니다. 최신 버전으로 업데이트해주세요.\n\nInvalid format.\n- 유효하지 않은 형식입니다.\n    ID & Password: 4~12자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    Name: 1~20자리의 영어, 숫자, 언더바(_)만 사용 가능합니다.\n    E-mail: 네이버 E-mail만 사용 가능합니다.\n\nInvalid number.\n- 유효하지 않은 숫자입니다. 정수를 입력해주세요.\n\nInvalid parameters.\n- 스크립트 오류. 해당 스크립트 개발자에게 문의하세요.\n\nInvalid version format.\n- 유효하지 않은 버전 형식입니다. 1.0과 같은 형식으로 입력해주세요.\n\nNo Internet.\n- 인터넷에 연결해주세요.\n\nThe password is incorrect.\n- 비밀번호가 올바르지 않습니다.\n\nThis e-mail is already used.\n-이미 사용중인 E-mail입니다. 다른 E-mail를 입력하세요.\n\nThis ID is already used.\n- 이미 사용중인 아이디입니다. 다른 아이디를 입력하세요.\n\nThis ID is not accepted.\n- 아이디가 아직 승인되지 않았습니다. 개발자가 아이디를 사용 허가할 때까지 기다려주세요.\n\nThis ID is not signed up the server.\n- 서버에 가입하지 않은 아이디입니다. 서버에 가입해주세요.",
         SHARE_TEXT = "Hello world",
         LICENSE_TEXT = "AstroLibrary is licensed under the GNU Lesser General Public License, Version 3 (LGPL-3.0).";
 
     let hasLevel = false,
         notiWindowInstance,
         preference,
-        scriptChecker,
         notificationWindow,
         verticalWindow,
         notice = "Error: No Internet.",
@@ -1677,189 +1675,6 @@ let me = this.me || {};
      */
     Preference.prototype.toString = function () {
         return JSON.stringify(this._obj);
-    };
-
-
-
-    /**
-     * Class representing a script checker.
-     * @since 2016-08-20
-     * @class
-     * @memberOf me.astro.utils
-     * @param {me.astro.utils.ScriptInfo} info Script information
-     */
-    function ScriptChecker(info) {
-        this._info = info;
-    }
-
-    /**
-     * Returns a hash of the string.
-     * @since 2016-08-20
-     * @param {String} str String
-     * @returns {String} Hash of the string
-     */
-    ScriptChecker.getHash = function (str) {
-        let messageDigest = MessageDigest_.getInstance("SHA-256"),
-            stringBuffer = new StringBuffer_(),
-            bytes;
-        messageDigest.update(new String_(str).getBytes());
-        bytes = messageDigest.digest();
-        for (let i = 0, len = bytes.length; i < len; i++) {
-            stringBuffer.append(Integer_.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
-        }
-        return stringBuffer.toString();
-    };
-
-    /**
-     * Check if the script is last version.
-     * @since 2016-08-21
-     * @returns {Boolean} If the script is last version, returns true
-     */
-    ScriptChecker.prototype.isLastVersion = function () {
-        let info = this._info,
-            tmpA = info.getVersion().split("."),
-            tmpB = readHtml(info.getVersionUrl()).split(".");
-        for (let i = 0, len = Math.max(tmpA.length, tmpB.length); i < len; i++) {
-            let a = Number(tmpA[i] || 0),
-                b = Number(tmpB[i] || 0);
-            if (a > b) {
-                return true;
-            } else if (a < b) {
-                return false;
-            }
-        }
-        return true;
-    };
-
-    /**
-     * Check if the script is modified.
-     * @since 2016-08-20
-     * @returns {Boolean} If the script is modified, returns true
-     */
-    ScriptChecker.prototype.isModified = function () {
-        let url = this._info.getHashUrl();
-        if (typeof url === "string") {
-            let hash = readHtml(url),
-                iterator = ScriptManager_.enabledScripts.iterator();
-            while (iterator.hasNext()) {
-                if (hash === ScriptChecker.getHash(File.read(CONTEXT.getDir("modpescripts", 0) + "/" + iterator.next()))) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            return false;
-        }
-    };
-
-
-
-    /**
-     * Class representing a script information.
-     * @since 2016-08-22
-     * @class
-     * @memberOf me.astro.utils
-     * @param {String} [name=""] Name of the script
-     * @param {String} [version="1.0"] Version of the script
-     */
-    function ScriptInfo(name, version) {
-        this._name = name || "";
-        this._version = version || "1.0";
-    }
-
-    /**
-     * Returns the developer name of the script.
-     * @since 2016-08-22
-     * @returns {String} Developer name of the script.
-     */
-    ScriptInfo.prototype.getDeveloper = function () {
-        return this._developer;
-    };
-
-    /**
-     * Returns the hash url of the script.
-     * @since 2016-08-22
-     * @returns {String} Hash url of the script
-     */
-    ScriptInfo.prototype.getHashUrl = function () {
-        return this._hashUrl;
-    };
-
-    /**
-     * Returns the name of the script.
-     * @since 2016-08-22
-     * @returns {String} Name of the script
-     */
-    ScriptInfo.prototype.getName = function () {
-        return this._name;
-    };
-
-    /**
-     * Returns the version of the script.
-     * @since 2016-08-22
-     * @returns {String} Version of the script
-     */
-    ScriptInfo.prototype.getVersion = function () {
-        return this._version;
-    };
-
-    /**
-     * Returns the version url of the script.
-     * @since 2016-08-22
-     * @returns {String} Version url of the script
-     */
-    ScriptInfo.prototype.getVersionUrl = function () {
-        return this._versionUrl;
-    };
-
-    /**
-     * Sets the developer name of the script.
-     * @since 2016-08-22
-     * @param {String} developer Developer name of the script.
-     */
-    ScriptInfo.prototype.setDeveloper = function (developer) {
-        this._developer = developer;
-        return this;
-    };
-
-    /**
-     * Sets the hash url of the script.
-     * @since 2016-08-22
-     * @param {String} url Hash url of the script
-     */
-    ScriptInfo.prototype.setHashUrl = function (url) {
-        this._hashUrl = url;
-        return this;
-    };
-
-    /**
-     * Sets the name of the script.
-     * @since 2016-08-22
-     * @param {String} name Name of the script
-     */
-    ScriptInfo.prototype.setName = function (name) {
-        this._name = name;
-        return this;
-    };
-
-    /**
-     * Sets the version of the script.
-     * @since 2016-08-22
-     * @param {String} version Version of the script
-     */
-    ScriptInfo.prototype.setVersion = function (version) {
-        this._version = version;
-        return this;
-    };
-
-    /**
-     * Sets the version url of the script.
-     * @since 2016-08-22
-     * @param {String} url Version url of the script
-     */
-    ScriptInfo.prototype.setVersionUrl = function (url) {
-        this._versionUrl = url;
-        return this;
     };
 
 
@@ -5189,15 +5004,6 @@ let me = this.me || {};
                 new Thread_({
                     run() {
                         notice = readHtml(NOTICE_URL);
-                        scriptChecker = new ScriptChecker(new ScriptInfo(NAME, VERSION)
-                            .setDeveloper(DEVELOPER)
-                            .setVersionUrl(VERSION_URL));
-                        if (!scriptChecker.isLastVersion()) {
-                            Toast.show("New update available.");
-                        }
-                        if (scriptChecker.isModified()) {
-                            Toast.show("Error: Tampered script.");
-                        }
                     }
                 }).start();
             }
@@ -5315,8 +5121,6 @@ let me = this.me || {};
         AddonManager: AddonManager,
         File: File,
         Preference: Preference,
-        ScriptChecker: ScriptChecker,
-        ScriptInfo: ScriptInfo,
         Text: Text
     };
     astro.widget = {

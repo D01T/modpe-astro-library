@@ -74,9 +74,7 @@ let me = this.me || {};
         FileOutputStream_ = java.io.FileOutputStream,
         InputStreamReader_ = java.io.InputStreamReader,
         Byte_ = java.lang.Byte,
-        Integer_ = java.lang.Integer,
         String_ = java.lang.String,
-        StringBuffer_ = java.lang.StringBuffer,
         Thread_ = java.lang.Thread,
         Array_ = java.lang.reflect.Array,
         DatagramSocket_ = java.net.DatagramSocket,
@@ -84,7 +82,6 @@ let me = this.me || {};
         InetSocketAddress_ = java.net.InetSocketAddress,
         URL_ = java.net.URL,
         ByteBuffer_ = java.nio.ByteBuffer,
-        MessageDigest_ = java.security.MessageDigest,
         ZipInputStream_ = java.util.zip.ZipInputStream,
         ScriptManager_ = net.zhuoweizhang.mcpelauncher.ScriptManager,
         HttpGet_ = org.apache.http.client.methods.HttpGet,
@@ -2848,7 +2845,7 @@ let me = this.me || {};
                         buttonText: buttonText,
                         func: func
                     });
-                    this._unread ++;
+                    this._unread++;
                     return this;
                 },
                 /**
@@ -2939,24 +2936,25 @@ let me = this.me || {};
                                     viewLayout = new LinearLayout_(CONTEXT);
                                 viewLayout.addView(new TextView(theme)
                                     .setText(notification.title)
-                                    .setTextColor(unread > 0 ?theme.getNotificationWindow(Theme.EFFECT_COLOR) : theme.getNotificationWindow(Theme.TEXT_COLOR))
+                                    .setTextColor(unread > 0 ? theme.getNotificationWindow(Theme.EFFECT_COLOR) : theme.getNotificationWindow(Theme.TEXT_COLOR))
                                     .setTextSize(18)
-                                    .show())
+                                    .show());
                                 viewLayout.addView(new TextView(theme)
                                     .setText(notification.text)
-                                    .show())
+                                    .setTextSize(12)
+                                    .show());
                                 if (typeof notification.func === "function") {
                                     viewLayout.addView(new Button(theme)
-                                    .setEffect(notification.func)
-                                    .setText(notification.buttonText)
-                                    .setWH(DP * 162, DP * 36)
-                                    .show())
+                                        .setEffect(notification.func)
+                                        .setText(notification.buttonText)
+                                        .setWH(DP * 162, DP * 36)
+                                        .show());
                                 }
                                 viewLayout.addView(new Divider(theme).show());
                                 viewLayout.setOrientation(1);
                                 notiLayout.addView(viewLayout, -1, -2);
                                 if (unread > 0) {
-                                    unread --;
+                                    unread--;
                                 }
                             }
                             thiz._unread = unread;
@@ -2965,7 +2963,7 @@ let me = this.me || {};
                                 .setText("Swipe the edge of the window to the left to close the window")
                                 .setTextColor(ColorUtils.setAlpha(theme.getNotificationWindow(Theme.TEXT_COLOR), 160))
                                 .setTextSize(10)
-                                .show())
+                                .show());
                             notiLayout.setOrientation(1);
                             notiLayout.setPadding(DP * 4, DP * 4, DP * 4, DP * 4);
                             windowLayout.addView(layout, -1, -1);
@@ -3673,7 +3671,7 @@ let me = this.me || {};
     ShowcaseWindow.prototype.show = function () {
         let itemXY = this._itemXY,
             radius = this._radius,
-            bitmap = Bitmap_.createBitmap(DEVICE_WIDTH, DEVICE_HEIGHT,  Bitmap_.Config.ARGB_8888),
+            bitmap = Bitmap_.createBitmap(DEVICE_WIDTH, DEVICE_HEIGHT, Bitmap_.Config.ARGB_8888),
             canvas = new Canvas_(bitmap),
             paint = new Paint_(),
             drawable = new BitmapDrawable_(bitmap);
@@ -5013,6 +5011,9 @@ let me = this.me || {};
             if (preference.get("enable_notifications")) {
                 notificationWindow.start();
             }
+            notificationWindow.addNotification("About", "AstroLibrary lets you add flat design and feel to your scripts.", "Get Started", () => {
+                CONTEXT.startActivity(new Intent_(Intent_.ACTION_VIEW, Uri_.parse("https://github.com/Astro36/AstroLibrary")));
+            });
             CONTEXT.runOnUiThread({
                 run() {
                     verticalWindow.addView(new ImageButton(Shape.CIRCLE)

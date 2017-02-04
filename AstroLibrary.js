@@ -107,7 +107,7 @@ let me = this.me || {};
         LICENSE_TEXT = "AstroLibrary is licensed under the GNU Lesser General Public License, Version 3 (LGPL-3.0).";
 
     let hasLevel = false,
-        notiWindowInstance,
+        notificationWindowInstance,
         preference,
         notificationWindow,
         verticalWindow,
@@ -2820,15 +2820,15 @@ let me = this.me || {};
     function NotificationWindow() {}
 
     NotificationWindow.getInstance = function () {
-        if (typeof notiWindowInstance === "undefined") {
+        if (typeof notificationWindowInstance === "undefined") {
             /** @lends me.astro.widget.NotificationWindow */
-            function NotiWindowInstance() {
+            function NotificationWindowInstance() {
                 this._theme = Theme.DEFAULT;
                 this._isRunning = false;
                 this._notifications = [];
                 this._unread = 0;
             }
-            NotiWindowInstance.prototype = {
+            NotificationWindowInstance.prototype = {
                 constructor: NotificationWindow,
                 /**
                  * Adds a notification.
@@ -3030,10 +3030,10 @@ let me = this.me || {};
                     return this;
                 }
             };
-            notiWindowInstance = new NotiWindowInstance();
-            return notiWindowInstance;
+            notificationWindowInstance = new NotificationWindowInstance();
+            return notificationWindowInstance;
         } else {
-            return notiWindowInstance;
+            return notificationWindowInstance;
         }
     };
 

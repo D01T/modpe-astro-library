@@ -4985,7 +4985,7 @@ let me = this.me || {};
      * @memberOf me.astro
      */
     function init() {
-        let res = ["ic_account_circle.png", "ic_colorize.png", "ic_edit.png", "ic_group.png", "ic_help_outline.png", "ic_info_outline.png", "ic_open_with.png", "ic_palette.png", "ic_person.png", "ic_person_add.png", "ic_settings.png", "ic_swap_horiz.png", "img_astro_library_transparent.png"],
+        let res = ["ic_account_circle.png", "ic_announcement.png", "ic_colorize.png", "ic_edit.png", "ic_group.png", "ic_help_outline.png", "ic_info_outline.png", "ic_open_with.png", "ic_palette.png", "ic_person.png", "ic_person_add.png", "ic_settings.png", "ic_swap_horiz.png", "img_astro_library_transparent.png"],
             isExists = true;
         for (let i = res.length; i--;) {
             if (!new File_(PATH, res[i]).exists()) {

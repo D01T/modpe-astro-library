@@ -939,7 +939,7 @@ let me = this.me || {};
         response = response || (() => {});
         if (Text.verifyId(id) && Text.verifyPassword(password) && Text.verifyName(name) && Text.verifyEmail(email)) {
             let server = new Server(ACCOUNT_URL);
-            server.post("type=sign_up&id=" + id + "&pw=" + password + "&email=" + email + "&name=" + name, inputStream => {
+            server.post("type=sign_up&id=" + id + "&password=" + password + "&email=" + email + "&name=" + name, inputStream => {
                 if (inputStream !== null) {
                     let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
                         buffer,

@@ -1361,75 +1361,96 @@ let me = this.me || {};
 
 
     /**
-     * Class representing a user server.
-     * @since 2016-09-11
+     * Class representing a user connection.
+     * @since 2017-02-18
      * @class
      * @memberOf me.astro.security
+     * @param {me.astro.security.Account} account Account instance
      */
-    function UserServer(account) {
-        let thiz = this;
-        thiz._account = account;
-        thiz._isRunning = true;
-        thiz._receivers = [];
-        thiz._response = (() => {});
-        new Thread_({
-            run() {
-                try {
-                    var buffer = Array_.newInstance(Byte_.TYPE, 128);
-                    var datagramSocket = new DatagramSocket_(19130);
-                    var datagramPacket = new DatagramPacket_(buffer, buffer.length);
-                    while (thiz._isRunning) {
-                        Thread_.sleep(1000);
-                        datagramSocket.receive(datagramPacket);
-                        let str = new String_(buffer, 0, datagramPacket.getLength());
-                        print(str);
-                        thiz._response(str);
-                    }
-                } catch (e) {
-                    print(e);
-                }
-            }
-        }).start();
+    function UserConnection(account) {
+        this._account = account;
+        this._isRunning = false;
+        this._response = (() => {});
+        this._cache = {};
     }
 
-    UserServer.prototype.addReceiver = function (id) {
-        let receivers = this._receivers;
-        if (receivers.indexOf(id) < 0) {
-            receivers.push(id);
-        }
+    UserConnection.prototype.isRunning = function () {
+        return this._isRunning;
+    };
+
+    UserConnection.prototype.setReceiver = function (func) {
+        this._response = func;
         return this;
     };
 
-    UserServer.prototype.send = function (str) {
-        let thiz = this,
-            account = this._account,
-            receivers = this._receivers;
-        if (account instanceof Account && account.isAvailable()) {
+    UserConnection.prototype.send = function (friendId, str) {
+        let cache = this._cache;
+        const callback = ip => {
             new Thread_({
                 run() {
                     try {
-                        let buffer = new String_(str).getBytes();
-                        for (let i = receivers.length; i--;) {
-                            let datagramSocket = new DatagramSocket_();
-                            datagramSocket.connect(new InetSocketAddress_(receivers[i], 19130));
-                            datagramSocket.send(new DatagramPacket_(buffer, buffer.length));
-                        }
+                        let buffer = new String_(str).getBytes(),
+                            socket = new DatagramSocket_(),
+                        socket.send(new DatagramPacket_(buffer, buffer.length, InetSocketAddress_.getByName(ip), 19000));
+                        socket.close();
                     } catch (e) {
                         print(e);
                     }
                 }
             }).start();
         }
+        if (friendId in cache) {
+            callback(cache[friendId]);
+        } else {
+            this._account.getFriendDataFromServer(friendId, "ip", (code, str) => {
+                if (code === Account.GET_SUCCESS) {
+                    callback(str);
+                }
+            });
+        }
         return this;
     };
 
-    UserServer.prototype.setResponse = function (func) {
-        this._response = func;
+    UserConnection.prototype.start = function () {
+        let thiz = this;
+        thiz._isRunning = true;
+        new Thread_({
+            run() {
+                try {
+                    let cache = thiz._cache,
+                        buffer = Array_.newInstance(Byte_.TYPE, 128),
+                        socket = new DatagramSocket_(19000),
+                        packet = new DatagramPacket_(buffer, buffer.length);
+                    while (thiz._isRunning) {
+                        Thread_.sleep(1000);
+                        socket.receive(packet);
+                        let str = new String_(packet.getData(), 0, packet.getLength());
+                        print(str);
+                        let ip = packet.getAddress().toString(),
+                            isUnknown = false;
+                        for (let id in cache) {
+                            if (cache[id] === ip) {
+                                thiz._response(friendId, str);
+                                isUnknown = false;
+                                break;
+                            }
+                        }
+                        if (isUnknown) {
+                            thiz._response("Unknown(" + ip + ")", str);
+                        }
+                    }
+                    socket.close();
+                } catch (e) {
+                    print(e);
+                }
+            }
+        }).start();
         return this;
     };
 
-    UserServer.prototype.stop = function () {
+    UserConnection.prototype.stop = function () {
         this._isRunning = false;
+        return this;
     };
 
 

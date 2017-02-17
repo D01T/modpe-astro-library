@@ -1019,6 +1019,41 @@ let me = this.me || {};
     };
 
     /**
+     * Gets friend's data from the server.
+     * @since 2017-02-18
+     * @param {String} friendId Friend's ID
+     * @param {String} key Key of data
+     * @param {Function} [response=function(code,str){}] Callback to be invoked when you connected the server.
+     */
+    Account.prototype.getFriendDataFromServer = function (friendId, key, response) {
+        response = response || (() => {});
+        let server = new Server(ACCOUNT_URL);
+        server.post("type=friend_get&user_code=" + this._userCode + "&friend_id=" + friendId + "&key=" + key, inputStream => {
+            if (inputStream !== null) {
+                let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
+                    buffer,
+                    str;
+                while ((buffer = inputStream.read()) !== -1) {
+                    byteArrayOutputStream.write(buffer);
+                }
+                inputStream.close();
+                byteArrayOutputStream.close();
+                str = new String_(byteArrayOutputStream.toByteArray());
+                if (str.contains("Error")) {
+                    Toast.show(str);
+                    response(Account.GET_FAIL);
+                } else {
+                    response(Account.GET_SUCCESS, str);
+                }
+            } else {
+                Toast.show("Error: Cannot connect to the server.");
+                response(Account.GET_FAIL);
+            }
+        });
+        return this;
+    };
+
+    /**
      * Returns user's E-mail.
      * @since 2016-07-04
      * @returns {String} User's E-mail
@@ -1129,7 +1164,7 @@ let me = this.me || {};
     Account.prototype.isRightFriend = function (friendId, response) {
         response = response || (() => {});
         let server = new Server(ACCOUNT_URL);
-        server.post("type=is_right_friend&user_code=" + this._userCode + "&friend_id=" + friendId, inputStream => {
+        server.post("type=friend_check&user_code=" + this._userCode + "&friend_id=" + friendId, inputStream => {
             if (inputStream !== null) {
                 let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
                     buffer,

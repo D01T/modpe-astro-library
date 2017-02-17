@@ -1121,6 +1121,40 @@ let me = this.me || {};
     };
 
     /**
+     * Checks if user is a right friend.
+     * @since 2017-02-18
+     * @param {String} friendId Friend's ID
+     * @param {Function} [response=function(code,isRightFriends){}] Callback to be invoked when you connected the server.
+     */
+    Account.prototype.isRightFriend = function (friendId, response) {
+        response = response || (() => {});
+        let server = new Server(ACCOUNT_URL);
+        server.post("type=is_right_friend&user_code=" + this._userCode + "&friend_id=" + friendId, inputStream => {
+            if (inputStream !== null) {
+                let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
+                    buffer,
+                    str;
+                while ((buffer = inputStream.read()) !== -1) {
+                    byteArrayOutputStream.write(buffer);
+                }
+                inputStream.close();
+                byteArrayOutputStream.close();
+                str = new String_(byteArrayOutputStream.toByteArray());
+                if (str.contains("Error")) {
+                    Toast.show(str);
+                    response(Account.GET_FAIL);
+                } else {
+                    response(Account.GET_SUCCESS, Boolean(str));
+                }
+            } else {
+                Toast.show("Error: Cannot connect to the server.");
+                response(Account.GET_FAIL);
+            }
+        });
+        return this;
+    };
+
+    /**
      * Sign in the server.
      * @since 2016-05-29
      * @param {Function} [response=function(code){}] Callback to be invoked when you connected the server.

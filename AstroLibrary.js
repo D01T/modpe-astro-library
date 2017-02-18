@@ -345,7 +345,7 @@ let me = this.me || {};
      * @returns {android.graphics.drawable.LayerDrawable} A drawable which has a shadow.
      */
     ShadowDrawable.create = function () {
-        let shadowDrawable = new LayerDrawable_([ShadowDrawable.RESOURCE, new ColorDrawable_(-1)]);
+        let shadowDrawable = new LayerDrawable_([ShadowDrawable.RESOURCE]);
         shadowDrawable.setLayerInset(0, DP * 3, DP * 6, DP * 3, DP * 3);
         return shadowDrawable;
     };
@@ -1390,7 +1390,7 @@ let me = this.me || {};
                 run() {
                     try {
                         let buffer = new String_(str).getBytes(),
-                            socket = new DatagramSocket_(),
+                            socket = new DatagramSocket_();
                         socket.send(new DatagramPacket_(buffer, buffer.length, InetSocketAddress_.getByName(ip), 19000));
                         socket.close();
                     } catch (e) {
@@ -2415,6 +2415,123 @@ let me = this.me || {};
      */
     EditText.prototype.setHintColor = function (color) {
         this._view.setHintTextColor(color);
+        return this;
+    };
+
+
+
+    /**
+     * Class representing a floating window.
+     * @since 2017-02-19
+     * @class
+     * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
+     */
+    function FloatingWindow(theme) {
+        theme = theme || Theme.DEFAULT;
+        this._theme = theme;
+        this._height = DP * 200;
+        this._width = DP * 360;
+        this._window = new PopupWindow_(CONTEXT);
+        this._layout = new LinearLayout_(CONTEXT);
+        this._layout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.TEXT_COLOR)));
+        this._layout.setOrientation(1);
+        this._window.setBackgroundDrawable(ShadowDrawable.create());
+        this._window.setContentView(this._layout);
+        this._window.setWidth(this._width + DP * 24);
+        this._window.setHeight(this._height + DP * 24);
+    }
+
+    /**
+     * Adds a layout on the floating window.
+     * @since 2017-02-19
+     * @param {android.view.View} view View
+     */
+    FloatingWindow.prototype.addView = function (view) {
+        this._layout.addView(view);
+        return this;
+    };
+
+    /**
+     * Disposes of the floating window.
+     * @since 2017-02-19
+     */
+    FloatingWindow.prototype.dismiss = function () {
+        let thiz = this;
+        CONTEXT.runOnUiThread({
+            run() {
+                thiz._window.dismiss();
+                thiz._window = null;
+            }
+        });
+        return this;
+    };
+
+    /**
+     * Returns the theme of the floating window.
+     * @since 2017-02-19
+     * @returns {me.astro.design.Theme} Theme of the window
+     */
+    FloatingWindow.prototype.getTheme = function () {
+        return this._theme;
+    };
+
+    /**
+     * Returns the floating window.
+     * @since 2017-02-19
+     * @returns {android.widget.PopupWindow} Window
+     */
+    FloatingWindow.prototype.getWindow = function () {
+        return this._window;
+    };
+
+    /**
+     * Returns the size of the floating window.
+     * @since 2017-02-19
+     * @returns {Array.<Number>} Width and height of the window
+     */
+    FloatingWindow.prototype.getWH = function () {
+        return [this._width, this._height];
+    };
+
+    /**
+     * Sets the color of the floating window.
+     * @since 2017-02-19
+     * @param {Number} color Color of the window
+     */
+    FloatingWindow.prototype.setColor = function (color) {
+        this._layout.setBackgroundDrawable(new ColorDrawable_(color));
+        return this;
+    };
+
+    /**
+     * Sets the focusable of the floating window.
+     * @since 2017-02-19
+     * @param {Boolean} focusable Focusable of the window
+     */
+    FloatingWindow.prototype.setFocusable = function (focusable) {
+        this._window.setFocusable(focusable);
+        return this;
+    };
+
+    /**
+     * Sets the size of the floating window.
+     * @since 2017-02-19
+     * @param {Number} width Width of the window
+     * @param {Number} height Height of the window
+     */
+    FloatingWindow.prototype.setWH = function (width, height) {
+        this._width = width;
+        this._height = height;
+        return this;
+    };
+
+    /**
+     * Shows the window on the floating screen.
+     * @since 2017-02-19
+     */
+    FloatingWindow.prototype.show = function () {
+        this._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
         return this;
     };
 
@@ -4346,7 +4463,7 @@ let me = this.me || {};
     Window.prototype.show = function () {
         let thiz = this,
             layouts = thiz._layouts;
-        thiz._window.showAtLocation(SCREEN, Gravity_.CENTER, -DP * 15, DP * 2);
+        thiz._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
         thiz._toggles[0].setChecked(true);
         for (let i = 1, len = layouts.length; i < len; i++) {
             layouts[i].setVisibility(View_.GONE);
@@ -4744,7 +4861,7 @@ let me = this.me || {};
                                             .setTextColor(Color.INDIGO)
                                             .setColor(Color.WHITE)
                                             .setEffect(view => {
-                                                let progressWindow = new ProgressWindow();
+                                                /*let progressWindow = new ProgressWindow();
                                                 progressWindow.setText("Removing...");
                                                 progressWindow.show();
                                                 user.removeFriend(view.getText(), code => {
@@ -4752,7 +4869,18 @@ let me = this.me || {};
                                                         window.dismiss();
                                                     }
                                                     progressWindow.dismiss();
-                                                });
+                                                });*/
+                                                let floatingWindow = new FloatingWindow();
+                                                floatingWindow.addView(new TextView()
+                                                        .setPadding(DP * 8, DP * 16, DP * 8, DP * 16)
+                                                        .setText("Manager")
+                                                        .setTextSize(24)
+                                                        .show())
+                                                    .addView(new Button()
+                                                        .setText("Close")
+                                                        .setEffect(() => floatingWindow.dismiss())
+                                                        .show())
+                                                    .show();
                                             })
                                             .setEffectColor(Color.WHITE)
                                             .setWH(-1, DP * 36)
@@ -5206,7 +5334,7 @@ let me = this.me || {};
     };
     astro.security = {
         Account: Account,
-        UserServer: UserServer
+        UserConnection: UserConnection
     };
     astro.utils = {
         AddonManager: AddonManager,
@@ -5223,6 +5351,7 @@ let me = this.me || {};
         ColorPickerWindow: ColorPickerWindow,
         Divider: Divider,
         EditText: EditText,
+        FloatingWindow: FloatingWindow,
         GridLayout: GridLayout,
         ImageButton: ImageButton,
         ImageToggle: ImageToggle,

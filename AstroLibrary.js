@@ -1836,7 +1836,6 @@ let me = this.me || {};
      * Class representing a view.
      * @since 2016-05-03
      * @class
-     * @abstract
      * @memberOf me.astro.widget
      */
     function View() {}
@@ -1862,11 +1861,10 @@ let me = this.me || {};
     /**
      * Sets a gravity for the view.
      * @since 2016-05-03
+     * @abstract
      * @param {Number} gravity Gravity for the view
      */
-    View.prototype.setGravity = function () {
-        return new Error("must be implemented by subclass!");
-    };
+    View.prototype.setGravity = function () {};
 
     /**
      * Sets the theme of the view.
@@ -2254,69 +2252,6 @@ let me = this.me || {};
 
 
     /**
-     * Class representing a window that shows a color picker.
-     * @since 2017-01-26
-     * @class
-     * @memberOf me.astro.widget
-     * @param {Number} [r=255] Red
-     * @param {Number} [g=0] Green
-     * @param {Number} [b=0] Blue
-     * @param {Function} [func=function(){}] Callback to be invoked when color was changed
-     */
-    function ColorPickerWindow(r, g, b, func) {
-        r = r || 255;
-        g = g || 0;
-        b = b || 0;
-        func = func || (() => {});
-        let viewer = this._viewer = new TextView_(CONTEXT);
-        this._picker = new ColorPicker(r, g, b, color => {
-            viewer.setBackgroundDrawable(new ColorDrawable_(color));
-            func(color);
-        });
-        viewer.setBackgroundDrawable(new ColorDrawable_(Color_.rgb(r, g, b)));
-        viewer.setGravity(Gravity_.CENTER);
-        viewer.setText("Click to close");
-        viewer.setTextColor(Color_.rgb(r, g, b));
-        viewer.setTextSize(1, 18);
-    }
-
-    /**
-     * Shows the window of color picker.
-     * @since 2017-01-26
-     */
-    ColorPickerWindow.prototype.show = function () {
-        let thiz = this;
-        CONTEXT.runOnUiThread({
-            run() {
-                let drawable = new GradientDrawable_(),
-                    layout = new LinearLayout_(CONTEXT),
-                    window = new PopupWindow_(layout, -2, -2);
-                thiz._viewer.setOnClickListener(new View_.OnClickListener({
-                    onClick(view) {
-                        CONTEXT.runOnUiThread({
-                            run() {
-                                window.dismiss();
-                                window = null;
-                            }
-                        });
-                    }
-                }));
-                drawable.setColor(Color_.rgb(97, 97, 97));
-                drawable.setCornerRadius(DP * 4);
-                layout.addView(thiz._picker.show(), DP * 280, DP * 240);
-                layout.addView(thiz._viewer, DP * 280, DP * 60);
-                layout.setBackgroundDrawable(drawable);
-                layout.setOrientation(1);
-                layout.setPadding(DP * 24, DP * 24, DP * 24, DP * 24);
-                window.setBackgroundDrawable(new ColorDrawable_(0));
-                window.showAtLocation(CONTEXT.getWindow().getDecorView(), Gravity_.CENTER, 0, 0);
-            }
-        });
-    };
-
-
-
-    /**
      * Class representing a divider.
      * @since 2017-01-27
      * @class
@@ -2415,123 +2350,6 @@ let me = this.me || {};
      */
     EditText.prototype.setHintColor = function (color) {
         this._view.setHintTextColor(color);
-        return this;
-    };
-
-
-
-    /**
-     * Class representing a floating window.
-     * @since 2017-02-19
-     * @class
-     * @memberOf me.astro.widget
-     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
-     */
-    function FloatingWindow(theme) {
-        theme = theme || Theme.DEFAULT;
-        this._theme = theme;
-        this._height = DP * 200;
-        this._width = DP * 360;
-        this._window = new PopupWindow_(CONTEXT);
-        this._layout = new LinearLayout_(CONTEXT);
-        this._layout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.TEXT_COLOR)));
-        this._layout.setOrientation(1);
-        this._window.setBackgroundDrawable(ShadowDrawable.create());
-        this._window.setContentView(this._layout);
-        this._window.setWidth(this._width + DP * 24);
-        this._window.setHeight(this._height + DP * 24);
-    }
-
-    /**
-     * Adds a layout on the floating window.
-     * @since 2017-02-19
-     * @param {android.view.View} view View
-     */
-    FloatingWindow.prototype.addView = function (view) {
-        this._layout.addView(view);
-        return this;
-    };
-
-    /**
-     * Disposes of the floating window.
-     * @since 2017-02-19
-     */
-    FloatingWindow.prototype.dismiss = function () {
-        let thiz = this;
-        CONTEXT.runOnUiThread({
-            run() {
-                thiz._window.dismiss();
-                thiz._window = null;
-            }
-        });
-        return this;
-    };
-
-    /**
-     * Returns the theme of the floating window.
-     * @since 2017-02-19
-     * @returns {me.astro.design.Theme} Theme of the window
-     */
-    FloatingWindow.prototype.getTheme = function () {
-        return this._theme;
-    };
-
-    /**
-     * Returns the floating window.
-     * @since 2017-02-19
-     * @returns {android.widget.PopupWindow} Window
-     */
-    FloatingWindow.prototype.getWindow = function () {
-        return this._window;
-    };
-
-    /**
-     * Returns the size of the floating window.
-     * @since 2017-02-19
-     * @returns {Array.<Number>} Width and height of the window
-     */
-    FloatingWindow.prototype.getWH = function () {
-        return [this._width, this._height];
-    };
-
-    /**
-     * Sets the color of the floating window.
-     * @since 2017-02-19
-     * @param {Number} color Color of the window
-     */
-    FloatingWindow.prototype.setColor = function (color) {
-        this._layout.setBackgroundDrawable(new ColorDrawable_(color));
-        return this;
-    };
-
-    /**
-     * Sets the focusable of the floating window.
-     * @since 2017-02-19
-     * @param {Boolean} focusable Focusable of the window
-     */
-    FloatingWindow.prototype.setFocusable = function (focusable) {
-        this._window.setFocusable(focusable);
-        return this;
-    };
-
-    /**
-     * Sets the size of the floating window.
-     * @since 2017-02-19
-     * @param {Number} width Width of the window
-     * @param {Number} height Height of the window
-     */
-    FloatingWindow.prototype.setWH = function (width, height) {
-        this._width = width;
-        this._height = height;
-        return this;
-    };
-
-    /**
-     * Shows the window on the floating screen.
-     * @since 2017-02-19
-     */
-    FloatingWindow.prototype.show = function () {
-        this._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
         return this;
     };
 
@@ -3019,10 +2837,582 @@ let me = this.me || {};
 
 
     /**
+     * Class representing a palette.
+     * @since 2016-09-09
+     * @class
+     * @memberOf me.astro.widget
+     */
+    function Palette() {
+        let thiz = this,
+            layout = this._layout = new GridLayout();
+        thiz._func = (() => {});
+        for (let i in Color) {
+            let color = Color[i];
+            if (typeof color === "number") {
+                let view = new TextView_(CONTEXT);
+                view.setBackgroundDrawable(new ColorDrawable_(color));
+                view.setOnClickListener(new View_.OnClickListener({
+                    onClick(view) {
+                        thiz._func(view.getTag());
+                    }
+                }));
+                view.setTag(color);
+                layout.addView(view);
+            }
+        }
+    }
+
+    /**
+     * Returns the effect function.
+     * @since 2016-09-09
+     * @returns {Function} Effect function
+     */
+    Palette.prototype.getEffect = function () {
+        return this._func;
+    };
+
+    /**
+     * Returns the view.
+     * @since 2016-09-09
+     * @returns {android.widget.LinearLayout} View
+     */
+    Palette.prototype.getView = function () {
+        return this._layout.getLayout();
+    };
+
+    /**
+     * Sets the effect function.
+     * @since 2016-09-09
+     * @param {Function} func Effect function
+     */
+    Palette.prototype.setEffect = function (func) {
+        this._func = func;
+        return this;
+    };
+
+    /**
+     * Returns the palette.
+     * @since 2016-09-09
+     * @returns {android.widget.LinearLayout} Palette
+     */
+    Palette.prototype.show = function () {
+        return this._layout.show();
+    };
+
+
+
+    /**
+     * Class representing a scroll view.
+     * @since 2016-09-06
+     * @class
+     * @memberOf me.astro.widget
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of scroll view
+     */
+    function ScrollView(theme) {
+        theme = theme || Theme.DEFAULT;
+        let thiz = this;
+        this._scrollView = new ScrollView_(CONTEXT);
+        this._scroller = new LinearLayout_(CONTEXT);
+        this._track = new TextView_(CONTEXT);
+        this._thumb = new TextView_(CONTEXT);
+        this._theme = theme;
+        this._width = DP * 340;
+        this._scrollView.setLayoutParams(new LinearLayout_.LayoutParams(this._width - DP * 6, -1));
+        this._scrollView.setOnScrollChangeListener(new View_.OnScrollChangeListener({
+            onScrollChange(v, scrollX, scrollY, oldScrollX, oldScrollY) {
+                CONTEXT.runOnUiThread({
+                    run() {
+                        thiz._track.setLayoutParams(new LinearLayout_.LayoutParams(DP * 12, v.getHeight() * scrollY / v.getChildAt(0).getHeight()));
+                    }
+                });
+            }
+        }));
+        this._scrollView.setOverScrollMode(View_.OVER_SCROLL_NEVER);
+        this._scrollView.setVerticalScrollBarEnabled(false);
+        this._scrollView.setHorizontalScrollBarEnabled(false);
+        this._scroller.addView(this._track);
+        this._scroller.addView(this._thumb);
+        this._scroller.setOrientation(1);
+        this._track.setLayoutParams(new LinearLayout_.LayoutParams(DP * 6, 0));
+        this._thumb.setBackgroundDrawable(new ColorDrawable_(theme.getScrollView(Theme.BACKGROUND_COLOR)));
+        this._thumb.setLayoutParams(new LinearLayout_.LayoutParams(DP * 6, DP * 36));
+        this._thumb.setOnTouchListener(new View_.OnTouchListener({
+            onTouch(v, event) {
+                let y = event.getRawY();
+                if (event.getAction() === MotionEvent_.ACTION_MOVE) {
+                    thiz._track.setLayoutParams(new LinearLayout_.LayoutParams(DP * 12, thiz._scrollView.getChildAt(0).getHeight() * y / (thiz._scrollView.getHeight() - DP * 18)));
+                    thiz._scrollView.scrollTo(0, thiz._scrollView.getChildAt(0).getHeight() * y / (thiz._scrollView.getHeight() - DP * 18));
+                }
+                return true;
+            }
+        }));
+    }
+
+    /**
+     * Adds a view on the scroll view.
+     * @since 2016-09-06
+     * @param {android.view.View} view View
+     */
+    ScrollView.prototype.addView = function (view) {
+        this._scrollView.addView(view);
+        return this;
+    };
+
+    /**
+     * Returns the scroll view.
+     * @since 2016-09-06
+     * @returns {android.widget.LinearLayout} Scroll view
+     */
+    ScrollView.prototype.getLayout = function () {
+        return this._scrollView;
+    };
+
+    /**
+     * Returns the theme of the view.
+     * @since 2016-09-06
+     * @returns {me.astro.design.Theme} Theme of the scroll view
+     */
+    ScrollView.prototype.getTheme = function () {
+        return this._theme;
+    };
+
+    /**
+     * Sets the color of the thumb of the scroll view.
+     * @since 2016-09-06
+     * @param {Number} color Color of the thumb of the scroll view
+     */
+    ScrollView.prototype.setThumbColor = function (color) {
+        this._thumb.setBackgroundDrawable(new ColorDrawable_(color));
+        return this;
+    };
+
+    /**
+     * Sets the drawable of the thumb of the scroll view.
+     * @since 2016-09-06
+     * @param {android.graphics.drawable.Drawable} drawable Drawable of the thumb of the scroll view
+     */
+    ScrollView.prototype.setThumbDrawable = function (drawable) {
+        this._thumb.setBackgroundDrawable(drawable);
+        return this;
+    };
+
+    /**
+     * Sets the color of the track of the scroll view.
+     * @since 2016-09-06
+     * @param {Number} color Color of the track of the scroll view
+     */
+    ScrollView.prototype.setTrackColor = function (color) {
+        this._scroller.setBackgroundDrawable(new ColorDrawable_(color));
+        return this;
+    };
+
+    /**
+     * Sets the drawable of the track of the scroll view.
+     * @since 2016-09-06
+     * @param {android.graphics.drawable.Drawable} drawable Drawable of the track of the scroll view
+     */
+    ScrollView.prototype.setTrackDrawable = function (drawable) {
+        this._scroller.setBackgroundDrawable(drawable);
+        return this;
+    };
+
+    /**
+     * Sets the width of scroll view.
+     * @since 2017-02-03
+     * @param {Number} width Width of scroll view
+     */
+    ScrollView.prototype.setWidth = function (width) {
+        this._width = width;
+        this._scrollView.setLayoutParams(new LinearLayout_.LayoutParams(this._width - DP * 6, -1));
+        return this;
+    };
+
+    /**
+     * Returns the scroll view.
+     * @since 2016-09-06
+     * @returns {android.widget.LinearLayout} Scroll view
+     */
+    ScrollView.prototype.show = function () {
+        let mainLayout = new LinearLayout_(CONTEXT);
+        mainLayout.addView(this._scrollView);
+        mainLayout.addView(this._scroller);
+        mainLayout.setLayoutParams(new LinearLayout_.LayoutParams(this._width, -1));
+        ViewUtils.setTheme(mainLayout, this._theme);
+        return mainLayout;
+    };
+
+
+
+    /**
+     * Class representing a sensor button.
+     * @since 2016-08-04
+     * @class
+     * @extends me.astro.widget.ImageButton
+     * @memberOf me.astro.widget
+     * @param {Number} [shape=me.astro.design.Shape.RECT] Shape of sensor button
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of sensor button
+     */
+    function SensorButton(shape, theme) {
+        shape = shape || Shape.RECT;
+        theme = theme || Theme.DEFAULT;
+        let thiz = this,
+            isLongClick = false;
+        thiz._shape = shape;
+        thiz._theme = theme;
+        thiz._params = new LinearLayout_.LayoutParams(shape === Shape.RECT ? -1 : DP * 40, shape === Shape.RECT ? DP * 36 : DP * 40);
+        thiz._view = new TextView_(CONTEXT);
+        thiz._pressedDrawable = new ColorDrawable_(0);
+        thiz._unpressedDrawable = new ColorDrawable_(0);
+        thiz._func = () => {};
+        thiz._params.setMargins(DP * 6, DP * 6, DP * 6, DP * 6);
+        thiz._view.setBackgroundDrawable(thiz._unpressedDrawable);
+        thiz._view.setGravity(Gravity_.CENTER);
+        thiz._view.setLayoutParams(thiz._params);
+        thiz._view.setOnLongClickListener(new View_.OnLongClickListener({
+            onLongClick(v) {
+                isLongClick = true;
+                return true;
+            }
+        }));
+        thiz._view.setOnTouchListener(new View_.OnTouchListener({
+            onTouch(v, event) {
+                let width = v.getWidth(),
+                    height = v.getHeight(),
+                    x = event.getX(),
+                    y = event.getY();
+                switch (event.getAction()) {
+                case MotionEvent_.ACTION_DOWN:
+                    v.setBackgroundDrawable(thiz._pressedDrawable);
+                    break;
+                case MotionEvent_.ACTION_MOVE:
+                    if (isLongClick) {
+                        thiz._func(event.getRawX(), event.getRawY(), v.getWidth(), v.getHeight());
+                    }
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._pressedDrawable);
+                    } else {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                    break;
+                case MotionEvent_.ACTION_UP:
+                    isLongClick = false;
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                    break;
+                case MotionEvent_.ACTION_CANCEL:
+                    isLongClick = false;
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                }
+                return false;
+            }
+        }));
+    }
+
+    SensorButton.prototype = Object.create(ImageButton.prototype);
+    SensorButton.prototype.constructor = SensorButton;
+
+
+
+    /**
+     * Class representing a slide button.
+     * @since 2016-08-04
+     * @class
+     * @extends me.astro.widget.ImageButton
+     * @memberOf me.astro.widget
+     * @param {Number} [shape=me.astro.design.Shape.RECT] Shape of slide button
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of slide button
+     */
+    function SlideButton(shape, theme) {
+        shape = shape || Shape.RECT;
+        theme = theme || Theme.DEFAULT;
+        let thiz = this,
+            oriX;
+        thiz._shape = shape;
+        thiz._theme = theme;
+        thiz._params = new LinearLayout_.LayoutParams(shape === Shape.RECT ? -1 : DP * 40, shape === Shape.RECT ? DP * 36 : DP * 40);
+        thiz._view = new TextView_(CONTEXT);
+        thiz._pressedDrawable = new ColorDrawable_(0);
+        thiz._unpressedDrawable = new ColorDrawable_(0);
+        thiz._func = () => {};
+        thiz._params.setMargins(DP * 6, DP * 6, DP * 6, DP * 6);
+        thiz._view.setBackgroundDrawable(thiz._unpressedDrawable);
+        thiz._view.setGravity(Gravity_.CENTER);
+        thiz._view.setLayoutParams(thiz._params);
+        thiz._view.setOnTouchListener(new View_.OnTouchListener({
+            onTouch(v, event) {
+                let width = v.getWidth(),
+                    height = v.getHeight(),
+                    x = event.getX(),
+                    y = event.getY();
+                switch (event.getAction()) {
+                case MotionEvent_.ACTION_DOWN:
+                    oriX = x;
+                    v.setBackgroundDrawable(thiz._pressedDrawable);
+                    break;
+                case MotionEvent_.ACTION_MOVE:
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._pressedDrawable);
+                    } else {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                    break;
+                case MotionEvent_.ACTION_UP:
+                    if (Math.abs(oriX - x) > width / 2) {
+                        if (oriX < x) {
+                            thiz._func(v, SlideButton.LEFT_RIGHT);
+                        } else {
+                            thiz._func(v, SlideButton.RIGHT_LEFT);
+                        }
+                    }
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                    break;
+                case MotionEvent_.ACTION_CANCEL:
+                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                        v.setBackgroundDrawable(thiz._unpressedDrawable);
+                    }
+                }
+                return true;
+            }
+        }));
+    }
+
+    SlideButton.LEFT_RIGHT = 0;
+    SlideButton.RIGHT_LEFT = 1;
+
+    SlideButton.prototype = Object.create(ImageButton.prototype);
+    SlideButton.prototype.constructor = SlideButton;
+
+
+
+    /**
+     * Class representing a toast.
+     * @since 2016-05-28
+     * @class
+     * @memberOf me.astro.widget
+     */
+    function Toast() {}
+
+    /**
+     * Shows the toast on the screen.
+     * @since 2016-05-27
+     * @param {String} text Displayed text of the toast
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of toast
+     */
+    Toast.show = function (text, theme) {
+        theme = theme || Theme.DEFAULT;
+        CONTEXT.runOnUiThread({
+            run() {
+                let textView = new TextView_(CONTEXT);
+                textView.setBackgroundDrawable(new ColorDrawable_(theme.getToast(Theme.BACKGROUND_COLOR)));
+                textView.setPadding(DP * 12, DP * 8, DP * 12, DP * 8);
+                textView.setText(text.toString());
+                textView.setTextColor(theme.getToast(Theme.TEXT_COLOR));
+                textView.setTextSize(1, 14);
+                let toast_ = new Toast_(CONTEXT);
+                toast_.setView(textView);
+                toast_.show();
+            }
+        });
+    };
+
+
+
+    /**
+     * Contains classes for windows.
+     * @memberOf me.astro
+     * @namespace window
+     */
+
+    /**
+     * Class representing a window that shows a color picker.
+     * @since 2017-01-26
+     * @class
+     * @memberOf me.astro.window
+     * @param {Number} [r=255] Red
+     * @param {Number} [g=0] Green
+     * @param {Number} [b=0] Blue
+     * @param {Function} [func=function(){}] Callback to be invoked when color was changed
+     */
+    function ColorPickerWindow(r, g, b, func) {
+        r = r || 255;
+        g = g || 0;
+        b = b || 0;
+        func = func || (() => {});
+        let viewer = this._viewer = new TextView_(CONTEXT);
+        this._picker = new ColorPicker(r, g, b, color => {
+            viewer.setBackgroundDrawable(new ColorDrawable_(color));
+            func(color);
+        });
+        viewer.setBackgroundDrawable(new ColorDrawable_(Color_.rgb(r, g, b)));
+        viewer.setGravity(Gravity_.CENTER);
+        viewer.setText("Click to close");
+        viewer.setTextColor(Color_.rgb(r, g, b));
+        viewer.setTextSize(1, 18);
+    }
+
+    /**
+     * Shows the window of color picker.
+     * @since 2017-01-26
+     */
+    ColorPickerWindow.prototype.show = function () {
+        let thiz = this;
+        CONTEXT.runOnUiThread({
+            run() {
+                let drawable = new GradientDrawable_(),
+                    layout = new LinearLayout_(CONTEXT),
+                    window = new PopupWindow_(layout, -2, -2);
+                thiz._viewer.setOnClickListener(new View_.OnClickListener({
+                    onClick(view) {
+                        CONTEXT.runOnUiThread({
+                            run() {
+                                window.dismiss();
+                                window = null;
+                            }
+                        });
+                    }
+                }));
+                drawable.setColor(Color_.rgb(97, 97, 97));
+                drawable.setCornerRadius(DP * 4);
+                layout.addView(thiz._picker.show(), DP * 280, DP * 240);
+                layout.addView(thiz._viewer, DP * 280, DP * 60);
+                layout.setBackgroundDrawable(drawable);
+                layout.setOrientation(1);
+                layout.setPadding(DP * 24, DP * 24, DP * 24, DP * 24);
+                window.setBackgroundDrawable(new ColorDrawable_(0));
+                window.showAtLocation(CONTEXT.getWindow().getDecorView(), Gravity_.CENTER, 0, 0);
+            }
+        });
+    };
+
+
+
+    /**
+     * Class representing a floating window.
+     * @since 2017-02-19
+     * @class
+     * @memberOf me.astro.window
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
+     */
+    function FloatingWindow(theme) {
+        theme = theme || Theme.DEFAULT;
+        this._theme = theme;
+        this._height = DP * 200;
+        this._width = DP * 360;
+        this._window = new PopupWindow_(CONTEXT);
+        this._layout = new LinearLayout_(CONTEXT);
+        this._layout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.TEXT_COLOR)));
+        this._layout.setOrientation(1);
+        this._window.setBackgroundDrawable(ShadowDrawable.create());
+        this._window.setContentView(this._layout);
+        this._window.setWidth(this._width + DP * 24);
+        this._window.setHeight(this._height + DP * 24);
+    }
+
+    /**
+     * Adds a layout on the floating window.
+     * @since 2017-02-19
+     * @param {android.view.View} view View
+     */
+    FloatingWindow.prototype.addView = function (view) {
+        this._layout.addView(view);
+        return this;
+    };
+
+    /**
+     * Disposes of the floating window.
+     * @since 2017-02-19
+     */
+    FloatingWindow.prototype.dismiss = function () {
+        let thiz = this;
+        CONTEXT.runOnUiThread({
+            run() {
+                thiz._window.dismiss();
+                thiz._window = null;
+            }
+        });
+        return this;
+    };
+
+    /**
+     * Returns the theme of the floating window.
+     * @since 2017-02-19
+     * @returns {me.astro.design.Theme} Theme of the window
+     */
+    FloatingWindow.prototype.getTheme = function () {
+        return this._theme;
+    };
+
+    /**
+     * Returns the floating window.
+     * @since 2017-02-19
+     * @returns {android.widget.PopupWindow} Window
+     */
+    FloatingWindow.prototype.getWindow = function () {
+        return this._window;
+    };
+
+    /**
+     * Returns the size of the floating window.
+     * @since 2017-02-19
+     * @returns {Array.<Number>} Width and height of the window
+     */
+    FloatingWindow.prototype.getWH = function () {
+        return [this._width, this._height];
+    };
+
+    /**
+     * Sets the color of the floating window.
+     * @since 2017-02-19
+     * @param {Number} color Color of the window
+     */
+    FloatingWindow.prototype.setColor = function (color) {
+        this._layout.setBackgroundDrawable(new ColorDrawable_(color));
+        return this;
+    };
+
+    /**
+     * Sets the focusable of the floating window.
+     * @since 2017-02-19
+     * @param {Boolean} focusable Focusable of the window
+     */
+    FloatingWindow.prototype.setFocusable = function (focusable) {
+        this._window.setFocusable(focusable);
+        return this;
+    };
+
+    /**
+     * Sets the size of the floating window.
+     * @since 2017-02-19
+     * @param {Number} width Width of the window
+     * @param {Number} height Height of the window
+     */
+    FloatingWindow.prototype.setWH = function (width, height) {
+        this._width = width;
+        this._height = height;
+        return this;
+    };
+
+    /**
+     * Shows the window on the floating screen.
+     * @since 2017-02-19
+     */
+    FloatingWindow.prototype.show = function () {
+        this._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
+        return this;
+    };
+
+
+
+    /**
      * Class representing a notification window.
      * @since 2017-01-29
      * @class
-     * @memberOf me.astro.widget
+     * @memberOf me.astro.window
      */
     function NotificationWindow() {}
 
@@ -3247,75 +3637,10 @@ let me = this.me || {};
 
 
     /**
-     * Class representing a palette.
-     * @since 2016-09-09
-     * @class
-     * @memberOf me.astro.widget
-     */
-    function Palette() {
-        let thiz = this,
-            layout = this._layout = new GridLayout();
-        thiz._func = (() => {});
-        for (let i in Color) {
-            let color = Color[i];
-            if (typeof color === "number") {
-                let view = new TextView_(CONTEXT);
-                view.setBackgroundDrawable(new ColorDrawable_(color));
-                view.setOnClickListener(new View_.OnClickListener({
-                    onClick(view) {
-                        thiz._func(view.getTag());
-                    }
-                }));
-                view.setTag(color);
-                layout.addView(view);
-            }
-        }
-    }
-
-    /**
-     * Returns the effect function.
-     * @since 2016-09-09
-     * @returns {Function} Effect function
-     */
-    Palette.prototype.getEffect = function () {
-        return this._func;
-    };
-
-    /**
-     * Returns the view.
-     * @since 2016-09-09
-     * @returns {android.widget.LinearLayout} View
-     */
-    Palette.prototype.getView = function () {
-        return this._layout.getLayout();
-    };
-
-    /**
-     * Sets the effect function.
-     * @since 2016-09-09
-     * @param {Function} func Effect function
-     */
-    Palette.prototype.setEffect = function (func) {
-        this._func = func;
-        return this;
-    };
-
-    /**
-     * Returns the palette.
-     * @since 2016-09-09
-     * @returns {android.widget.LinearLayout} Palette
-     */
-    Palette.prototype.show = function () {
-        return this._layout.show();
-    };
-
-
-
-    /**
      * Class representing a palette window.
      * @since 2016-09-09
      * @class
-     * @memberOf me.astro.widget
+     * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
      */
     function PaletteWindow(theme) {
@@ -3389,7 +3714,7 @@ let me = this.me || {};
      * Class representing a progress window.
      * @since 2016-07-05
      * @class
-     * @memberOf me.astro.widget
+     * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
      * @param {Boolean} [canForceShutdown=true] Enables force shutdown
      */
@@ -3563,225 +3888,10 @@ let me = this.me || {};
 
 
     /**
-     * Class representing a scroll view.
-     * @since 2016-09-06
-     * @class
-     * @memberOf me.astro.widget
-     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of scroll view
-     */
-    function ScrollView(theme) {
-        theme = theme || Theme.DEFAULT;
-        let thiz = this;
-        this._scrollView = new ScrollView_(CONTEXT);
-        this._scroller = new LinearLayout_(CONTEXT);
-        this._track = new TextView_(CONTEXT);
-        this._thumb = new TextView_(CONTEXT);
-        this._theme = theme;
-        this._width = DP * 340;
-        this._scrollView.setLayoutParams(new LinearLayout_.LayoutParams(this._width - DP * 6, -1));
-        this._scrollView.setOnScrollChangeListener(new View_.OnScrollChangeListener({
-            onScrollChange(v, scrollX, scrollY, oldScrollX, oldScrollY) {
-                CONTEXT.runOnUiThread({
-                    run() {
-                        thiz._track.setLayoutParams(new LinearLayout_.LayoutParams(DP * 12, v.getHeight() * scrollY / v.getChildAt(0).getHeight()));
-                    }
-                });
-            }
-        }));
-        this._scrollView.setOverScrollMode(View_.OVER_SCROLL_NEVER);
-        this._scrollView.setVerticalScrollBarEnabled(false);
-        this._scrollView.setHorizontalScrollBarEnabled(false);
-        this._scroller.addView(this._track);
-        this._scroller.addView(this._thumb);
-        this._scroller.setOrientation(1);
-        this._track.setLayoutParams(new LinearLayout_.LayoutParams(DP * 6, 0));
-        this._thumb.setBackgroundDrawable(new ColorDrawable_(theme.getScrollView(Theme.BACKGROUND_COLOR)));
-        this._thumb.setLayoutParams(new LinearLayout_.LayoutParams(DP * 6, DP * 36));
-        this._thumb.setOnTouchListener(new View_.OnTouchListener({
-            onTouch(v, event) {
-                let y = event.getRawY();
-                if (event.getAction() === MotionEvent_.ACTION_MOVE) {
-                    thiz._track.setLayoutParams(new LinearLayout_.LayoutParams(DP * 12, thiz._scrollView.getChildAt(0).getHeight() * y / (thiz._scrollView.getHeight() - DP * 18)));
-                    thiz._scrollView.scrollTo(0, thiz._scrollView.getChildAt(0).getHeight() * y / (thiz._scrollView.getHeight() - DP * 18));
-                }
-                return true;
-            }
-        }));
-    }
-
-    /**
-     * Adds a view on the scroll view.
-     * @since 2016-09-06
-     * @param {android.view.View} view View
-     */
-    ScrollView.prototype.addView = function (view) {
-        this._scrollView.addView(view);
-        return this;
-    };
-
-    /**
-     * Returns the scroll view.
-     * @since 2016-09-06
-     * @returns {android.widget.LinearLayout} Scroll view
-     */
-    ScrollView.prototype.getLayout = function () {
-        return this._scrollView;
-    };
-
-    /**
-     * Returns the theme of the view.
-     * @since 2016-09-06
-     * @returns {me.astro.design.Theme} Theme of the scroll view
-     */
-    ScrollView.prototype.getTheme = function () {
-        return this._theme;
-    };
-
-    /**
-     * Sets the color of the thumb of the scroll view.
-     * @since 2016-09-06
-     * @param {Number} color Color of the thumb of the scroll view
-     */
-    ScrollView.prototype.setThumbColor = function (color) {
-        this._thumb.setBackgroundDrawable(new ColorDrawable_(color));
-        return this;
-    };
-
-    /**
-     * Sets the drawable of the thumb of the scroll view.
-     * @since 2016-09-06
-     * @param {android.graphics.drawable.Drawable} drawable Drawable of the thumb of the scroll view
-     */
-    ScrollView.prototype.setThumbDrawable = function (drawable) {
-        this._thumb.setBackgroundDrawable(drawable);
-        return this;
-    };
-
-    /**
-     * Sets the color of the track of the scroll view.
-     * @since 2016-09-06
-     * @param {Number} color Color of the track of the scroll view
-     */
-    ScrollView.prototype.setTrackColor = function (color) {
-        this._scroller.setBackgroundDrawable(new ColorDrawable_(color));
-        return this;
-    };
-
-    /**
-     * Sets the drawable of the track of the scroll view.
-     * @since 2016-09-06
-     * @param {android.graphics.drawable.Drawable} drawable Drawable of the track of the scroll view
-     */
-    ScrollView.prototype.setTrackDrawable = function (drawable) {
-        this._scroller.setBackgroundDrawable(drawable);
-        return this;
-    };
-
-    /**
-     * Sets the width of scroll view.
-     * @since 2017-02-03
-     * @param {Number} width Width of scroll view
-     */
-    ScrollView.prototype.setWidth = function (width) {
-        this._width = width;
-        this._scrollView.setLayoutParams(new LinearLayout_.LayoutParams(this._width - DP * 6, -1));
-        return this;
-    };
-
-    /**
-     * Returns the scroll view.
-     * @since 2016-09-06
-     * @returns {android.widget.LinearLayout} Scroll view
-     */
-    ScrollView.prototype.show = function () {
-        let mainLayout = new LinearLayout_(CONTEXT);
-        mainLayout.addView(this._scrollView);
-        mainLayout.addView(this._scroller);
-        mainLayout.setLayoutParams(new LinearLayout_.LayoutParams(this._width, -1));
-        ViewUtils.setTheme(mainLayout, this._theme);
-        return mainLayout;
-    };
-
-
-
-    /**
-     * Class representing a sensor button.
-     * @since 2016-08-04
-     * @class
-     * @extends me.astro.widget.ImageButton
-     * @memberOf me.astro.widget
-     * @param {Number} [shape=me.astro.design.Shape.RECT] Shape of sensor button
-     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of sensor button
-     */
-    function SensorButton(shape, theme) {
-        shape = shape || Shape.RECT;
-        theme = theme || Theme.DEFAULT;
-        let thiz = this,
-            isLongClick = false;
-        thiz._shape = shape;
-        thiz._theme = theme;
-        thiz._params = new LinearLayout_.LayoutParams(shape === Shape.RECT ? -1 : DP * 40, shape === Shape.RECT ? DP * 36 : DP * 40);
-        thiz._view = new TextView_(CONTEXT);
-        thiz._pressedDrawable = new ColorDrawable_(0);
-        thiz._unpressedDrawable = new ColorDrawable_(0);
-        thiz._func = () => {};
-        thiz._params.setMargins(DP * 6, DP * 6, DP * 6, DP * 6);
-        thiz._view.setBackgroundDrawable(thiz._unpressedDrawable);
-        thiz._view.setGravity(Gravity_.CENTER);
-        thiz._view.setLayoutParams(thiz._params);
-        thiz._view.setOnLongClickListener(new View_.OnLongClickListener({
-            onLongClick(v) {
-                isLongClick = true;
-                return true;
-            }
-        }));
-        thiz._view.setOnTouchListener(new View_.OnTouchListener({
-            onTouch(v, event) {
-                let width = v.getWidth(),
-                    height = v.getHeight(),
-                    x = event.getX(),
-                    y = event.getY();
-                switch (event.getAction()) {
-                case MotionEvent_.ACTION_DOWN:
-                    v.setBackgroundDrawable(thiz._pressedDrawable);
-                    break;
-                case MotionEvent_.ACTION_MOVE:
-                    if (isLongClick) {
-                        thiz._func(event.getRawX(), event.getRawY(), v.getWidth(), v.getHeight());
-                    }
-                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
-                        v.setBackgroundDrawable(thiz._pressedDrawable);
-                    } else {
-                        v.setBackgroundDrawable(thiz._unpressedDrawable);
-                    }
-                    break;
-                case MotionEvent_.ACTION_UP:
-                    isLongClick = false;
-                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
-                        v.setBackgroundDrawable(thiz._unpressedDrawable);
-                    }
-                    break;
-                case MotionEvent_.ACTION_CANCEL:
-                    isLongClick = false;
-                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
-                        v.setBackgroundDrawable(thiz._unpressedDrawable);
-                    }
-                }
-                return false;
-            }
-        }));
-    }
-
-    SensorButton.prototype = Object.create(ImageButton.prototype);
-    SensorButton.prototype.constructor = SensorButton;
-
-
-
-    /**
      * Class representing a showcase window.
      * @since 2017-01-27
      * @class
-     * @memberOf me.astro.widget
+     * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of showcase window
      */
     function ShowcaseWindow(theme) {
@@ -3895,83 +4005,10 @@ let me = this.me || {};
 
 
     /**
-     * Class representing a slide button.
-     * @since 2016-08-04
-     * @class
-     * @extends me.astro.widget.ImageButton
-     * @memberOf me.astro.widget
-     * @param {Number} [shape=me.astro.design.Shape.RECT] Shape of slide button
-     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of slide button
-     */
-    function SlideButton(shape, theme) {
-        shape = shape || Shape.RECT;
-        theme = theme || Theme.DEFAULT;
-        let thiz = this,
-            oriX;
-        thiz._shape = shape;
-        thiz._theme = theme;
-        thiz._params = new LinearLayout_.LayoutParams(shape === Shape.RECT ? -1 : DP * 40, shape === Shape.RECT ? DP * 36 : DP * 40);
-        thiz._view = new TextView_(CONTEXT);
-        thiz._pressedDrawable = new ColorDrawable_(0);
-        thiz._unpressedDrawable = new ColorDrawable_(0);
-        thiz._func = () => {};
-        thiz._params.setMargins(DP * 6, DP * 6, DP * 6, DP * 6);
-        thiz._view.setBackgroundDrawable(thiz._unpressedDrawable);
-        thiz._view.setGravity(Gravity_.CENTER);
-        thiz._view.setLayoutParams(thiz._params);
-        thiz._view.setOnTouchListener(new View_.OnTouchListener({
-            onTouch(v, event) {
-                let width = v.getWidth(),
-                    height = v.getHeight(),
-                    x = event.getX(),
-                    y = event.getY();
-                switch (event.getAction()) {
-                case MotionEvent_.ACTION_DOWN:
-                    oriX = x;
-                    v.setBackgroundDrawable(thiz._pressedDrawable);
-                    break;
-                case MotionEvent_.ACTION_MOVE:
-                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
-                        v.setBackgroundDrawable(thiz._pressedDrawable);
-                    } else {
-                        v.setBackgroundDrawable(thiz._unpressedDrawable);
-                    }
-                    break;
-                case MotionEvent_.ACTION_UP:
-                    if (Math.abs(oriX - x) > width / 2) {
-                        if (oriX < x) {
-                            thiz._func(v, SlideButton.LEFT_RIGHT);
-                        } else {
-                            thiz._func(v, SlideButton.RIGHT_LEFT);
-                        }
-                    }
-                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
-                        v.setBackgroundDrawable(thiz._unpressedDrawable);
-                    }
-                    break;
-                case MotionEvent_.ACTION_CANCEL:
-                    if (x >= 0 && x <= width && y >= 0 && y <= height) {
-                        v.setBackgroundDrawable(thiz._unpressedDrawable);
-                    }
-                }
-                return true;
-            }
-        }));
-    }
-
-    SlideButton.LEFT_RIGHT = 0;
-    SlideButton.RIGHT_LEFT = 1;
-
-    SlideButton.prototype = Object.create(ImageButton.prototype);
-    SlideButton.prototype.constructor = SlideButton;
-
-
-
-    /**
      * Class representing a splash window.
      * @since 2016-12-15
      * @class
-     * @memberOf me.astro.widget
+     * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of splash window
      */
     function SplashWindow(theme) {
@@ -4105,43 +4142,10 @@ let me = this.me || {};
 
 
     /**
-     * Class representing a toast.
-     * @since 2016-05-28
-     * @class
-     * @memberOf me.astro.widget
-     */
-    function Toast() {}
-
-    /**
-     * Shows the toast on the screen.
-     * @since 2016-05-27
-     * @param {String} text Displayed text of the toast
-     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of toast
-     */
-    Toast.show = function (text, theme) {
-        theme = theme || Theme.DEFAULT;
-        CONTEXT.runOnUiThread({
-            run() {
-                let textView = new TextView_(CONTEXT);
-                textView.setBackgroundDrawable(new ColorDrawable_(theme.getToast(Theme.BACKGROUND_COLOR)));
-                textView.setPadding(DP * 12, DP * 8, DP * 12, DP * 8);
-                textView.setText(text.toString());
-                textView.setTextColor(theme.getToast(Theme.TEXT_COLOR));
-                textView.setTextSize(1, 14);
-                let toast_ = new Toast_(CONTEXT);
-                toast_.setView(textView);
-                toast_.show();
-            }
-        });
-    };
-
-
-
-    /**
      * Class representing a verticle window.
      * @since 2016-08-04
      * @class
-     * @memberOf me.astro.widget
+     * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of verticle window
      */
     function VerticalWindow(theme) {
@@ -4316,7 +4320,7 @@ let me = this.me || {};
      * Class representing a window.
      * @since 2016-05-27
      * @class
-     * @memberOf me.astro.widget
+     * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
      */
     function Window(theme) {
@@ -5348,25 +5352,27 @@ let me = this.me || {};
         TextView: TextView,
         Button: Button,
         ColorPicker: ColorPicker,
-        ColorPickerWindow: ColorPickerWindow,
         Divider: Divider,
         EditText: EditText,
-        FloatingWindow: FloatingWindow,
         GridLayout: GridLayout,
         ImageButton: ImageButton,
         ImageToggle: ImageToggle,
         KakaoLink: KakaoLink,
         Layout: Layout,
-        NotificationWindow: NotificationWindow,
         Palette: Palette,
-        PaletteWindow: PaletteWindow,
-        ProgressWindow: ProgressWindow,
         ScrollView: ScrollView,
         SensorButton: SensorButton,
-        ShowcaseWindow: ShowcaseWindow,
         SlideButton: SlideButton,
+        Toast: Toast
+    };
+    astro.window = {
+        ColorPickerWindow: ColorPickerWindow,
+        FloatingWindow: FloatingWindow,
+        NotificationWindow: NotificationWindow,
+        PaletteWindow: PaletteWindow,
+        ProgressWindow: ProgressWindow,
+        ShowcaseWindow: ShowcaseWindow,
         SplashWindow: SplashWindow,
-        Toast: Toast,
         VerticalWindow: VerticalWindow,
         Window: Window
     };

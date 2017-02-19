@@ -3711,6 +3711,167 @@ let me = this.me || {};
 
 
     /**
+     * Class representing a popup window.
+     * @since 2016-05-27
+     * @class
+     * @memberOf me.astro.window
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
+     */
+    function PopupWindow(theme) {
+        theme = theme || Theme.DEFAULT;
+        let thiz = this;
+        thiz._theme = theme;
+        thiz._height = DP * 320;
+        thiz._width = DP * 400;
+        thiz._layouts = [];
+        thiz._toggles = [];
+        thiz._window = new PopupWindow_(CONTEXT);
+        thiz._windowLayout = new LinearLayout_(CONTEXT);
+        thiz._sideBarLayout = new LinearLayout_(CONTEXT);
+        thiz._contentLayout = new FrameLayout_(CONTEXT);
+        thiz._windowLayout.addView(thiz._sideBarLayout, DP * 60, thiz._height);
+        thiz._windowLayout.addView(thiz._contentLayout, thiz._width - DP * 60, thiz._height);
+        thiz._windowLayout.setBackgroundDrawable(ShadowDrawable.create());
+        thiz._windowLayout.setGravity(Gravity_.CENTER);
+        thiz._sideBarLayout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.BACKGROUND_COLOR)));
+        thiz._sideBarLayout.setOrientation(1);
+        thiz._contentLayout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.TEXT_COLOR)));
+        thiz._window.setBackgroundDrawable(new ColorDrawable_(0));
+        thiz._window.setContentView(thiz._windowLayout);
+        thiz._window.setWidth(thiz._width + DP * 24);
+        thiz._window.setHeight(thiz._height + DP * 24);
+    }
+
+    /**
+     * Adds a layout on the window.
+     * @since 2016-05-27
+     * @param {android.graphics.Bitmap} image Image which is placed the sidebar
+     * @param {android.widget.LinearLayout} layout Layout
+     */
+    PopupWindow.prototype.addLayout = function (image, layout) {
+        let thiz = this,
+            theme = thiz._theme,
+            imageToggle = new ImageToggle();
+        imageToggle.getView().setId(thiz._layouts.length);
+        thiz._sideBarLayout.addView(imageToggle.setEffect(function (buttonView, isChecked) {
+                let layouts = thiz._layouts,
+                    toggles = thiz._toggles,
+                    id = buttonView.getId();
+                for (let i = 0, len = layouts.length; i < len; i++) {
+                    layouts[i].setVisibility(View_.GONE);
+                    toggles[i].setChecked(false);
+                }
+                layouts[id].setVisibility(View_.VISIBLE);
+            })
+            .setEffectImage(Drawable.setTint(new BitmapDrawable_(image), theme.getWindow(Theme.TEXT_COLOR)), theme.getWindow(Theme.EFFECT_COLOR), DP * 12)
+            .setImage(Drawable.setTint(new BitmapDrawable_(image), theme.getWindow(Theme.TEXT_COLOR)), theme.getWindow(Theme.BACKGROUND_COLOR), DP * 12)
+            .setPadding(0, 0, 0, 0)
+            .setWH(DP * 60, DP * 60)
+            .show());
+        thiz._layouts.push(layout);
+        thiz._toggles.push(imageToggle);
+        thiz._contentLayout.addView(layout);
+        return this;
+    };
+
+    /**
+     * Disposes of the window.
+     * @since 2016-05-27
+     */
+    PopupWindow.prototype.dismiss = function () {
+        let thiz = this,
+            layouts = thiz._layouts;
+        CONTEXT.runOnUiThread({
+            run() {
+                thiz._window.dismiss();
+                thiz._window = null;
+                for (let i = 0, len = layouts.length; i < len; i++) {
+                    layouts[i].setVisibility(View_.GONE);
+                }
+                thiz._layouts = null;
+            }
+        });
+        return this;
+    };
+
+    /**
+     * Returns the theme of the window.
+     * @since 2016-09-09
+     * @returns {me.astro.design.Theme} Theme of the window
+     */
+    PopupWindow.prototype.getTheme = function () {
+        return this._theme;
+    };
+
+    /**
+     * Returns the window.
+     * @since 2016-05-27
+     * @returns {android.widget.PopupWindow} Window
+     */
+    PopupWindow.prototype.getWindow = function () {
+        return this._window;
+    };
+
+    /**
+     * Returns the size of the window.
+     * @since 2016-05-27
+     * @returns {Array.<Number>} Width and height of the window
+     */
+    PopupWindow.prototype.getWH = function () {
+        return [this._width, this._height];
+    };
+
+    /**
+     * Sets the color of the window.
+     * @since 2016-05-27
+     * @param {Number} color Color of the window
+     */
+    PopupWindow.prototype.setColor = function (color) {
+        this._color = color;
+        this._sideBarLayout.setBackgroundDrawable(new ColorDrawable_(color));
+        return this;
+    };
+
+    /**
+     * Sets the focusable of the window.
+     * @since 2016-05-27
+     * @param {Boolean} focusable Focusable of the window
+     */
+    PopupWindow.prototype.setFocusable = function (focusable) {
+        this._window.setFocusable(focusable);
+        return this;
+    };
+
+    /**
+     * Sets the size of the window.
+     * @since 2016-05-27
+     * @param {Number} width Width of the window
+     * @param {Number} height Height of the window
+     */
+    PopupWindow.prototype.setWH = function (width, height) {
+        this._width = width;
+        this._height = height;
+        return this;
+    };
+
+    /**
+     * Shows the window on the screen.
+     * @since 2016-05-27
+     */
+    PopupWindow.prototype.show = function () {
+        let thiz = this,
+            layouts = thiz._layouts;
+        thiz._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
+        thiz._toggles[0].setChecked(true);
+        for (let i = 1, len = layouts.length; i < len; i++) {
+            layouts[i].setVisibility(View_.GONE);
+        }
+        return this;
+    };
+
+
+
+    /**
      * Class representing a progress window.
      * @since 2016-07-05
      * @class
@@ -4317,167 +4478,6 @@ let me = this.me || {};
 
 
     /**
-     * Class representing a window.
-     * @since 2016-05-27
-     * @class
-     * @memberOf me.astro.window
-     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
-     */
-    function Window(theme) {
-        theme = theme || Theme.DEFAULT;
-        let thiz = this;
-        thiz._theme = theme;
-        thiz._height = DP * 320;
-        thiz._width = DP * 400;
-        thiz._layouts = [];
-        thiz._toggles = [];
-        thiz._window = new PopupWindow_(CONTEXT);
-        thiz._windowLayout = new LinearLayout_(CONTEXT);
-        thiz._sideBarLayout = new LinearLayout_(CONTEXT);
-        thiz._contentLayout = new FrameLayout_(CONTEXT);
-        thiz._windowLayout.addView(thiz._sideBarLayout, DP * 60, thiz._height);
-        thiz._windowLayout.addView(thiz._contentLayout, thiz._width - DP * 60, thiz._height);
-        thiz._windowLayout.setBackgroundDrawable(ShadowDrawable.create());
-        thiz._windowLayout.setGravity(Gravity_.CENTER);
-        thiz._sideBarLayout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.BACKGROUND_COLOR)));
-        thiz._sideBarLayout.setOrientation(1);
-        thiz._contentLayout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.TEXT_COLOR)));
-        thiz._window.setBackgroundDrawable(new ColorDrawable_(0));
-        thiz._window.setContentView(thiz._windowLayout);
-        thiz._window.setWidth(thiz._width + DP * 24);
-        thiz._window.setHeight(thiz._height + DP * 24);
-    }
-
-    /**
-     * Adds a layout on the window.
-     * @since 2016-05-27
-     * @param {android.graphics.Bitmap} image Image which is placed the sidebar
-     * @param {android.widget.LinearLayout} layout Layout
-     */
-    Window.prototype.addLayout = function (image, layout) {
-        let thiz = this,
-            theme = thiz._theme,
-            imageToggle = new ImageToggle();
-        imageToggle.getView().setId(thiz._layouts.length);
-        thiz._sideBarLayout.addView(imageToggle.setEffect(function (buttonView, isChecked) {
-                let layouts = thiz._layouts,
-                    toggles = thiz._toggles,
-                    id = buttonView.getId();
-                for (let i = 0, len = layouts.length; i < len; i++) {
-                    layouts[i].setVisibility(View_.GONE);
-                    toggles[i].setChecked(false);
-                }
-                layouts[id].setVisibility(View_.VISIBLE);
-            })
-            .setEffectImage(Drawable.setTint(new BitmapDrawable_(image), theme.getWindow(Theme.TEXT_COLOR)), theme.getWindow(Theme.EFFECT_COLOR), DP * 12)
-            .setImage(Drawable.setTint(new BitmapDrawable_(image), theme.getWindow(Theme.TEXT_COLOR)), theme.getWindow(Theme.BACKGROUND_COLOR), DP * 12)
-            .setPadding(0, 0, 0, 0)
-            .setWH(DP * 60, DP * 60)
-            .show());
-        thiz._layouts.push(layout);
-        thiz._toggles.push(imageToggle);
-        thiz._contentLayout.addView(layout);
-        return this;
-    };
-
-    /**
-     * Disposes of the window.
-     * @since 2016-05-27
-     */
-    Window.prototype.dismiss = function () {
-        let thiz = this,
-            layouts = thiz._layouts;
-        CONTEXT.runOnUiThread({
-            run() {
-                thiz._window.dismiss();
-                thiz._window = null;
-                for (let i = 0, len = layouts.length; i < len; i++) {
-                    layouts[i].setVisibility(View_.GONE);
-                }
-                thiz._layouts = null;
-            }
-        });
-        return this;
-    };
-
-    /**
-     * Returns the theme of the window.
-     * @since 2016-09-09
-     * @returns {me.astro.design.Theme} Theme of the window
-     */
-    Window.prototype.getTheme = function () {
-        return this._theme;
-    };
-
-    /**
-     * Returns the window.
-     * @since 2016-05-27
-     * @returns {android.widget.PopupWindow} Window
-     */
-    Window.prototype.getWindow = function () {
-        return this._window;
-    };
-
-    /**
-     * Returns the size of the window.
-     * @since 2016-05-27
-     * @returns {Array.<Number>} Width and height of the window
-     */
-    Window.prototype.getWH = function () {
-        return [this._width, this._height];
-    };
-
-    /**
-     * Sets the color of the window.
-     * @since 2016-05-27
-     * @param {Number} color Color of the window
-     */
-    Window.prototype.setColor = function (color) {
-        this._color = color;
-        this._sideBarLayout.setBackgroundDrawable(new ColorDrawable_(color));
-        return this;
-    };
-
-    /**
-     * Sets the focusable of the window.
-     * @since 2016-05-27
-     * @param {Boolean} focusable Focusable of the window
-     */
-    Window.prototype.setFocusable = function (focusable) {
-        this._window.setFocusable(focusable);
-        return this;
-    };
-
-    /**
-     * Sets the size of the window.
-     * @since 2016-05-27
-     * @param {Number} width Width of the window
-     * @param {Number} height Height of the window
-     */
-    Window.prototype.setWH = function (width, height) {
-        this._width = width;
-        this._height = height;
-        return this;
-    };
-
-    /**
-     * Shows the window on the screen.
-     * @since 2016-05-27
-     */
-    Window.prototype.show = function () {
-        let thiz = this,
-            layouts = thiz._layouts;
-        thiz._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
-        thiz._toggles[0].setChecked(true);
-        for (let i = 1, len = layouts.length; i < len; i++) {
-            layouts[i].setVisibility(View_.GONE);
-        }
-        return this;
-    };
-
-
-
-    /**
      * Returns the context.
      * @since 2017-01-22
      * @memberOf me.astro
@@ -4619,7 +4619,7 @@ let me = this.me || {};
     function showWindow() {
         CONTEXT.runOnUiThread({
             run() {
-                let window = new Window(),
+                let window = new PopupWindow(),
                     loginId = new EditText(),
                     loginPassword = new EditText(),
                     registerId = new EditText(),
@@ -4745,7 +4745,7 @@ let me = this.me || {};
             CONTEXT.runOnUiThread({
                 run() {
                     try {
-                        let window = new Window(),
+                        let window = new PopupWindow(),
                             password = new EditText(),
                             name = new EditText(),
                             email = new EditText(),
@@ -5057,7 +5057,7 @@ let me = this.me || {};
         CONTEXT.runOnUiThread({
             run() {
                 try {
-                    let window = new Window();
+                    let window = new PopupWindow();
                     window.addLayout(Bitmap.createBitmap(PATH + "ic_settings.png"), new Layout()
                             .addView(new TextView()
                                 .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
@@ -5363,18 +5363,21 @@ let me = this.me || {};
         ScrollView: ScrollView,
         SensorButton: SensorButton,
         SlideButton: SlideButton,
-        Toast: Toast
+        Toast: Toast,
+        // This class was deprecated in version 2.1. Use me.astro.window.Window instead.
+        Window: PopupWindow
     };
     astro.window = {
+        Window: Window,
         ColorPickerWindow: ColorPickerWindow,
         FloatingWindow: FloatingWindow,
         NotificationWindow: NotificationWindow,
         PaletteWindow: PaletteWindow,
+        PopupWindow: PopupWindow,
         ProgressWindow: ProgressWindow,
         ShowcaseWindow: ShowcaseWindow,
         SplashWindow: SplashWindow,
         VerticalWindow: VerticalWindow,
-        Window: Window
     };
     Object.freeze(astro);
 

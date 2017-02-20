@@ -1398,7 +1398,7 @@ let me = this.me || {};
                     }
                 }
             }).start();
-        }
+        };
         if (friendId in cache) {
             callback(cache[friendId]);
         } else {
@@ -1430,7 +1430,7 @@ let me = this.me || {};
                             isUnknown = false;
                         for (let id in cache) {
                             if (cache[id] === ip) {
-                                thiz._response(friendId, str);
+                                thiz._response(id, str);
                                 isUnknown = false;
                                 break;
                             }
@@ -3229,9 +3229,153 @@ let me = this.me || {};
      */
 
     /**
-     * Class representing a window that shows a color picker.
-     * @since 2017-01-26
+     * Class representing a window.
+     * @since 2017-02-20
      * @class
+     * @memberOf me.astro.window
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
+     */
+    function Window(theme) {
+        theme = theme || Theme.DEFAULT;
+        this._theme = theme;
+        this._window = new PopupWindow_(CONTEXT);
+    }
+
+    /**
+     * Disposes of the window.
+     * @since 2017-02-20
+     */
+    Window.prototype.dismiss = function () {
+        let thiz = this;
+        CONTEXT.runOnUiThread({
+            run() {
+                if (thiz._window instanceof PopupWindow_) {
+                    thiz._window.dismiss();
+                    thiz._window = null;
+                }
+            }
+        });
+        return this;
+    };
+
+    /**
+     * Returns the theme of the window.
+     * @since 2017-02-20
+     * @returns {me.astro.design.Theme} Theme of the window
+     */
+    Window.prototype.getTheme = function () {
+        return this._theme;
+    };
+
+    /**
+     * Returns the window.
+     * @since 2017-02-20
+     * @returns {android.widget.PopupWindow} Window
+     */
+    Window.prototype.getWindow = function () {
+        return this._window;
+    };
+
+    /**
+     * Sets the focusable of the window.
+     * @since 2017-02-20
+     * @param {Boolean} focusable Focusable of the window
+     */
+    Window.prototype.setFocusable = function (focusable) {
+        this._window.setFocusable(focusable);
+        return this;
+    };
+
+    /**
+     * Sets the theme of the window.
+     * @since 2017-02-20
+     * @param {me.astro.design.Theme} theme Theme of the window
+     */
+    Window.prototype.setTheme = function (theme) {
+        this._theme = theme;
+        return this;
+    };
+
+    /**
+     * Shows the window on the screen.
+     * @since 2017-02-20
+     */
+    Window.prototype.show = function () {
+        this._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
+        return this;
+    };
+
+
+
+    /**
+     * Class representing a size changed window.
+     * @since 2017-02-20
+     * @class
+     * @extends me.astro.window.Window
+     * @memberOf me.astro.window
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
+     */
+    function SizeChangedWindow(theme) {
+        theme = theme || Theme.DEFAULT;
+        this._theme = theme;
+        this._height = DP * 200;
+        this._width = DP * 360;
+        this._window = new PopupWindow_(CONTEXT);
+    }
+
+    SizeChangedWindow.prototype = Object.create(Window.prototype);
+    SizeChangedWindow.prototype.constructor = SizeChangedWindow;
+
+    /**
+     * Returns the size of the window.
+     * @since 2017-02-20
+     * @returns {Array.<Number>} Width and height of the window
+     */
+    SizeChangedWindow.prototype.getWH = function () {
+        return [this._width, this._height];
+    };
+
+    /**
+     * Sets the size of the window.
+     * @since 2017-02-20
+     * @param {Number} width Width of the window
+     * @param {Number} height Height of the window
+     */
+    SizeChangedWindow.prototype.setWH = function (width, height) {
+        this._width = width;
+        this._height = height;
+        return this;
+    };
+
+
+
+    /**
+     * Class representing a size fixed window.
+     * @since 2017-02-20
+     * @class
+     * @extends me.astro.window.Window
+     * @memberOf me.astro.window
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
+     */
+    function SizeFixedWindow(theme) {
+        theme = theme || Theme.DEFAULT;
+        this._theme = theme;
+        this._window = new PopupWindow_(CONTEXT);
+        this._window.setWidth(DEVICE_WIDTH);
+        this._window.setHeight(DEVICE_HEIGHT);
+    }
+
+    SizeFixedWindow.prototype = Object.create(Window.prototype);
+    SizeFixedWindow.prototype.constructor = SizeFixedWindow;
+
+
+
+
+    /**
+     * Class representing a window that shows a color picker.
+     * @since 2017-02-20
+     * @class
+     * @extends me.astro.window.SizeFixedWindow
      * @memberOf me.astro.window
      * @param {Number} [r=255] Red
      * @param {Number} [g=0] Green
@@ -3255,9 +3399,12 @@ let me = this.me || {};
         viewer.setTextSize(1, 18);
     }
 
+    ColorPickerWindow.prototype = Object.create(SizeFixedWindow.prototype);
+    ColorPickerWindow.prototype.constructor = ColorPickerWindow;
+
     /**
      * Shows the window of color picker.
-     * @since 2017-01-26
+     * @since 2017-02-20
      */
     ColorPickerWindow.prototype.show = function () {
         let thiz = this;
@@ -3266,6 +3413,7 @@ let me = this.me || {};
                 let drawable = new GradientDrawable_(),
                     layout = new LinearLayout_(CONTEXT),
                     window = new PopupWindow_(layout, -2, -2);
+                thiz._window = window;
                 thiz._viewer.setOnClickListener(new View_.OnClickListener({
                     onClick(view) {
                         CONTEXT.runOnUiThread({
@@ -3293,8 +3441,9 @@ let me = this.me || {};
 
     /**
      * Class representing a floating window.
-     * @since 2017-02-19
+     * @since 2017-02-20
      * @class
+     * @extends me.astro.window.SizeChangedWindow
      * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
      */
@@ -3313,9 +3462,12 @@ let me = this.me || {};
         this._window.setHeight(this._height + DP * 24);
     }
 
+    FloatingWindow.prototype = Object.create(SizeChangedWindow.prototype);
+    FloatingWindow.prototype.constructor = FloatingWindow;
+
     /**
      * Adds a layout on the floating window.
-     * @since 2017-02-19
+     * @since 2017-02-20
      * @param {android.view.View} view View
      */
     FloatingWindow.prototype.addView = function (view) {
@@ -3324,50 +3476,8 @@ let me = this.me || {};
     };
 
     /**
-     * Disposes of the floating window.
-     * @since 2017-02-19
-     */
-    FloatingWindow.prototype.dismiss = function () {
-        let thiz = this;
-        CONTEXT.runOnUiThread({
-            run() {
-                thiz._window.dismiss();
-                thiz._window = null;
-            }
-        });
-        return this;
-    };
-
-    /**
-     * Returns the theme of the floating window.
-     * @since 2017-02-19
-     * @returns {me.astro.design.Theme} Theme of the window
-     */
-    FloatingWindow.prototype.getTheme = function () {
-        return this._theme;
-    };
-
-    /**
-     * Returns the floating window.
-     * @since 2017-02-19
-     * @returns {android.widget.PopupWindow} Window
-     */
-    FloatingWindow.prototype.getWindow = function () {
-        return this._window;
-    };
-
-    /**
-     * Returns the size of the floating window.
-     * @since 2017-02-19
-     * @returns {Array.<Number>} Width and height of the window
-     */
-    FloatingWindow.prototype.getWH = function () {
-        return [this._width, this._height];
-    };
-
-    /**
-     * Sets the color of the floating window.
-     * @since 2017-02-19
+     * Sets the color of the window.
+     * @since 2017-02-20
      * @param {Number} color Color of the window
      */
     FloatingWindow.prototype.setColor = function (color) {
@@ -3375,43 +3485,13 @@ let me = this.me || {};
         return this;
     };
 
-    /**
-     * Sets the focusable of the floating window.
-     * @since 2017-02-19
-     * @param {Boolean} focusable Focusable of the window
-     */
-    FloatingWindow.prototype.setFocusable = function (focusable) {
-        this._window.setFocusable(focusable);
-        return this;
-    };
-
-    /**
-     * Sets the size of the floating window.
-     * @since 2017-02-19
-     * @param {Number} width Width of the window
-     * @param {Number} height Height of the window
-     */
-    FloatingWindow.prototype.setWH = function (width, height) {
-        this._width = width;
-        this._height = height;
-        return this;
-    };
-
-    /**
-     * Shows the window on the floating screen.
-     * @since 2017-02-19
-     */
-    FloatingWindow.prototype.show = function () {
-        this._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
-        return this;
-    };
-
 
 
     /**
      * Class representing a notification window.
-     * @since 2017-01-29
+     * @since 2017-02-20
      * @class
+     * @extends me.astro.window.SizeFixedWindow
      * @memberOf me.astro.window
      */
     function NotificationWindow() {}
@@ -3419,214 +3499,196 @@ let me = this.me || {};
     NotificationWindow.getInstance = function () {
         if (typeof notificationWindowInstance === "undefined") {
             /** @lends me.astro.widget.NotificationWindow */
-            function NotificationWindowInstance() {
+            const NotificationWindowInstance = function () {
                 this._theme = Theme.DEFAULT;
                 this._isRunning = false;
                 this._notifications = [];
                 this._unread = 0;
-            }
-            NotificationWindowInstance.prototype = {
-                constructor: NotificationWindow,
-                /**
-                 * Adds a notification.
-                 * @since 2017-01-29
-                 * @param {String} title Title of notification
-                 * @param {String} text Text of notification
-                 * @param {String} [buttonText] Text of notification button
-                 * @param {Function} [func] Function of notification button
-                 */
-                addNotification(title, text, buttonText, func) {
-                    this._notifications.push({
-                        title: title,
-                        text: text,
-                        buttonText: buttonText,
-                        func: func
-                    });
-                    this._unread++;
-                    return this;
-                },
-                /**
-                 * Disposes of the notification window.
-                 * @since 2017-01-29
-                 */
-                dismiss() {
-                    let windowLayout = this._windowLayout,
-                        window = this._window;
-                    new Thread_({
-                        run() {
-                            CONTEXT.runOnUiThread({
-                                run() {
-                                    if (windowLayout instanceof LinearLayout_) {
-                                        let anim = new TranslateAnimation_(0, DP * -200, 0, 0);
-                                        anim.setDuration(500);
-                                        anim.setInterpolator(new DecelerateInterpolator_());
-                                        windowLayout.startAnimation(anim);
-                                        windowLayout = null;
-                                    }
-                                }
-                            });
-                            Thread_.sleep(500);
-                            CONTEXT.runOnUiThread({
-                                run() {
-                                    if (window instanceof PopupWindow_) {
-                                        window.dismiss();
-                                        window = null;
-                                    }
-                                }
-                            });
-                        }
-                    }).start();
-                    return this;
-                },
-                /**
-                 * Returns the theme of the notification window.
-                 * @since 2017-01-29
-                 * @returns {me.astro.design.Theme} Theme of the notification window
-                 */
-                getTheme() {
-                    return this._theme;
-                },
-                /**
-                 * Returns whether the notification window is currently running.
-                 * @since 2017-01-29
-                 * @returns {Boolean} Whether the notification window is running
-                 */
-                isRunning() {
-                    return this._isRunning;
-                },
-                /**
-                 * Sets the theme of the notification window.
-                 * @since 2017-01-29
-                 * @param {me.astro.design.Theme} theme Theme of the notification window
-                 */
-                setTheme(theme) {
-                    this._theme = theme;
-                    return this;
-                },
-                /**
-                 * Shows the window on the screen.
-                 * @since 2017-01-29
-                 */
-                show() {
-                    let thiz = this,
-                        theme = thiz._theme,
-                        notifications = thiz._notifications,
-                        unread = thiz._unread;
-                    CONTEXT.runOnUiThread({
-                        run() {
-                            let touchX,
-                                anim = new TranslateAnimation_(DP * -200, 0, 0, 0),
-                                drawable = new GradientDrawable_(GradientDrawable_.Orientation.LEFT_RIGHT, [Color.BLACK, 0]),
-                                layout = new LinearLayout_(CONTEXT),
-                                notiLayout = thiz._layout = new LinearLayout_(CONTEXT),
-                                windowLayout = thiz._windowLayout = new LinearLayout_(CONTEXT),
-                                window = thiz._window = new PopupWindow_(windowLayout, DP * 208, -1);
-                            anim.setDuration(500);
-                            anim.setInterpolator(new DecelerateInterpolator_());
-                            layout.addView(new ScrollView(theme)
-                                .addView(thiz._layout)
-                                .setWidth(DP * 192)
-                                .show());
-                            layout.setBackgroundDrawable(new ColorDrawable_(theme.getNotificationWindow(Theme.BACKGROUND_COLOR)));
-                            for (let i = notifications.length; i--;) {
-                                let notification = notifications[i],
-                                    viewLayout = new LinearLayout_(CONTEXT);
-                                viewLayout.addView(new TextView(theme)
-                                    .setText(notification.title)
-                                    .setTextColor(unread > 0 ? theme.getNotificationWindow(Theme.EFFECT_COLOR) : theme.getNotificationWindow(Theme.TEXT_COLOR))
-                                    .setTextSize(18)
-                                    .show());
-                                viewLayout.addView(new TextView(theme)
-                                    .setText(notification.text)
-                                    .setTextSize(12)
-                                    .show());
-                                if (typeof notification.func === "function") {
-                                    viewLayout.addView(new Button(theme)
-                                        .setEffect(notification.func)
-                                        .setText(notification.buttonText)
-                                        .setWH(DP * 162, DP * 36)
-                                        .show());
-                                }
-                                viewLayout.addView(new Divider(theme).show());
-                                viewLayout.setOrientation(1);
-                                notiLayout.addView(viewLayout, -1, -2);
-                                if (unread > 0) {
-                                    unread--;
+            };
+
+            NotificationWindowInstance.prototype = Object.create(SizeFixedWindow.prototype);
+            NotificationWindowInstance.prototype.constructor = NotificationWindow;
+
+            /**
+             * Adds a notification.
+             * @since 2017-02-20
+             * @param {String} title Title of notification
+             * @param {String} text Text of notification
+             * @param {String} [buttonText] Text of notification button
+             * @param {Function} [func] Function of notification button
+             */
+            NotificationWindowInstance.prototype.addNotification = function (title, text, buttonText, func) {
+                this._notifications.push({
+                    title: title,
+                    text: text,
+                    buttonText: buttonText,
+                    func: func
+                });
+                this._unread++;
+                return this;
+            };
+
+            NotificationWindowInstance.prototype.dismiss = function () {
+                let windowLayout = this._windowLayout,
+                    window = this._window;
+                new Thread_({
+                    run() {
+                        CONTEXT.runOnUiThread({
+                            run() {
+                                if (windowLayout instanceof LinearLayout_) {
+                                    let anim = new TranslateAnimation_(0, DP * -200, 0, 0);
+                                    anim.setDuration(500);
+                                    anim.setInterpolator(new DecelerateInterpolator_());
+                                    windowLayout.startAnimation(anim);
+                                    windowLayout = null;
                                 }
                             }
-                            thiz._unread = unread;
-                            notiLayout.addView(new TextView(theme)
-                                .setGravity(Gravity_.CENTER)
-                                .setText("Swipe the edge of the window to the left to close the window")
-                                .setTextColor(ColorUtils.setAlpha(theme.getNotificationWindow(Theme.TEXT_COLOR), 160))
-                                .setTextSize(10)
-                                .show());
-                            notiLayout.setOrientation(1);
-                            notiLayout.setPadding(DP * 4, DP * 4, DP * 4, DP * 4);
-                            windowLayout.addView(layout, -1, -1);
-                            windowLayout.setBackgroundDrawable(drawable);
-                            windowLayout.setPadding(0, 0, DP * 16, 0);
-                            windowLayout.setOnTouchListener(new View_.OnTouchListener({
-                                onTouch(v, event) {
-                                    switch (event.getAction()) {
-                                    case MotionEvent_.ACTION_DOWN:
-                                        touchX = event.getX();
-                                        break;
-                                    case MotionEvent_.ACTION_CANCEL:
-                                    case MotionEvent_.ACTION_UP:
-                                        if (touchX - event.getX() > DP * 16 && touchX >= 0 && touchX <= DP * 208) {
-                                            thiz.dismiss();
-                                        }
-                                        break;
-                                    }
-                                    return true;
+                        });
+                        Thread_.sleep(500);
+                        CONTEXT.runOnUiThread({
+                            run() {
+                                if (window instanceof PopupWindow_) {
+                                    window.dismiss();
+                                    window = null;
                                 }
-                            }));
-                            windowLayout.startAnimation(anim);
-                            window.showAtLocation(SCREEN, Gravity_.CENTER | Gravity_.LEFT, 0, 0);
-                        }
-                    });
-                    return this;
-                },
-                /**
-                 * Starts the notification window.
-                 * @since 2017-01-29
-                 */
-                start() {
-                    let thiz = this;
-                    CONTEXT.runOnUiThread({
-                        run() {
-                            let touchX;
-                            SCREEN.setOnTouchListener(new View_.OnTouchListener({
-                                onTouch(v, event) {
-                                    switch (event.getAction()) {
-                                    case MotionEvent_.ACTION_DOWN:
-                                        touchX = event.getX();
-                                        break;
-                                    case MotionEvent_.ACTION_CANCEL:
-                                    case MotionEvent_.ACTION_UP:
-                                        if (thiz._isRunning && event.getX() - touchX > DP * 16 && touchX >= 0 && touchX <= DP * 16) {
-                                            thiz.show();
-                                        }
-                                        break;
-                                    }
-                                    return true;
-                                }
-                            }));
-                        }
-                    });
-                    this._isRunning = true;
-                    return this;
-                },
-                /**
-                 * Stops the notification window.
-                 * @since 2017-01-29
-                 */
-                stop() {
-                    this._isRunning = false;
-                    return this;
-                }
+                            }
+                        });
+                    }
+                }).start();
+                return this;
             };
+
+            /**
+             * Returns whether the notification window is currently running.
+             * @since 2017-01-29
+             * @returns {Boolean} Whether the notification window is running
+             */
+            NotificationWindowInstance.prototype.isRunning = function () {
+                return this._isRunning;
+            };
+
+            NotificationWindowInstance.prototype.show = function () {
+                let thiz = this,
+                    theme = thiz._theme,
+                    notifications = thiz._notifications,
+                    unread = thiz._unread;
+                CONTEXT.runOnUiThread({
+                    run() {
+                        let touchX,
+                            anim = new TranslateAnimation_(DP * -200, 0, 0, 0),
+                            drawable = new GradientDrawable_(GradientDrawable_.Orientation.LEFT_RIGHT, [Color.BLACK, 0]),
+                            layout = new LinearLayout_(CONTEXT),
+                            notiLayout = thiz._layout = new LinearLayout_(CONTEXT),
+                            windowLayout = thiz._windowLayout = new LinearLayout_(CONTEXT),
+                            window = thiz._window = new PopupWindow_(windowLayout, DP * 208, -1);
+                        anim.setDuration(500);
+                        anim.setInterpolator(new DecelerateInterpolator_());
+                        layout.addView(new ScrollView(theme)
+                            .addView(thiz._layout)
+                            .setWidth(DP * 192)
+                            .show());
+                        layout.setBackgroundDrawable(new ColorDrawable_(theme.getNotificationWindow(Theme.BACKGROUND_COLOR)));
+                        for (let i = notifications.length; i--;) {
+                            let notification = notifications[i],
+                                viewLayout = new LinearLayout_(CONTEXT);
+                            viewLayout.addView(new TextView(theme)
+                                .setText(notification.title)
+                                .setTextColor(unread > 0 ? theme.getNotificationWindow(Theme.EFFECT_COLOR) : theme.getNotificationWindow(Theme.TEXT_COLOR))
+                                .setTextSize(18)
+                                .show());
+                            viewLayout.addView(new TextView(theme)
+                                .setText(notification.text)
+                                .setTextSize(12)
+                                .show());
+                            if (typeof notification.func === "function") {
+                                viewLayout.addView(new Button(theme)
+                                    .setEffect(notification.func)
+                                    .setText(notification.buttonText)
+                                    .setWH(DP * 162, DP * 36)
+                                    .show());
+                            }
+                            viewLayout.addView(new Divider(theme).show());
+                            viewLayout.setOrientation(1);
+                            notiLayout.addView(viewLayout, -1, -2);
+                            if (unread > 0) {
+                                unread--;
+                            }
+                        }
+                        thiz._unread = unread;
+                        notiLayout.addView(new TextView(theme)
+                            .setGravity(Gravity_.CENTER)
+                            .setText("Swipe the edge of the window to the left to close the window")
+                            .setTextColor(ColorUtils.setAlpha(theme.getNotificationWindow(Theme.TEXT_COLOR), 160))
+                            .setTextSize(10)
+                            .show());
+                        notiLayout.setOrientation(1);
+                        notiLayout.setPadding(DP * 4, DP * 4, DP * 4, DP * 4);
+                        windowLayout.addView(layout, -1, -1);
+                        windowLayout.setBackgroundDrawable(drawable);
+                        windowLayout.setPadding(0, 0, DP * 16, 0);
+                        windowLayout.setOnTouchListener(new View_.OnTouchListener({
+                            onTouch(v, event) {
+                                switch (event.getAction()) {
+                                case MotionEvent_.ACTION_DOWN:
+                                    touchX = event.getX();
+                                    break;
+                                case MotionEvent_.ACTION_CANCEL:
+                                case MotionEvent_.ACTION_UP:
+                                    if (touchX - event.getX() > DP * 16 && touchX >= 0 && touchX <= DP * 208) {
+                                        thiz.dismiss();
+                                    }
+                                    break;
+                                }
+                                return true;
+                            }
+                        }));
+                        windowLayout.startAnimation(anim);
+                        window.showAtLocation(SCREEN, Gravity_.CENTER | Gravity_.LEFT, 0, 0);
+                    }
+                });
+                return this;
+            };
+
+            /**
+             * Starts the notification window.
+             * @since 2017-02-20
+             */
+            NotificationWindowInstance.prototype.start = function () {
+                let thiz = this;
+                CONTEXT.runOnUiThread({
+                    run() {
+                        let touchX;
+                        SCREEN.setOnTouchListener(new View_.OnTouchListener({
+                            onTouch(v, event) {
+                                switch (event.getAction()) {
+                                case MotionEvent_.ACTION_DOWN:
+                                    touchX = event.getX();
+                                    break;
+                                case MotionEvent_.ACTION_CANCEL:
+                                case MotionEvent_.ACTION_UP:
+                                    if (thiz._isRunning && event.getX() - touchX > DP * 16 && touchX >= 0 && touchX <= DP * 16) {
+                                        thiz.show();
+                                    }
+                                    break;
+                                }
+                                return true;
+                            }
+                        }));
+                    }
+                });
+                this._isRunning = true;
+                return this;
+            };
+
+            /**
+             * Stops the notification window.
+             * @since 2017-02-20
+             */
+            NotificationWindowInstance.prototype.stop = function () {
+                this._isRunning = false;
+                return this;
+            };
+
             notificationWindowInstance = new NotificationWindowInstance();
             return notificationWindowInstance;
         } else {
@@ -3638,73 +3700,35 @@ let me = this.me || {};
 
     /**
      * Class representing a palette window.
-     * @since 2016-09-09
+     * @since 2017-02-20
      * @class
+     * @extends me.astro.window.SizeFixedWindow
      * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
      */
     function PaletteWindow(theme) {
         theme = theme || Theme.DEFAULT;
-        let thiz = this;
-        thiz._theme = theme;
-        thiz._window = new PopupWindow_(CONTEXT);
-        thiz._layout = new ScrollView(theme);
-        thiz._palette = new Palette();
-        thiz._window.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.BACKGROUND_COLOR)));
-        thiz._window.setContentView(thiz._layout.show());
-        thiz._window.setWidth(DP * 340);
-        thiz._window.setHeight(DP * 340);
-        thiz._layout.addView(thiz._palette.show());
+        this._theme = theme;
+        this._window = new PopupWindow_(CONTEXT);
+        this._layout = new ScrollView(theme);
+        this._palette = new Palette();
+        this._window.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.BACKGROUND_COLOR)));
+        this._window.setContentView(this._layout.show());
+        this._window.setWidth(DP * 340);
+        this._window.setHeight(DP * 340);
+        this._layout.addView(this._palette.show());
     }
 
-    /**
-     * Disposes of the palette window.
-     * @since 2016-09-09
-     */
-    PaletteWindow.prototype.dismiss = function () {
-        let thiz = this;
-        CONTEXT.runOnUiThread({
-            run() {
-                thiz._window.dismiss();
-            }
-        });
-        return this;
-    };
+    PaletteWindow.prototype = Object.create(SizeFixedWindow.prototype);
+    PaletteWindow.prototype.constructor = PaletteWindow;
 
     /**
-     * Returns the theme of the palette window.
-     * @since 2016-09-09
-     * @returns {me.astro.design.Theme} Theme of the palette window
-     */
-    PaletteWindow.prototype.getTheme = function () {
-        return this._theme;
-    };
-
-    /**
-     * Returns the palette window.
-     * @since 2016-09-09
-     * @returns {android.widget.PopupWindow} Palette window
-     */
-    PaletteWindow.prototype.getWindow = function () {
-        return this._window;
-    };
-
-    /**
-     * Sets the color of the palette window.
-     * @since 2016-09-09
-     * @param {Number} color Color of the palette window
+     * Sets the color of the window.
+     * @since 2017-02-20
+     * @param {Number} color Color of the window
      */
     PaletteWindow.prototype.setColor = function (color) {
         this._window.setBackgroundDrawable(new ColorDrawable_(color));
-        return this;
-    };
-
-    /**
-     * Show the palette window on the screen.
-     * @since 2016-09-09
-     */
-    PaletteWindow.prototype.show = function () {
-        this._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
         return this;
     };
 
@@ -3712,39 +3736,42 @@ let me = this.me || {};
 
     /**
      * Class representing a popup window.
-     * @since 2016-05-27
+     * @since 2017-02-20
      * @class
+     * @extends me.astro.window.SizeChangedWindow
      * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
      */
     function PopupWindow(theme) {
         theme = theme || Theme.DEFAULT;
-        let thiz = this;
-        thiz._theme = theme;
-        thiz._height = DP * 320;
-        thiz._width = DP * 400;
-        thiz._layouts = [];
-        thiz._toggles = [];
-        thiz._window = new PopupWindow_(CONTEXT);
-        thiz._windowLayout = new LinearLayout_(CONTEXT);
-        thiz._sideBarLayout = new LinearLayout_(CONTEXT);
-        thiz._contentLayout = new FrameLayout_(CONTEXT);
-        thiz._windowLayout.addView(thiz._sideBarLayout, DP * 60, thiz._height);
-        thiz._windowLayout.addView(thiz._contentLayout, thiz._width - DP * 60, thiz._height);
-        thiz._windowLayout.setBackgroundDrawable(ShadowDrawable.create());
-        thiz._windowLayout.setGravity(Gravity_.CENTER);
-        thiz._sideBarLayout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.BACKGROUND_COLOR)));
-        thiz._sideBarLayout.setOrientation(1);
-        thiz._contentLayout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.TEXT_COLOR)));
-        thiz._window.setBackgroundDrawable(new ColorDrawable_(0));
-        thiz._window.setContentView(thiz._windowLayout);
-        thiz._window.setWidth(thiz._width + DP * 24);
-        thiz._window.setHeight(thiz._height + DP * 24);
+        this._theme = theme;
+        this._height = DP * 320;
+        this._width = DP * 400;
+        this._layouts = [];
+        this._toggles = [];
+        this._window = new PopupWindow_(CONTEXT);
+        this._windowLayout = new LinearLayout_(CONTEXT);
+        this._sideBarLayout = new LinearLayout_(CONTEXT);
+        this._contentLayout = new FrameLayout_(CONTEXT);
+        this._windowLayout.addView(this._sideBarLayout, DP * 60, this._height);
+        this._windowLayout.addView(this._contentLayout, this._width - DP * 60, this._height);
+        this._windowLayout.setBackgroundDrawable(ShadowDrawable.create());
+        this._windowLayout.setGravity(Gravity_.CENTER);
+        this._sideBarLayout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.BACKGROUND_COLOR)));
+        this._sideBarLayout.setOrientation(1);
+        this._contentLayout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.TEXT_COLOR)));
+        this._window.setBackgroundDrawable(new ColorDrawable_(0));
+        this._window.setContentView(this._windowLayout);
+        this._window.setWidth(this._width + DP * 24);
+        this._window.setHeight(this._height + DP * 24);
     }
+
+    PopupWindow.prototype = Object.create(SizeChangedWindow.prototype);
+    PopupWindow.prototype.constructor = PopupWindow;
 
     /**
      * Adds a layout on the window.
-     * @since 2016-05-27
+     * @since 2017-02-20
      * @param {android.graphics.Bitmap} image Image which is placed the sidebar
      * @param {android.widget.LinearLayout} layout Layout
      */
@@ -3774,10 +3801,6 @@ let me = this.me || {};
         return this;
     };
 
-    /**
-     * Disposes of the window.
-     * @since 2016-05-27
-     */
     PopupWindow.prototype.dismiss = function () {
         let thiz = this,
             layouts = thiz._layouts;
@@ -3795,35 +3818,8 @@ let me = this.me || {};
     };
 
     /**
-     * Returns the theme of the window.
-     * @since 2016-09-09
-     * @returns {me.astro.design.Theme} Theme of the window
-     */
-    PopupWindow.prototype.getTheme = function () {
-        return this._theme;
-    };
-
-    /**
-     * Returns the window.
-     * @since 2016-05-27
-     * @returns {android.widget.PopupWindow} Window
-     */
-    PopupWindow.prototype.getWindow = function () {
-        return this._window;
-    };
-
-    /**
-     * Returns the size of the window.
-     * @since 2016-05-27
-     * @returns {Array.<Number>} Width and height of the window
-     */
-    PopupWindow.prototype.getWH = function () {
-        return [this._width, this._height];
-    };
-
-    /**
      * Sets the color of the window.
-     * @since 2016-05-27
+     * @since 2017-02-20
      * @param {Number} color Color of the window
      */
     PopupWindow.prototype.setColor = function (color) {
@@ -3832,32 +3828,6 @@ let me = this.me || {};
         return this;
     };
 
-    /**
-     * Sets the focusable of the window.
-     * @since 2016-05-27
-     * @param {Boolean} focusable Focusable of the window
-     */
-    PopupWindow.prototype.setFocusable = function (focusable) {
-        this._window.setFocusable(focusable);
-        return this;
-    };
-
-    /**
-     * Sets the size of the window.
-     * @since 2016-05-27
-     * @param {Number} width Width of the window
-     * @param {Number} height Height of the window
-     */
-    PopupWindow.prototype.setWH = function (width, height) {
-        this._width = width;
-        this._height = height;
-        return this;
-    };
-
-    /**
-     * Shows the window on the screen.
-     * @since 2016-05-27
-     */
     PopupWindow.prototype.show = function () {
         let thiz = this,
             layouts = thiz._layouts;
@@ -3873,8 +3843,9 @@ let me = this.me || {};
 
     /**
      * Class representing a progress window.
-     * @since 2016-07-05
+     * @since 2017-02-20
      * @class
+     * @extends me.astro.window.SizeFixedWindow
      * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
      * @param {Boolean} [canForceShutdown=true] Enables force shutdown
@@ -3950,43 +3921,27 @@ let me = this.me || {};
         }
     }
 
-    /**
-     * Disposes of the progress window.
-     * @since 2016-07-05
-     */
+    ProgressWindow.prototype = Object.create(SizeFixedWindow.prototype);
+    ProgressWindow.prototype.constructor = ProgressWindow;
+
     ProgressWindow.prototype.dismiss = function () {
         let thiz = this;
         CONTEXT.runOnUiThread({
             run() {
                 thiz._isRunning = false;
-                thiz._window.dismiss();
+                if (thiz._window instanceof PopupWindow_) {
+                    thiz._window.dismiss();
+                    thiz._window = null;
+                }
             }
         });
         return this;
     };
 
     /**
-     * Returns the theme of the progress window.
-     * @since 2016-09-09
-     * @returns {me.astro.design.Theme} Theme of the progress window
-     */
-    ProgressWindow.prototype.getTheme = function () {
-        return this._theme;
-    };
-
-    /**
-     * Returns the progress window.
-     * @since 2016-07-05
-     * @returns {android.widget.PopupWindow} Progress window
-     */
-    ProgressWindow.prototype.getWindow = function () {
-        return this._window;
-    };
-
-    /**
-     * Sets the color of the progress window.
-     * @since 2016-07-05
-     * @param {Number} color Color of the progress window
+     * Sets the color of the window.
+     * @since 2017-02-20
+     * @param {Number} color Color of the window
      */
     ProgressWindow.prototype.setColor = function (color) {
         this._window.setBackgroundDrawable(new ColorDrawable_(color));
@@ -3995,7 +3950,7 @@ let me = this.me || {};
 
     /**
      * Sets the effect function.
-     * @since 2016-07-05
+     * @since 2017-02-20
      * @param {Number} color0 Effect color
      * @param {Number} color1 Background color
      */
@@ -4010,7 +3965,7 @@ let me = this.me || {};
 
     /**
      * Sets a displayed text.
-     * @since 2016-07-05
+     * @since 2017-02-20
      * @param {Number} text Displayed text
      */
     ProgressWindow.prototype.setText = function (text) {
@@ -4020,7 +3975,7 @@ let me = this.me || {};
 
     /**
      * Sets the color of displayed text.
-     * @since 2016-07-05
+     * @since 2017-02-20
      * @param {Number} textColor Color of displayed text
      */
     ProgressWindow.prototype.setTextColor = function (textColor) {
@@ -4029,17 +3984,8 @@ let me = this.me || {};
     };
 
     /**
-     * Show the progress window on the screen.
-     * @since 2016-07-05
-     */
-    ProgressWindow.prototype.show = function () {
-        this._window.showAtLocation(SCREEN, Gravity_.CENTER, 0, 0);
-        return this;
-    };
-
-    /**
      * Stops the effect of progress.
-     * @since 2016-07-05
+     * @since 2017-02-20
      */
     ProgressWindow.prototype.stop = function () {
         this._isRunning = false;
@@ -4050,62 +3996,31 @@ let me = this.me || {};
 
     /**
      * Class representing a showcase window.
-     * @since 2017-01-27
+     * @since 2017-02-20
      * @class
+     * @extends me.astro.window.SizeFixedWindow
      * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of showcase window
      */
     function ShowcaseWindow(theme) {
         theme = theme || Theme.DEFAULT;
-        let thiz = this;
-        thiz._theme = theme;
-        thiz._color = ColorUtils.setAlpha(theme.getShowcaseWindow(Theme.BACKGROUND_COLOR), 204);
-        thiz._radius = DP * 50;
-        thiz._itemXY = [DP * 100, DP * 100];
-        thiz._window = new PopupWindow_(CONTEXT);
-        thiz._window.setWidth(DEVICE_WIDTH);
-        thiz._window.setHeight(DEVICE_HEIGHT);
+        this._theme = theme;
+        this._color = ColorUtils.setAlpha(theme.getShowcaseWindow(Theme.BACKGROUND_COLOR), 204);
+        this._radius = DP * 50;
+        this._itemXY = [DP * 100, DP * 100];
+        this._window = new PopupWindow_(CONTEXT);
+        this._window.setWidth(DEVICE_WIDTH);
+        this._window.setHeight(DEVICE_HEIGHT);
     }
 
-    /**
-     * Disposes of the showcase window.
-     * @since 2017-01-27
-     */
-    ShowcaseWindow.prototype.dismiss = function () {
-        let thiz = this;
-        if (thiz._window !== null) {
-            CONTEXT.runOnUiThread({
-                run() {
-                    thiz._window.dismiss();
-                    thiz._window = null;
-                }
-            });
-        }
-        return this;
-    };
+    ShowcaseWindow.prototype = Object.create(SizeFixedWindow.prototype);
+    ShowcaseWindow.prototype.constructor = ShowcaseWindow;
 
     /**
-     * Returns the theme of the showcase window.
-     * @since 2017-01-27
-     * @returns {me.astro.design.Theme} Theme of the showcase window
+     * Sets the color of the window.
+     * @since 2017-02-20
+     * @param {Number} color Color of the window
      */
-    ShowcaseWindow.prototype.getTheme = function () {
-        return this._theme;
-    };
-
-    /**
-     * Returns the showcase window.
-     * @since 2017-01-27
-     * @returns {android.widget.PopupWindow} Showcase window
-     */
-    ShowcaseWindow.prototype.getWindow = function () {
-        return this._window;
-    };
-
-    /**
-     * Sets the color of the showcase window.
-     * @since 2017-01-27
-     * @param {Number} color Color of the showcase window
     ShowcaseWindow.prototype.setColor = function (color) {
         this._color = color;
         return this;
@@ -4113,7 +4028,7 @@ let me = this.me || {};
 
     /**
      * Sets the item location.
-     * @since 2017-01-27
+     * @since 2017-02-20
      * @param {Number} x X location of the item
      * @param {Number} y Y location of the item
      */
@@ -4124,7 +4039,7 @@ let me = this.me || {};
 
     /**
      * Sets the circle radius that emphasizes the item.
-     * @since 2017-01-27
+     * @since 2017-02-20
      * @param {Number} radius
      */
     ShowcaseWindow.prototype.setRadius = function (radius) {
@@ -4134,7 +4049,7 @@ let me = this.me || {};
 
     /**
      * Sets a view on the window.
-     * @since 2017-01-27
+     * @since 2017-02-20
      * @param {android.widget.LinearLayout} view View
      */
     ShowcaseWindow.prototype.setView = function (view) {
@@ -4142,10 +4057,6 @@ let me = this.me || {};
         return this;
     };
 
-    /**
-     * Shows the showcase window on the screen.
-     * @since 2017-01-27
-     */
     ShowcaseWindow.prototype.show = function () {
         let itemXY = this._itemXY,
             radius = this._radius,
@@ -4167,48 +4078,34 @@ let me = this.me || {};
 
     /**
      * Class representing a splash window.
-     * @since 2016-12-15
+     * @since 2017-02-20
      * @class
+     * @extends me.astro.window.SizeFixedWindow
      * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of splash window
      */
     function SplashWindow(theme) {
         theme = theme || Theme.DEFAULT;
-        let thiz = this;
-        thiz._theme = theme;
-        thiz._height = DEVICE_HEIGHT;
-        thiz._width = DEVICE_WIDTH;
-        thiz._delay = 1000;
-        thiz._layout = new LinearLayout_(CONTEXT);
-        thiz._layout.setBackgroundDrawable(new ColorDrawable_(theme.getSplashWindow(Theme.BACKGROUND_COLOR)));
-        thiz._layout.setGravity(Gravity_.CENTER);
-        thiz._window = new PopupWindow_(CONTEXT);
-        thiz._window.setBackgroundDrawable(new ColorDrawable_(0));
-        this._window.setContentView(thiz._layout);
-        thiz._window.setWidth(DEVICE_WIDTH);
-        thiz._window.setHeight(DEVICE_HEIGHT);
+        this._theme = theme;
+        this._height = DEVICE_HEIGHT;
+        this._width = DEVICE_WIDTH;
+        this._delay = 1000;
+        this._layout = new LinearLayout_(CONTEXT);
+        this._layout.setBackgroundDrawable(new ColorDrawable_(theme.getSplashWindow(Theme.BACKGROUND_COLOR)));
+        this._layout.setGravity(Gravity_.CENTER);
+        this._window = new PopupWindow_(CONTEXT);
+        this._window.setBackgroundDrawable(new ColorDrawable_(0));
+        this._window.setContentView(this._layout);
+        this._window.setWidth(DEVICE_WIDTH);
+        this._window.setHeight(DEVICE_HEIGHT);
     }
 
-    /**
-     * Disposes of the splash window.
-     * @since 2016-12-15
-     */
-    SplashWindow.prototype.dismiss = function () {
-        let thiz = this;
-        if (thiz._window !== null) {
-            CONTEXT.runOnUiThread({
-                run() {
-                    thiz._window.dismiss();
-                    thiz._window = null;
-                }
-            });
-        }
-        return this;
-    };
+    SplashWindow.prototype = Object.create(SizeFixedWindow.prototype);
+    SplashWindow.prototype.constructor = SplashWindow;
 
     /**
      * Returns the delay of the splash window.
-     * @since 2016-12-15
+     * @since 2017-02-20
      * @returns {Number} Delay of the splash window
      */
     SplashWindow.prototype.getDelay = function () {
@@ -4216,27 +4113,9 @@ let me = this.me || {};
     };
 
     /**
-     * Returns the theme of the splash window.
-     * @since 2016-12-15
-     * @returns {me.astro.design.Theme} Theme of the splash window
-     */
-    SplashWindow.prototype.getTheme = function () {
-        return this._theme;
-    };
-
-    /**
-     * Returns the splash window.
-     * @since 2016-12-15
-     * @returns {android.widget.PopupWindow} Vertical window
-     */
-    SplashWindow.prototype.getWindow = function () {
-        return this._window;
-    };
-
-    /**
-     * Sets the color of the splash window.
-     * @since 2016-12-15
-     * @param {Number} color Color of the splash window
+     * Sets the color of the window.
+     * @since 2017-02-20
+     * @param {Number} color Color of the window
      */
     SplashWindow.prototype.setColor = function (color) {
         this._layout.setBackgroundDrawable(new ColorDrawable_(color));
@@ -4245,7 +4124,7 @@ let me = this.me || {};
 
     /**
      * Sets the delay of the splash window.
-     * @since 2016-12-15
+     * @since 2017-02-20
      * @param {Number} delay Delay of the splash window
      */
     SplashWindow.prototype.setDelay = function (delay) {
@@ -4255,7 +4134,7 @@ let me = this.me || {};
 
     /**
      * Sets a view on the window.
-     * @since 2016-12-15
+     * @since 2017-02-20
      * @param {android.widget.LinearLayout} view View
      */
     SplashWindow.prototype.setView = function (view) {
@@ -4263,16 +4142,10 @@ let me = this.me || {};
         return this;
     };
 
-    /**
-     * Shows the splash window on the screen.
-     * @since 2016-12-15
-     * @param {Number} [x=0] X location of the vertical window.
-     * @param {Number} [y=0] Y location of the vertical window.
-     */
-    SplashWindow.prototype.show = function (x, y) {
+    SplashWindow.prototype.show = function () {
         let thiz = this,
             anim = new AlphaAnimation_(0, 1);
-        thiz._window.showAtLocation(SCREEN, Gravity_.BOTTOM | Gravity_.RIGHT, x || 0, y || 0);
+        thiz._window.showAtLocation(SCREEN, Gravity_.BOTTOM | Gravity_.RIGHT, 0, 0);
         anim.setDuration(Math.floor(thiz._delay / 4));
         anim.setInterpolator(new DecelerateInterpolator_());
         thiz._layout.startAnimation(anim);
@@ -4304,8 +4177,9 @@ let me = this.me || {};
 
     /**
      * Class representing a verticle window.
-     * @since 2016-08-04
+     * @since 2017-02-20
      * @class
+     * @extends me.astro.window.SizeChangedWindow
      * @memberOf me.astro.window
      * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of verticle window
      */
@@ -4333,9 +4207,12 @@ let me = this.me || {};
         thiz._window.setHeight(DP * 156);
     }
 
+    VerticalWindow.prototype = Object.create(SizeChangedWindow.prototype);
+    VerticalWindow.prototype.constructor = VerticalWindow;
+
     /**
      * Adds a view on the window.
-     * @since 2016-08-04
+     * @since 2017-02-20
      * @param {android.widget.LinearLayout} view View
      */
     VerticalWindow.prototype.addView = function (view) {
@@ -4381,10 +4258,6 @@ let me = this.me || {};
         return this;
     };
 
-    /**
-     * Disposes of the vertical window.
-     * @since 2016-08-04
-     */
     VerticalWindow.prototype.dismiss = function () {
         let thiz = this,
             layouts = thiz._layouts;
@@ -4402,35 +4275,8 @@ let me = this.me || {};
     };
 
     /**
-     * Returns the theme of the vertical window.
-     * @since 2016-09-09
-     * @returns {me.astro.design.Theme} Theme of the vertical window
-     */
-    VerticalWindow.prototype.getTheme = function () {
-        return this._theme;
-    };
-
-    /**
-     * Returns the vertical window.
-     * @since 2016-08-04
-     * @returns {android.widget.PopupWindow} Vertical window
-     */
-    VerticalWindow.prototype.getWindow = function () {
-        return this._window;
-    };
-
-    /**
-     * Returns the size of the vertical window.
-     * @since 2016-08-04
-     * @returns {Array.<Number>} Width and height of the vertical window.
-     */
-    VerticalWindow.prototype.getWH = function () {
-        return [this._width, this._height];
-    };
-
-    /**
      * Returns the x location of the vertical window.
-     * @since 2016-08-26
+     * @since 2017-02-20
      * @returns {Number} X location of the vertical window.
      */
     VerticalWindow.prototype.getX = function () {
@@ -4439,7 +4285,7 @@ let me = this.me || {};
 
     /**
      * Returns the y location of the vertical window.
-     * @since 2016-08-26
+     * @since 2017-02-20
      * @returns {Number} Y location of the vertical window.
      */
     VerticalWindow.prototype.getY = function () {
@@ -4447,9 +4293,9 @@ let me = this.me || {};
     };
 
     /**
-     * Sets the color of the vertical window.
-     * @since 2016-08-04
-     * @param {Number} color Color of the vertical window
+     * Sets the color of the window.
+     * @since 2017-02-20
+     * @param {Number} color Color of the window
      */
     VerticalWindow.prototype.setColor = function (color) {
         this._sensor.setImage(Bitmap.createBitmap(PATH + "ic_open_with.png", DP * 24, DP * 24), color);
@@ -4461,10 +4307,10 @@ let me = this.me || {};
     };
 
     /**
-     * Shows the vertical window on the screen.
-     * @since 2016-08-04
-     * @param {Number} [x=0] X location of the vertical window.
-     * @param {Number} [y=0] Y location of the vertical window.
+     * Shows the window on the screen.
+     * @since 2017-02-20
+     * @param {Number} [x=0] X location of the window.
+     * @param {Number} [y=0] Y location of the window.
      */
     VerticalWindow.prototype.show = function (x, y) {
         let thiz = this,
@@ -5364,11 +5210,13 @@ let me = this.me || {};
         SensorButton: SensorButton,
         SlideButton: SlideButton,
         Toast: Toast,
-        // This class was deprecated in version 2.1. Use me.astro.window.Window instead.
+        // This class was deprecated in version 2.1. Use me.astro.window.PopupWindow instead.
         Window: PopupWindow
     };
     astro.window = {
         Window: Window,
+        SizeChangedWindow: SizeChangedWindow,
+        SizeFixedWindow: SizeFixedWindow,
         ColorPickerWindow: ColorPickerWindow,
         FloatingWindow: FloatingWindow,
         NotificationWindow: NotificationWindow,

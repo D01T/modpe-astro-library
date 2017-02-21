@@ -3450,7 +3450,7 @@ let me = this.me || {};
     function FloatingWindow(theme) {
         theme = theme || Theme.DEFAULT;
         this._theme = theme;
-        this._height = DP * 200;
+        this._height = DP * 240;
         this._width = DP * 360;
         this._window = new PopupWindow_(CONTEXT);
         this._layout = new LinearLayout_(CONTEXT);
@@ -3484,6 +3484,34 @@ let me = this.me || {};
         this._layout.setBackgroundDrawable(new ColorDrawable_(color));
         return this;
     };
+
+
+
+    /**
+     * Class representing a floating text window.
+     * @since 2017-02-21
+     * @class
+     * @extends me.astro.window.FloatingWindow
+     * @memberOf me.astro.window
+     * @param {me.astro.design.Theme} [theme=me.astro.design.Theme.DEFAULT] Theme of window
+     */
+    function FloatingTextWindow(theme) {
+        theme = theme || Theme.DEFAULT;
+        this._theme = theme;
+        this._height = DP * 240;
+        this._width = DP * 360;
+        this._window = new PopupWindow_(CONTEXT);
+        this._layout = new LinearLayout_(CONTEXT);
+        this._layout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.TEXT_COLOR)));
+        this._layout.setOrientation(1);
+        this._window.setBackgroundDrawable(ShadowDrawable.create());
+        this._window.setContentView(this._layout);
+        this._window.setWidth(this._width + DP * 24);
+        this._window.setHeight(this._height + DP * 24);
+    }
+
+    FloatingTextWindow.prototype = Object.create(FloatingWindow.prototype);
+    FloatingTextWindow.prototype.constructor = FloatingTextWindow;
 
 
 
@@ -5219,6 +5247,7 @@ let me = this.me || {};
         SizeFixedWindow: SizeFixedWindow,
         ColorPickerWindow: ColorPickerWindow,
         FloatingWindow: FloatingWindow,
+        FloatingTextWindow: FloatingTextWindow,
         NotificationWindow: NotificationWindow,
         PaletteWindow: PaletteWindow,
         PopupWindow: PopupWindow,

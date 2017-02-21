@@ -543,6 +543,23 @@ let me = this.me || {};
     };
 
     /**
+     * Returns a color of FloatingWindow theme.
+     * @since 2017-02-21
+     * @param {Number} type Type of color
+     * @returns {Number} Color
+     */
+    Theme.prototype.getFloatingWindow = function (type) {
+        switch (type) {
+        case Theme.BACKGROUND_COLOR:
+            return this._colorTextWhite;
+        case Theme.EFFECT_COLOR:
+            return this._colorTextGrey;
+        case Theme.TEXT_COLOR:
+            return this._colorTextBlack;
+        }
+    };
+
+    /**
      * Returns a color of NotificationWindow theme.
      * @since 2017-01-30
      * @param {Number} type Type of color
@@ -628,7 +645,7 @@ let me = this.me || {};
     };
 
     /**
-     * Returns a color of Window theme.
+     * Returns a color of PopupWindow theme.
      * @since 2016-05-28
      * @param {Number} type Type of color
      * @returns {Number} Color
@@ -3344,6 +3361,8 @@ let me = this.me || {};
     SizeChangedWindow.prototype.setWH = function (width, height) {
         this._width = width;
         this._height = height;
+        this._window.setWidth(width);
+        this._window.setHeight(height);
         return this;
     };
 
@@ -3454,7 +3473,7 @@ let me = this.me || {};
         this._width = DP * 360;
         this._window = new PopupWindow_(CONTEXT);
         this._layout = new LinearLayout_(CONTEXT);
-        this._layout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.TEXT_COLOR)));
+        this._layout.setBackgroundDrawable(new ColorDrawable_(theme.getFloatingWindow(Theme.BACKGROUND_COLOR)));
         this._layout.setOrientation(1);
         this._window.setBackgroundDrawable(ShadowDrawable.create());
         this._window.setContentView(this._layout);
@@ -3485,6 +3504,14 @@ let me = this.me || {};
         return this;
     };
 
+    FloatingWindow.prototype.setWH = function (width, height) {
+        this._width = width;
+        this._height = height;
+        this._window.setWidth(width + DP * 24);
+        this._window.setHeight(height + DP * 24);
+        return this;
+    };
+
 
 
     /**
@@ -3502,7 +3529,7 @@ let me = this.me || {};
         this._width = DP * 360;
         this._window = new PopupWindow_(CONTEXT);
         this._layout = new LinearLayout_(CONTEXT);
-        this._layout.setBackgroundDrawable(new ColorDrawable_(theme.getWindow(Theme.TEXT_COLOR)));
+        this._layout.setBackgroundDrawable(new ColorDrawable_(theme.getFloatingWindow(Theme.BACKGROUND_COLOR)));
         this._layout.setOrientation(1);
         this._window.setBackgroundDrawable(ShadowDrawable.create());
         this._window.setContentView(this._layout);
@@ -3853,6 +3880,14 @@ let me = this.me || {};
     PopupWindow.prototype.setColor = function (color) {
         this._color = color;
         this._sideBarLayout.setBackgroundDrawable(new ColorDrawable_(color));
+        return this;
+    };
+
+    PopupWindow.prototype.setWH = function (width, height) {
+        this._width = width;
+        this._height = height;
+        this._window.setWidth(width + DP * 24);
+        this._window.setHeight(height + DP * 24);
         return this;
     };
 

@@ -4420,7 +4420,7 @@ let me = this.me || {};
      * Returns the window.
      * @since 2016-07-05
      * @memberOf me.astro
-     * @returns {me.astro.widget.VerticalWindow} Window
+     * @returns {me.astro.window.VerticalWindow} Window
      */
     const getWindow = () => verticalWindow;
 

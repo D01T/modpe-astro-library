@@ -4881,25 +4881,47 @@ let me = this.me || {};
                                             .setTextColor(Color.INDIGO)
                                             .setColor(Color.WHITE)
                                             .setEffect(view => {
-                                                /*let progressWindow = new ProgressWindow();
-                                                progressWindow.setText("Removing...");
-                                                progressWindow.show();
-                                                user.removeFriend(view.getText(), code => {
-                                                    if (code === Account.EDIT_SUCCESS) {
-                                                        window.dismiss();
+                                                let floatingWindow = new FloatingWindow(),
+                                                    nameTextView = new TextView().setText("Name: None");
+                                                user.getFriendDataFromServer(view.getText(), "name", (code, str) => {
+                                                    if (code === Account.GET_SUCCESS) {
+                                                        nameTextView.setText("Name: " + str);
                                                     }
-                                                    progressWindow.dismiss();
-                                                });*/
-                                                let floatingWindow = new FloatingWindow();
+                                                });
                                                 floatingWindow.addView(new TextView()
-                                                        .setPadding(DP * 8, DP * 16, DP * 8, DP * 16)
+                                                        .setPadding(DP * 8, DP * 16, DP * 8, DP * 4)
                                                         .setText("Manager")
                                                         .setTextSize(24)
                                                         .show())
-                                                    .addView(new Button()
-                                                        .setText("Close")
-                                                        .setEffect(() => floatingWindow.dismiss())
+                                                    .addView(new TextView()
+                                                        .setPadding(DP * 8, 0, DP * 8, DP * 16)
+                                                        .setText("You can only show your right friend information.")
+                                                        .setTextSize(14)
                                                         .show())
+                                                    .addView(nameTextView.show())
+                                                    .addView(new Layout()
+                                                        .addView(new Button()
+                                                            .setText("Remove")
+                                                            .setEffect(() => {
+                                                                let progressWindow = new ProgressWindow();
+                                                                progressWindow.setText("Removing...");
+                                                                progressWindow.show();
+                                                                user.removeFriend(view.getText(), code => {
+                                                                    if (code === Account.EDIT_SUCCESS) {
+                                                                        floatingWindow.dismiss();
+                                                                        window.dismiss();
+                                                                    }
+                                                                    progressWindow.dismiss();
+                                                                });
+                                                            })
+                                                            .show())
+                                                        .addView(new Button()
+                                                            .setText("Close")
+                                                            .setEffect(() => floatingWindow.dismiss())
+                                                            .show())
+                                                        .setOrientation(0)
+                                                        .show())
+                                                    .setFocusable(true)
                                                     .show();
                                             })
                                             .setEffectColor(Color.WHITE)

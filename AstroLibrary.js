@@ -1083,6 +1083,39 @@ let me = this.me || {};
     };
 
     /**
+     * Gets messages from the server.
+     * @since 2017-02-24
+     * @param {Function} [response=function(code,arr){}] Callback to be invoked when you connected the server.
+     */
+    Account.prototype.getMessagesFromServer = function (response) {
+        response = response || (() => {});
+        let server = new Server(ACCOUNT_URL);
+        server.post("type=get&user_code=" + this._userCode + "&key=messages", inputStream => {
+            if (inputStream !== null) {
+                let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
+                    buffer,
+                    str;
+                while ((buffer = inputStream.read()) !== -1) {
+                    byteArrayOutputStream.write(buffer);
+                }
+                inputStream.close();
+                byteArrayOutputStream.close();
+                str = new String_(byteArrayOutputStream.toByteArray());
+                if (str.contains("Error")) {
+                    Toast.show(str);
+                    response(Account.GET_FAIL);
+                } else {
+                    response(Account.GET_SUCCESS, JSON.parse(str));
+                }
+            } else {
+                Toast.show("Error: Cannot connect to the server.");
+                response(Account.GET_FAIL);
+            }
+        });
+        return this;
+    };
+
+    /**
      * Returns user's E-mail.
      * @since 2016-07-04
      * @returns {String} User's E-mail

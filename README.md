@@ -63,6 +63,23 @@ This is ModPE integrated library for BlockLauncher.
 - Remove `ScriptChecker` class.
 - Remove `ScriptInfo` class.
 
+### 2.1
+- Add `FloatingWindow` class.
+- Add `UserConnection` class.
+- Add `Account.isRightFriend` method.
+- Add `Account.getFriendDataFromServer` method.
+- Add `Account.getMessagesFromServer` method.
+- Add `Account.sendMessage` method.
+- **Change parent object of window type classes;** `me.astro.widget` -> `me.astro.window`.
+- **Change the class name;** `me.astro.widget.Window` -> `me.astro.window.PopupWindow`.
+- Improve window type classes.
+- Improve theme system, and `setWH` method.
+- Fix friend window.
+- Fix password undefined error.
+- Fix JSDoc comments.
+- Fix some bugs.
+- Remove `UserServer` class.
+
 ## Documentation
 Information for library API:
 
@@ -77,6 +94,9 @@ Information for library API:
 
 ### 2.0
 [Documents](https://astro36.github.io/AstroLibrary/2.0/index.html)
+
+### 2.1
+[Documents](https://astro36.github.io/AstroLibrary/2.1/index.html)
 
 ## Contributors
 Thanks to all contributors who helps to make AstroLibrary better.

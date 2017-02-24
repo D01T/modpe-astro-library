@@ -926,22 +926,34 @@ let me = this.me || {};
     Account.EDIT_SUCCESS = 5;
 
     /**
-     * Get a data from the server fail
+     * Gets a data from the server fail
      * @type {Number}
      */
     Account.GET_FAIL = 6;
 
     /**
-     * Get a data from the server success
+     * Gets a data from the server success
      * @type {Number}
      */
     Account.GET_SUCCESS = 7;
 
     /**
+     * Sends a data from the server fail
+     * @type {Number}
+     */
+    Account.SEND_FAIL = 8;
+
+    /**
+     * Sends a data from the server success
+     * @type {Number}
+     */
+    Account.SEND_SUCCESS = 9;
+
+    /**
      * Logout
      * @type {Number}
      */
-    Account.LOGOUT = 8;
+    Account.LOGOUT = 10;
 
     /**
      * Sign up the server.
@@ -1372,6 +1384,44 @@ let me = this.me || {};
             friends.splice(index, 1);
             this.modifyData("friends", encodeURIComponent(JSON.stringify(friends)), response);
         }
+        return this;
+    };
+
+
+
+    /**
+     * Sends the message to the friend.
+     * @since 2017-02-24
+     * @param {String} friendId Friend's ID
+     * @param {String} message Message text
+     * @param {Function} [response=function(code){}] Callback to be invoked when you connected the server.
+     */
+    Account.prototype.sendMessage = function (friendId, message, response) {
+        response = response || (() => {});
+        let server = new Server(ACCOUNT_URL);
+        server.post("type=send_message&user_code=" + this._userCode + "&friend_id=" + friendId + "&value=" + message, inputStream => {
+            if (inputStream !== null) {
+                let byteArrayOutputStream = new ByteArrayOutputStream_(1024),
+                    buffer,
+                    str;
+                while ((buffer = inputStream.read()) !== -1) {
+                    byteArrayOutputStream.write(buffer);
+                }
+                inputStream.close();
+                byteArrayOutputStream.close();
+                str = new String_(byteArrayOutputStream.toByteArray());
+                if (str.contains("Error")) {
+                    Toast.show(str);
+                    response(Account.SEND_FAIL);
+                } else {
+                    Toast.show(str);
+                    response(Account.SEND_SUCCESS);
+                }
+            } else {
+                Toast.show("Error: Cannot connect to the server.");
+                response(Account.SEND_FAIL);
+            }
+        });
         return this;
     };
 

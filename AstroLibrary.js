@@ -1391,15 +1391,31 @@ let me = this.me || {};
         this._cache = {};
     }
 
+    /**
+     * Returns whether the user connecting socket is currently running.
+     * @since 2017-02-18
+     * @returns {Boolean} Whether the user connecting socket is running
+     */
     UserConnection.prototype.isRunning = function () {
         return this._isRunning;
     };
 
+    /**
+     * Sets the socket receiver function.
+     * @since 2017-02-18
+     * @param {Function} func Socket receiver function
+     */
     UserConnection.prototype.setReceiver = function (func) {
         this._response = func;
         return this;
     };
 
+    /**
+     * Sends the message to the friend.
+     * @since 2017-02-18
+     * @param {String} friendId Friend's ID
+     * @param {String} str Message text
+     */
     UserConnection.prototype.send = function (friendId, str) {
         let cache = this._cache;
         const callback = ip => {
@@ -1428,6 +1444,10 @@ let me = this.me || {};
         return this;
     };
 
+    /**
+     * Starts the socket receiver.
+     * @since 2017-02-18
+     */
     UserConnection.prototype.start = function () {
         let thiz = this;
         thiz._isRunning = true;
@@ -1465,6 +1485,10 @@ let me = this.me || {};
         return this;
     };
 
+    /**
+     * Stops the socket receiver.
+     * @since 2017-02-18
+     */
     UserConnection.prototype.stop = function () {
         this._isRunning = false;
         return this;
@@ -3553,7 +3577,7 @@ let me = this.me || {};
 
     NotificationWindow.getInstance = function () {
         if (typeof notificationWindowInstance === "undefined") {
-            /** @lends me.astro.widget.NotificationWindow */
+            /** @lends me.astro.window.NotificationWindow */
             const NotificationWindowInstance = function () {
                 this._theme = Theme.DEFAULT;
                 this._isRunning = false;

@@ -1,24 +1,37 @@
 # AstroLibrary
+
 ![logo](https://github.com/Astro36/AstroLibrary/blob/master/res/img_astro_library.png)
-ModPE integrated library
+
+> ModPE integrated library
 
 ## Introduction
-![main](https://github.com/Astro36/AstroLibrary/blob/master/res/img_main_0.png)
-![main](https://github.com/Astro36/AstroLibrary/blob/master/res/img_main_1.png)
-![login](https://github.com/Astro36/AstroLibrary/blob/master/res/img_login.png)
-![sign up](https://github.com/Astro36/AstroLibrary/blob/master/res/img_sign_up.png)
-![account](https://github.com/Astro36/AstroLibrary/blob/master/res/img_account.png)
-![friends_manager](https://github.com/Astro36/AstroLibrary/blob/master/res/img_friends_manager.png)
-![player_manager](https://github.com/Astro36/AstroLibrary/blob/master/res/img_player_manager.png)
-![settings](https://github.com/Astro36/AstroLibrary/blob/master/res/img_settings.png)
+
+| Main 1 | Main 2 |
+|:-:|:-:|
+| ![main](https://github.com/Astro36/AstroLibrary/blob/master/res/img_main_0.png) | ![main](https://github.com/Astro36/AstroLibrary/blob/master/res/img_main_1.png) |
+
+| Login | Sign Up |
+|:-:|:-:
+| ![login](https://github.com/Astro36/AstroLibrary/blob/master/res/img_login.png) | ![sign up](https://github.com/Astro36/AstroLibrary/blob/master/res/img_sign_up.png) |
+
+| Account | Friend Manager |
+|:-:|:-:|
+| ![account](https://github.com/Astro36/AstroLibrary/blob/master/res/img_account.png) | ![friends_manager](https://github.com/Astro36/AstroLibrary/blob/master/res/img_friends_manager.png) |
+
+| Player Manager | Setting |
+|:-:|:-:|
+| ![player_manager](https://github.com/Astro36/AstroLibrary/blob/master/res/img_player_manager.png) | ![settings](https://github.com/Astro36/AstroLibrary/blob/master/res/img_settings.png) |
+
 This is ModPE integrated library for BlockLauncher.
 
 ## ChangeLog
 
 ### 1.0
+
 - First release.
 
 ### 1.1
+
 - Add `SplashWindow` class.
 - Add `Bitmap.blur` method.
 - Add `File.preventMediaScanning` method.
@@ -27,6 +40,7 @@ This is ModPE integrated library for BlockLauncher.
 - Remove debug mode and hash check feature.
 
 ### 1.2
+
 - Add `ColorUtils` class.
 - Add `ViewUtils` class.
 - Add `Bitmap.decodeBase64` method.
@@ -41,6 +55,7 @@ This is ModPE integrated library for BlockLauncher.
 - Fix some bugs.
 
 ### 2.0
+
 - Add `ColorPicker` class.
 - Add `ColorPickerWindow` class.
 - Add `Divider` class.
@@ -64,6 +79,7 @@ This is ModPE integrated library for BlockLauncher.
 - Remove `ScriptInfo` class.
 
 ### 2.1
+
 - Add `FloatingWindow` class.
 - Add `UserConnection` class.
 - Add `Account.isRightFriend` method.
@@ -81,24 +97,31 @@ This is ModPE integrated library for BlockLauncher.
 - Remove `UserServer` class.
 
 ## Documentation
+
 Information for library API:
 
 ### 1.0
+
 [Documents](https://astro36.github.io/AstroLibrary/1.0/index.html)
 
 ### 1.1
+
 [Documents](https://astro36.github.io/AstroLibrary/1.1/index.html)
 
 ### 1.2
+
 [Documents](https://astro36.github.io/AstroLibrary/1.2/index.html)
 
 ### 2.0
+
 [Documents](https://astro36.github.io/AstroLibrary/2.0/index.html)
 
 ### 2.1
+
 [Documents](https://astro36.github.io/AstroLibrary/2.1/index.html)
 
 ## Contributors
+
 Thanks to all contributors who helps to make AstroLibrary better.
 
 [https://github.com/Astro36/AstroLibrary/graphs/contributors](https://github.com/Astro36/AstroLibrary/graphs/contributors)
